@@ -13,8 +13,6 @@ pragma solidity ^0.8.2;
  * @author Basil Gorin
  * Adapted for Syn City by Superpower Labs
  */
-
-// interfaceId is 0x4fc35859
 interface IERC20Receiver {
   /**
    * @notice Handle the receipt of a ERC20 token(s)

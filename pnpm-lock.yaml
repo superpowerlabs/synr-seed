@@ -8,6 +8,7 @@ specifiers:
   '@nomiclabs/hardhat-waffle': ^2.0.1
   '@openzeppelin/contracts': ^4.2.0
   '@openzeppelin/contracts-upgradeable': ^4.5.2
+  '@openzeppelin/hardhat-upgrades': ^1.16.0
   chai: ^4.3.4
   dotenv: ^10.0.0
   ethereum-waffle: ^3.4.0
@@ -33,6 +34,7 @@ devDependencies:
   '@nomiclabs/hardhat-waffle': 2.0.1_b5edb2070812aa32af4b3ffe4f4a52ce
   '@openzeppelin/contracts': 4.4.1
   '@openzeppelin/contracts-upgradeable': 4.5.2
+  '@openzeppelin/hardhat-upgrades': 1.16.0_81c1cea25e0bf5ac4a1ee0b24827d8f5
   chai: 4.3.4
   dotenv: 10.0.0
   ethereum-waffle: 3.4.0_typescript@4.6.2
@@ -603,6 +605,37 @@ packages:
 
   /@openzeppelin/contracts/4.4.1:
     resolution: {integrity: sha512-o+pHCf/yMLSlV5MkDQEzEQL402i6SoRnktru+0rdSxVEFZcTzzGhZCAtZjUFyKGazMSv1TilzMg+RbED1N8XHQ==}
+    dev: true
+
+  /@openzeppelin/hardhat-upgrades/1.16.0_81c1cea25e0bf5ac4a1ee0b24827d8f5:
+    resolution: {integrity: sha512-+nymvk0WBTnN5QtlEyqUeiLumpxgSZyo6s9XG0M68OzDhUSk5YB9KXAiL3VhC4CpyrkWHWkoYn0esAVuwmk9Sw==}
+    hasBin: true
+    peerDependencies:
+      '@nomiclabs/hardhat-ethers': ^2.0.0
+      hardhat: ^2.0.2
+    dependencies:
+      '@nomiclabs/hardhat-ethers': 2.0.3_ethers@5.5.2+hardhat@2.8.0
+      '@openzeppelin/upgrades-core': 1.13.1
+      chalk: 4.1.2
+      hardhat: 2.8.0
+      proper-lockfile: 4.1.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@openzeppelin/upgrades-core/1.13.1:
+    resolution: {integrity: sha512-xqrNQ65BG0pW8Tb8RVI73gHf3mBuuMuduiKQ8PxpFnmMq/CAuwVNbkPRAif7q1USVkXsIdrMKGki1eaZX1xh8g==}
+    dependencies:
+      bn.js: 5.2.0
+      cbor: 8.1.0
+      chalk: 4.1.2
+      compare-versions: 4.1.3
+      debug: 4.3.3
+      ethereumjs-util: 7.1.3
+      proper-lockfile: 4.1.2
+      solidity-ast: 0.4.30
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@resolver-engine/core/0.3.3:
@@ -2141,6 +2174,13 @@ packages:
       nofilter: 1.0.4
     dev: true
 
+  /cbor/8.1.0:
+    resolution: {integrity: sha512-DwGjNW9omn6EwP70aXsn7FQJx5kO12tX0bZkaTjzdVFM6/7nhA4t0EENocKGx6D2Bch9PE2KzCUf5SceBdeijg==}
+    engines: {node: '>=12.19'}
+    dependencies:
+      nofilter: 3.1.0
+    dev: true
+
   /chai/4.3.4:
     resolution: {integrity: sha512-yS5H68VYOCtN1cjfwumDSuzn/9c+yza4f3reKXlE5rUg7SFcCEy90gJvydNgOYtblyf4Zi6jIWRnXOgErta0KA==}
     engines: {node: '>=4'}
@@ -2442,6 +2482,10 @@ packages:
 
   /commander/3.0.2:
     resolution: {integrity: sha512-Gar0ASD4BDyKC4hl4DwHqDrmvjoxWKZigVnAbn5H1owvm4CxCPdb0HQDehwNYMJpla5+M2tPmPARzhtYuwpHow==}
+    dev: true
+
+  /compare-versions/4.1.3:
+    resolution: {integrity: sha512-WQfnbDcrYnGr55UwbxKiQKASnTtNnaAWVi8jZyy8NTpVAXWACSne8lMD1iaIo9AiU6mnuLvSVshCzewVuWxHUg==}
     dev: true
 
   /component-emitter/1.3.0:
@@ -6376,6 +6420,11 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /nofilter/3.1.0:
+    resolution: {integrity: sha512-l2NNj07e9afPnhAhvgVrCD/oy2Ai1yfLpuo3EpiO1jFTsB4sFz6oIfAfSZyQzVpkZQ9xS8ZS5g1jCBgq4Hwo0g==}
+    engines: {node: '>=12.19'}
+    dev: true
+
   /normalize-package-data/2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
     dependencies:
@@ -6974,6 +7023,14 @@ packages:
       asap: 2.0.6
     dev: true
 
+  /proper-lockfile/4.1.2:
+    resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
+    dependencies:
+      graceful-fs: 4.2.8
+      retry: 0.12.0
+      signal-exit: 3.0.6
+    dev: true
+
   /proxy-addr/2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
@@ -7462,6 +7519,11 @@ packages:
     engines: {node: '>=0.12'}
     dev: true
 
+  /retry/0.12.0:
+    resolution: {integrity: sha1-G0KmJmoh8HQh0bC1S33BZ7AcATs=}
+    engines: {node: '>= 4'}
+    dev: true
+
   /rimraf/2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
     hasBin: true
@@ -7874,6 +7936,10 @@ packages:
       prettier: 1.19.1
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /solidity-ast/0.4.30:
+    resolution: {integrity: sha512-3xsQIbZEPx6w7+sQokuOvk1RkMb5GIpuK0GblQDIH6IAkU4+uyJQVJIRNP+8KwhzkViwRKq0hS4zLqQNLKpxOA==}
     dev: true
 
   /solidity-comments-extractor/0.0.7:
