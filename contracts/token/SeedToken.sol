@@ -15,11 +15,14 @@ contract SeedToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable,
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(address manager_) public initializer {
+  function initialize() public initializer {
     __ERC20_init("Mobland Seed Token", "SEED");
     __ERC20Burnable_init();
     __Ownable_init();
     __UUPSUpgradeable_init();
+  }
+
+  function setManager(address manager_) external onlyOwner {
     require(manager_.isContract(), "manager not a contract");
     manager = manager_;
   }

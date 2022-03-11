@@ -10,12 +10,12 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe.skip("Integration test", function () {
+describe("Integration test", function () {
 
   let SyndicateERC20, synr
   let SyntheticSyndicateERC20, sSynr
   let InputPool, inputPool
-  let OutPull, outputPool
+  let OutputPull, outputPool
   let SeedToken, seed
 
   let deployer, fundOwner, superAdmin, operator, user1, user2, marketplace, treasury
@@ -26,7 +26,7 @@ describe.skip("Integration test", function () {
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
     InputPool = await ethers.getContractFactory("InputPool");
-    OutPull = await ethers.getContractFactory("OutputPool");
+    OutputPull = await ethers.getContractFactory("OutputPool");
     SeedToken = await ethers.getContractFactory("SeedToken");
   })
 
@@ -46,11 +46,10 @@ describe.skip("Integration test", function () {
     seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed()
 
-    outputPool = await upgrades.deployProxy(OutPull, [synr.address, sSynr.address, seed.address]);
+    outputPool = await upgrades.deployProxy(OutputPull, [seed.address]);
     await outputPool.deployed()
 
-    seed = await SeedToken.deploy(superAdmin.address, synr.address, sSynr.address);
-
+    await seed.setManager(outputPool.address)
   }
 
   async function configure() {
@@ -64,7 +63,7 @@ describe.skip("Integration test", function () {
 
 
     it("should manage the entire flow", async function () {
-
+      expect(await seed.manager()).equal(outputPool.address)
 
     })
 
