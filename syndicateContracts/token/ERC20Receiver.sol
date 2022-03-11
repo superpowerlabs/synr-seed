@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity 0.8.1;
 
 /**
  * @title ERC20 token receiver interface
@@ -13,7 +13,7 @@ pragma solidity ^0.8.2;
  * @author Basil Gorin
  * Adapted for Syn City by Superpower Labs
  */
-interface IERC20Receiver {
+interface ERC20Receiver {
   /**
    * @notice Handle the receipt of a ERC20 token(s)
    * @dev The ERC20 smart contract calls this function on the recipient
