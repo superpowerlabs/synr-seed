@@ -3,12 +3,14 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./token/SeedToken.sol";
 
 contract OutputPool is Initializable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
+  using SafeMathUpgradeable for uint256;
 
   SeedToken public seed;
 
@@ -32,8 +34,6 @@ contract OutputPool is Initializable, WormholeTunnelUpgradeable {
     uint96 synrAmount;
     // @dev Total burned sSYNR amount
     uint96 sSynrAmount;
-    // @dev An array of holder's deposits
-    uint16 passAmount;
     Deposit[] deposits;
   }
 
@@ -51,16 +51,14 @@ contract OutputPool is Initializable, WormholeTunnelUpgradeable {
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
   function deserializePayload(uint256 payload) public pure returns (uint256[4] memory) {
-    return [payload % 10, (payload / 10) % 1e10, (payload / 1e11) % 1e10, payload / 1e21];
+    return [payload % 10, payload.div(10) % 1e10, payload.div(1e11) % 1e10, payload.div(1e21)];
   }
 
   function _updateUser(address user, uint256[4] memory payload) internal {
     if (payload[0] == 0) {
       users[user].synrAmount += uint96(payload[2]);
-    } else if (payload[0] == 1) {
-      users[user].sSynrAmount += uint96(payload[2]);
     } else {
-      users[user].passAmount += 1;
+      users[user].sSynrAmount += uint96(payload[2]);
     }
     Deposit memory deposit = Deposit({
       tokenType: uint8(payload[0]),
@@ -71,15 +69,12 @@ contract OutputPool is Initializable, WormholeTunnelUpgradeable {
     users[user].deposits.push(deposit);
   }
 
-  function _makeDeposit(address to, uint256[4] memory payloadArray) internal  {
+  function _makeDeposit(address to, uint256[4] memory payloadArray) internal {
     // this must be adjusted based on type of stake, time passed, etc.
     if (payloadArray[0] == 0) {
       seed.mint(to, payloadArray[3]);
-    } else if (payloadArray[0] == 1) {
-      // InputPool must be whitelisted to receive sSYNR
-      seed.mint(to, payloadArray[3]);
     } else {
-      // SYNR Pass
+      // InputPool must be whitelisted to receive sSYNR
       seed.mint(to, payloadArray[3]);
     }
     _updateUser(to, payloadArray);

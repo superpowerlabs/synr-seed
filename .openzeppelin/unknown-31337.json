@@ -2,20 +2,40 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-      "txHash": "0x57881c900da512d334005fc47bd3f7d558185a5dad0f7177aeacaf62ad28fe43",
+      "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+      "txHash": "0xd33de9bf0e9f2ba020c5e52edab416b9fb7d01f32ecc99a889147e110bcb7358",
       "kind": "uups"
     },
     {
       "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-      "txHash": "0xf1752abcb0cb28286b3c12a2aacb20b6eace512edd7395d3058f1b3a419301ac",
+      "txHash": "0x15f7269e0324e94638a0240d4a4ae54c51ef038ff60fb8547b3f5edb9a30579b",
+      "kind": "uups"
+    },
+    {
+      "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      "txHash": "0x5a495ee168eaf4658e6b811226a34a72f86317f67d1d521b0b9b894feb666ad7",
+      "kind": "uups"
+    },
+    {
+      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      "txHash": "0x00eb466b07a48fdb7f6984c8fc4393af98572878d5540f17d3184885b2f009ac",
+      "kind": "uups"
+    },
+    {
+      "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+      "txHash": "0x611d1bca8a50dce7c55f69a94963120010ca7bfde47b30e77816dfd28e07545f",
+      "kind": "uups"
+    },
+    {
+      "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+      "txHash": "0xccb9abbe3c5ec0fad82946a25591e4e1207178c8dde4c229c344a0f9382a2e58",
       "kind": "uups"
     }
   ],
   "impls": {
     "86d5f52d8aa712ea203820cd6f4c00766c288666bc688e7753b1b8026b2ec244": {
-      "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-      "txHash": "0xd8a0f69631c19fcaab4edc00e34e34d34e9d0eb6d323e0cb360c8a5e5e64adf5",
+      "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+      "txHash": "0x6cdfe57bfb6f5531fdc806974d826c547af2f9c20d8db2f53b7a9f17ab106a1f",
       "layout": {
         "storage": [
           {
@@ -171,8 +191,8 @@
       }
     },
     "f196f440d7133465cfbe49f7796c23f536f1a3baff67371349f3211e445c9ec2": {
-      "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-      "txHash": "0xfd4c275a319eeb4e3954cf2eb6f5c82dafb01d0060323ea9418fe290b92137dd",
+      "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      "txHash": "0x651939175948ed6ec6ab8eac4a4a388071d0997f62839a8d869d302078a96145",
       "layout": {
         "storage": [
           {
@@ -267,7 +287,7 @@
             "label": "seed",
             "offset": 0,
             "slot": "304",
-            "type": "t_contract(SeedToken)9016",
+            "type": "t_contract(SeedToken)9288",
             "contract": "OutputPool",
             "src": "contracts/OutputPool.sol:13"
           },
@@ -275,7 +295,7 @@
             "label": "users",
             "offset": 0,
             "slot": "305",
-            "type": "t_mapping(t_address,t_struct(User)8543_storage)",
+            "type": "t_mapping(t_address,t_struct(User)8818_storage)",
             "contract": "OutputPool",
             "src": "contracts/OutputPool.sol:40"
           }
@@ -287,7 +307,7 @@
           "t_address_payable": {
             "label": "address payable"
           },
-          "t_array(t_struct(Deposit)8532_storage)dyn_storage": {
+          "t_array(t_struct(Deposit)8807_storage)dyn_storage": {
             "label": "struct OutputPool.Deposit[]"
           },
           "t_array(t_uint256)49_storage": {
@@ -302,10 +322,10 @@
           "t_bytes32": {
             "label": "bytes32"
           },
-          "t_contract(SeedToken)9016": {
+          "t_contract(SeedToken)9288": {
             "label": "contract SeedToken"
           },
-          "t_mapping(t_address,t_struct(User)8543_storage)": {
+          "t_mapping(t_address,t_struct(User)8818_storage)": {
             "label": "mapping(address => struct OutputPool.User)"
           },
           "t_mapping(t_bytes32,t_bool)": {
@@ -314,7 +334,7 @@
           "t_mapping(t_uint16,t_bytes32)": {
             "label": "mapping(uint16 => bytes32)"
           },
-          "t_struct(Deposit)8532_storage": {
+          "t_struct(Deposit)8807_storage": {
             "label": "struct OutputPool.Deposit",
             "members": [
               {
@@ -356,7 +376,7 @@
               }
             ]
           },
-          "t_struct(User)8543_storage": {
+          "t_struct(User)8818_storage": {
             "label": "struct OutputPool.User",
             "members": [
               {
@@ -373,7 +393,510 @@
               },
               {
                 "label": "deposits",
-                "type": "t_array(t_struct(Deposit)8532_storage)dyn_storage"
+                "type": "t_array(t_struct(Deposit)8807_storage)dyn_storage"
+              }
+            ]
+          },
+          "t_uint16": {
+            "label": "uint16"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_uint32": {
+            "label": "uint32"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint96": {
+            "label": "uint96"
+          }
+        }
+      }
+    },
+    "9fdf9cbf4f48ba00fbc85ade99e3ed2590367084eca13beab0a3cabf7cb4a8a6": {
+      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      "txHash": "0xe497bdfafc58dc2c4ff0423fa510fafcb3daa6af94549fe2ee8c947ff4e389ad",
+      "layout": {
+        "storage": [
+          {
+            "label": "_wormholeState",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_struct(State)26_storage",
+            "contract": "WormholeCommon",
+            "src": "@ndujalabs/wormhole-tunnel/contracts/WormholeCommon.sol:29"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:102"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:87"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "154",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "254",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "synr",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_contract(SyndicateERC20)11033",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:17"
+          },
+          {
+            "label": "sSynr",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_contract(SyntheticSyndicateERC20)11153",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:18"
+          },
+          {
+            "label": "pass",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_contract(SynCityPasses)9474",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:19"
+          },
+          {
+            "label": "encodedStatus",
+            "offset": 0,
+            "slot": "307",
+            "type": "t_uint256",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:51"
+          },
+          {
+            "label": "users",
+            "offset": 0,
+            "slot": "308",
+            "type": "t_mapping(t_address,t_struct(User)7855_storage)",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:54"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address"
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_array(t_struct(Deposit)7844_storage)dyn_storage": {
+            "label": "struct InputPool.Deposit[]"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_contract(SynCityPasses)9474": {
+            "label": "contract SynCityPasses"
+          },
+          "t_contract(SyndicateERC20)11033": {
+            "label": "contract SyndicateERC20"
+          },
+          "t_contract(SyntheticSyndicateERC20)11153": {
+            "label": "contract SyntheticSyndicateERC20"
+          },
+          "t_mapping(t_address,t_struct(User)7855_storage)": {
+            "label": "mapping(address => struct InputPool.User)"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)"
+          },
+          "t_mapping(t_uint16,t_bytes32)": {
+            "label": "mapping(uint16 => bytes32)"
+          },
+          "t_struct(Deposit)7844_storage": {
+            "label": "struct InputPool.Deposit",
+            "members": [
+              {
+                "label": "tokenType",
+                "type": "t_uint8"
+              },
+              {
+                "label": "tokenAmount",
+                "type": "t_uint96"
+              },
+              {
+                "label": "lockedFrom",
+                "type": "t_uint32"
+              },
+              {
+                "label": "lockedUntil",
+                "type": "t_uint32"
+              },
+              {
+                "label": "unstaked",
+                "type": "t_uint8"
+              }
+            ]
+          },
+          "t_struct(State)26_storage": {
+            "label": "struct WormholeCommon.State",
+            "members": [
+              {
+                "label": "wormhole",
+                "type": "t_address_payable"
+              },
+              {
+                "label": "chainId",
+                "type": "t_uint16"
+              },
+              {
+                "label": "completedTransfers",
+                "type": "t_mapping(t_bytes32,t_bool)"
+              },
+              {
+                "label": "contractsByChainId",
+                "type": "t_mapping(t_uint16,t_bytes32)"
+              }
+            ]
+          },
+          "t_struct(User)7855_storage": {
+            "label": "struct InputPool.User",
+            "members": [
+              {
+                "label": "synrAmount",
+                "type": "t_uint96"
+              },
+              {
+                "label": "sSynrAmount",
+                "type": "t_uint96"
+              },
+              {
+                "label": "passAmount",
+                "type": "t_uint16"
+              },
+              {
+                "label": "deposits",
+                "type": "t_array(t_struct(Deposit)7844_storage)dyn_storage"
+              }
+            ]
+          },
+          "t_uint16": {
+            "label": "uint16"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_uint32": {
+            "label": "uint32"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint96": {
+            "label": "uint96"
+          }
+        }
+      }
+    },
+    "08277b679f2640da99d1127ad06e32a9f128dfc4ac12c02cdc508ed58767eb64": {
+      "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "txHash": "0x17a516501095076d4a368a17cf1138faf633100145465988735ab1840a70d9ab",
+      "layout": {
+        "storage": [
+          {
+            "label": "_wormholeState",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_struct(State)26_storage",
+            "contract": "WormholeCommon",
+            "src": "@ndujalabs/wormhole-tunnel/contracts/WormholeCommon.sol:29"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:102"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:87"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "154",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "254",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "synr",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_contract(SyndicateERC20)11308",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:22"
+          },
+          {
+            "label": "sSynr",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_contract(SyntheticSyndicateERC20)11428",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:23"
+          },
+          {
+            "label": "encodedStatus",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_uint256",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:53"
+          },
+          {
+            "label": "users",
+            "offset": 0,
+            "slot": "307",
+            "type": "t_mapping(t_address,t_struct(User)8167_storage)",
+            "contract": "InputPool",
+            "src": "contracts/InputPool.sol:56"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address"
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_array(t_struct(Deposit)8158_storage)dyn_storage": {
+            "label": "struct InputPool.Deposit[]"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_contract(SyndicateERC20)11308": {
+            "label": "contract SyndicateERC20"
+          },
+          "t_contract(SyntheticSyndicateERC20)11428": {
+            "label": "contract SyntheticSyndicateERC20"
+          },
+          "t_mapping(t_address,t_struct(User)8167_storage)": {
+            "label": "mapping(address => struct InputPool.User)"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)"
+          },
+          "t_mapping(t_uint16,t_bytes32)": {
+            "label": "mapping(uint16 => bytes32)"
+          },
+          "t_struct(Deposit)8158_storage": {
+            "label": "struct InputPool.Deposit",
+            "members": [
+              {
+                "label": "tokenType",
+                "type": "t_uint8"
+              },
+              {
+                "label": "tokenAmount",
+                "type": "t_uint96"
+              },
+              {
+                "label": "lockedFrom",
+                "type": "t_uint32"
+              },
+              {
+                "label": "lockedUntil",
+                "type": "t_uint32"
+              },
+              {
+                "label": "unstaked",
+                "type": "t_uint8"
+              }
+            ]
+          },
+          "t_struct(State)26_storage": {
+            "label": "struct WormholeCommon.State",
+            "members": [
+              {
+                "label": "wormhole",
+                "type": "t_address_payable"
+              },
+              {
+                "label": "chainId",
+                "type": "t_uint16"
+              },
+              {
+                "label": "completedTransfers",
+                "type": "t_mapping(t_bytes32,t_bool)"
+              },
+              {
+                "label": "contractsByChainId",
+                "type": "t_mapping(t_uint16,t_bytes32)"
+              }
+            ]
+          },
+          "t_struct(User)8167_storage": {
+            "label": "struct InputPool.User",
+            "members": [
+              {
+                "label": "synrAmount",
+                "type": "t_uint96"
+              },
+              {
+                "label": "sSynrAmount",
+                "type": "t_uint96"
+              },
+              {
+                "label": "deposits",
+                "type": "t_array(t_struct(Deposit)8158_storage)dyn_storage"
               }
             ]
           },

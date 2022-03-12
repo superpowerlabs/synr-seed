@@ -4,6 +4,8 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 import "./interfaces/IERC20.sol";
 import "./token/SyndicateERC20.sol";
@@ -11,12 +13,14 @@ import "./token/SynCityPasses.sol";
 import "./token/SyntheticSyndicateERC20.sol";
 import "./interfaces/IERC20Receiver.sol";
 
+import "hardhat/console.sol";
+
 contract InputPool is Initializable, IERC20Receiver, IERC721ReceiverUpgradeable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
+  using SafeMathUpgradeable for uint256;
 
   SyndicateERC20 public synr;
   SyntheticSyndicateERC20 public sSynr;
-  SynCityPasses public pass;
 
   struct Deposit {
     // @dev token type 0: SYNR, 1: sSYNR, 2: SYNR Pass
@@ -41,8 +45,6 @@ contract InputPool is Initializable, IERC20Receiver, IERC721ReceiverUpgradeable,
     // @dev Total burned sSYNR amount
     uint96 sSynrAmount;
     // @dev An array of holder's deposits
-    uint16 passAmount;
-    // @dev An array of holder's deposits
     Deposit[] deposits;
   }
 
@@ -56,18 +58,12 @@ contract InputPool is Initializable, IERC20Receiver, IERC721ReceiverUpgradeable,
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(
-    address synr_,
-    address sSynr_,
-    address pass_
-  ) public initializer {
+  function initialize(address synr_, address sSynr_) public initializer {
     __WormholeTunnel_init();
     require(synr_.isContract(), "synr_ not a contract");
     require(sSynr_.isContract(), "sSynr_ not a contract");
-    require(pass_.isContract(), "pass_ not a contract");
     synr = SyndicateERC20(synr_);
     sSynr = SyntheticSyndicateERC20(sSynr_);
-    pass = SynCityPasses(pass_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -118,7 +114,7 @@ contract InputPool is Initializable, IERC20Receiver, IERC721ReceiverUpgradeable,
     uint256 amount // uint96-like
   ) public view returns (uint256) {
     validateInputPayload(type_, lockupTime, amount);
-    return type_ + lockupTime * 10 + amount * 1e5;
+    return type_.add(lockupTime.mul(10)).add(amount.mul(1e5));
   }
 
   /**
@@ -133,11 +129,11 @@ contract InputPool is Initializable, IERC20Receiver, IERC721ReceiverUpgradeable,
     uint256 amount,
     Deposit memory deposit
   ) public view returns (uint256) {
-    return type_ + deposit.lockedFrom * 10 + deposit.lockedUntil * 1e11 + amount * 1e21;
+    return type_.add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(amount.mul(1e21));
   }
 
   function minimumLockingTime() public view returns (uint256) {
-    return (encodedStatus / 1e10) % 1e10;
+    return encodedStatus % 1e5;
   }
 
   function validateInputPayload(
@@ -145,36 +141,30 @@ contract InputPool is Initializable, IERC20Receiver, IERC721ReceiverUpgradeable,
     uint256 lockupTime,
     uint256 amount
   ) public view returns (bool) {
-    require(type_ < 3, "InputPool: invalid token type");
+    require(type_ < 2, "InputPool: invalid token type");
+    require(amount < 1e28, "InputPool: amount out of range");
+    require(lockupTime < type(uint32).max, "InputPool: lockedTime out of range");
     if (type_ == 0) {
       require(lockupTime > minimumLockingTime(), "InputPool: invalid lockupTime type");
     }
-    if (type_ == 2) {
-      require(amount < 889, "InputPool: Not a Mobland SYNR Pass token ID");
-    } else {
-      require(amount < 1e28, "InputPool: amount out of range");
-    }
-    require(lockupTime < type(uint32).max, "InputPool: lockedTime out of range");
     return true;
   }
 
   function deserializePayload(uint256 payload) public pure returns (uint256[3] memory) {
-    return [payload % 10, (payload / 10) % 1e4, payload / 1e5];
+    return [payload % 10, payload.div(10) % 1e4, payload.div(1e5)];
   }
 
   function _updateUser(address user, uint256[3] memory payload) internal returns (Deposit memory) {
     if (payload[0] == 0) {
       users[user].synrAmount += uint96(payload[2]);
-    } else if (payload[0] == 1) {
-      users[user].sSynrAmount += uint96(payload[2]);
     } else {
-      users[user].passAmount += 1;
+      users[user].sSynrAmount += uint96(payload[2]);
     }
     Deposit memory deposit = Deposit({
       tokenType: uint8(payload[0]),
       tokenAmount: uint96(payload[2]),
       lockedFrom: payload[0] == 0 ? uint32(block.timestamp) : 0,
-      lockedUntil: payload[0] == 0 ? uint32(block.timestamp + (payload[1] * 1 days)) : 0,
+      lockedUntil: payload[0] == 0 ? uint32(block.timestamp.add(payload[1] * 1 days)) : 0,
       unstaked: 0
     });
     users[user].deposits.push(deposit);
@@ -184,14 +174,13 @@ contract InputPool is Initializable, IERC20Receiver, IERC721ReceiverUpgradeable,
   function _makeDeposit(uint256[3] memory payloadArray) internal returns (uint256) {
     validateInputPayload(payloadArray[0], payloadArray[1], payloadArray[2]);
     // it will throw if the contract is not a token spender, or if the balance is insufficient
+
+    console.log(payloadArray[0]);
     if (payloadArray[0] == 0) {
       synr.safeTransferFrom(_msgSender(), address(this), payloadArray[2], "");
-    } else if (payloadArray[0] == 1) {
+    } else {
       // InputPool must be whitelisted to receive sSYNR
       sSynr.transferFrom(_msgSender(), address(this), payloadArray[2]);
-    } else {
-      // SYNR Pass
-      pass.safeTransferFrom(_msgSender(), address(this), payloadArray[2]);
     }
     return fromInputPayloadToTransferPayload(payloadArray[0], payloadArray[2], _updateUser(_msgSender(), payloadArray));
   }
@@ -203,8 +192,6 @@ contract InputPool is Initializable, IERC20Receiver, IERC721ReceiverUpgradeable,
     require(block.timestamp > deposit.lockedUntil, "InputPool: token still locked");
     if (deposit.tokenType == 0) {
       synr.safeTransferFrom(address(this), _msgSender(), deposit.tokenAmount, "");
-    } else if (deposit.tokenType == 2) {
-      pass.safeTransferFrom(address(this), _msgSender(), deposit.tokenAmount);
     } else {
       revert("InputPool: sSYNR cannot be unstaked");
     }
