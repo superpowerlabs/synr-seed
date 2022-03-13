@@ -8,7 +8,7 @@ import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./token/SeedToken.sol";
 
-contract OutputPool is Initializable, WormholeTunnelUpgradeable {
+contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -17,15 +17,16 @@ contract OutputPool is Initializable, WormholeTunnelUpgradeable {
   struct Deposit {
     // @dev token type (SYNR or sSYNR)
     uint8 tokenType;
-    // @dev token amount staked
-    // SYNR maxTokenSupply is 10 billion * 18 decimals = 1e28
-    // which is less type(uint96).max (~79e28)
-    uint96 tokenAmount;
     // @dev locking period - from
     uint32 lockedFrom;
     // @dev locking period - until
     uint32 lockedUntil;
+    // @dev token amount staked
+    // SYNR maxTokenSupply is 10 billion * 18 decimals = 1e28
+    // which is less type(uint96).max (~79e28)
+    uint96 tokenAmount;
     // space available for 11 more bytes
+    uint8 unlocked;
   }
 
   /// @dev Data structure representing token holder using a pool
@@ -62,22 +63,49 @@ contract OutputPool is Initializable, WormholeTunnelUpgradeable {
     }
     Deposit memory deposit = Deposit({
       tokenType: uint8(payload[0]),
-      tokenAmount: uint96(payload[3]),
       lockedFrom: uint32(payload[1]),
-      lockedUntil: uint32(payload[2])
+      lockedUntil: uint32(payload[2]),
+      tokenAmount: uint96(payload[3]),
+      unlocked: 0
     });
     users[user].deposits.push(deposit);
   }
 
-  function _makeDeposit(address to, uint256[4] memory payloadArray) internal {
+  function _mintSeedAndSaveDeposit(address to, uint256[4] memory payloadArray) internal {
     // this must be adjusted based on type of stake, time passed, etc.
     if (payloadArray[0] == 0) {
       seed.mint(to, payloadArray[3]);
     } else {
-      // InputPool must be whitelisted to receive sSYNR
+      // SynrPool must be whitelisted to receive sSYNR
       seed.mint(to, payloadArray[3]);
     }
     _updateUser(to, payloadArray);
+  }
+
+  function getDepositIndex(address user, uint256[4] memory payloadArray) public view returns (uint256) {
+    for (uint256 i; i < users[user].deposits.length; i++) {
+      if (
+        uint256(users[user].deposits[i].tokenType) == payloadArray[0] &&
+        uint256(users[user].deposits[i].lockedFrom) == payloadArray[1] &&
+        uint256(users[user].deposits[i].lockedUntil) == payloadArray[2] &&
+        uint256(users[user].deposits[i].lockedUntil) < block.timestamp &&
+        uint256(users[user].deposits[i].tokenAmount) == payloadArray[3] &&
+        uint256(users[user].deposits[i].unlocked) == 0
+      ) {
+        return i + 1;
+      }
+    }
+    return 0;
+  }
+
+  function getDepositByIndex(address user, uint256 i) public view returns (Deposit memory) {
+    return users[user].deposits[i];
+  }
+
+  function _unlockDeposit(uint256[4] memory payloadArray) internal {
+    uint256 depositIndex = getDepositIndex(_msgSender(), payloadArray);
+    require(depositIndex > 0, "SeedFactory: deposit not found or already unlocked");
+    users[_msgSender()].deposits[depositIndex].unlocked = 1;
   }
 
   function wormholeTransfer(
@@ -90,13 +118,14 @@ contract OutputPool is Initializable, WormholeTunnelUpgradeable {
     // solhint-disable-next-line
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
-    // The transfer happens only from Ethereum to BSC, so,
-    // this function returns a bad sequence if called
-    return 1;
+    require(_msgSender() == address(bytes20(recipient)), "SeedFactory: only the sender can receive on other chain");
+    uint256[4] memory payloadArray = deserializePayload(payload);
+    _unlockDeposit(payloadArray);
+    return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
-    _makeDeposit(to, deserializePayload(payload));
+    _mintSeedAndSaveDeposit(to, deserializePayload(payload));
   }
 }

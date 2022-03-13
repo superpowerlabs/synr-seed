@@ -14,7 +14,7 @@ describe("Integration test", function () {
 
   let SyndicateERC20, synr
   let SyntheticSyndicateERC20, sSynr
-  let InputPool, inputPool
+  let SynrPool, inputPool
   let OutputPull, outputPool
   let SeedToken, seed
 
@@ -25,8 +25,8 @@ describe("Integration test", function () {
     ;[deployer, fundOwner, superAdmin, operator, user1, user2, marketplace, treasury] = await ethers.getSigners()
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
-    InputPool = await ethers.getContractFactory("InputPool");
-    OutputPull = await ethers.getContractFactory("OutputPool");
+    SynrPool = await ethers.getContractFactory("SynrPool");
+    OutputPull = await ethers.getContractFactory("SeedFactory");
     SeedToken = await ethers.getContractFactory("SeedToken");
   })
 

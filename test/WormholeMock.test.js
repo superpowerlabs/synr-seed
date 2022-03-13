@@ -16,7 +16,7 @@ describe.only("#WormholeMock", function () {
   let WormholeMock, wormhole
   let SyndicateERC20, synr
   let SyntheticSyndicateERC20, sSynr
-  let InputPool, inputPool
+  let SynrPool, inputPool
   let OutputPull, outputPool
   let SeedToken, seed
 
@@ -27,8 +27,8 @@ describe.only("#WormholeMock", function () {
     ;[deployer, fundOwner, superAdmin, operator, user1, user2, marketplace, treasury] = await ethers.getSigners()
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
-    InputPool = await ethers.getContractFactory("InputPool");
-    OutputPull = await ethers.getContractFactory("OutputPool");
+    SynrPool = await ethers.getContractFactory("SynrPool");
+    OutputPull = await ethers.getContractFactory("SeedFactory");
     SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
   })
@@ -47,7 +47,7 @@ describe.only("#WormholeMock", function () {
     sSynr = await SyntheticSyndicateERC20.deploy(superAdmin.address);
     await sSynr.deployed()
 
-    inputPool = await upgrades.deployProxy(InputPool, [synr.address, sSynr.address]);
+    inputPool = await upgrades.deployProxy(SynrPool, [synr.address, sSynr.address]);
     await inputPool.deployed()
 
     await sSynr.updateRole(inputPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
@@ -89,8 +89,8 @@ describe.only("#WormholeMock", function () {
 
     it("should manage the entire flow", async function () {
 
-      // stake SYNR in the InputPool
-      const payload = await inputPool.serializeInputPayload(
+      // stake SYNR in the SynrPool
+      const payload = await inputPool.getSerializedPayload(
           0, // SYNR
           365, // 1 year
           ethers.utils.parseEther('10000') // 10,000 SYNR
