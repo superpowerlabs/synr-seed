@@ -53,7 +53,7 @@ contract WormholeMock {
     // for now we assume it is valid
 //    (valid, reason) = verifyVM(vm);
     return (vm, true, "");
-  }gamp
+  }
 
   function parseVM(bytes memory encodedVM) public pure virtual returns (VM memory vm) {
     uint index = 0;
