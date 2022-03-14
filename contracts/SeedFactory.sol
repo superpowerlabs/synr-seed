@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./token/SeedToken.sol";
+import "hardhat/console.sol";
 
 contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
@@ -105,7 +106,7 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
   function _unlockDeposit(uint256[4] memory payloadArray) internal {
     uint256 depositIndex = getDepositIndex(_msgSender(), payloadArray);
     require(depositIndex > 0, "SeedFactory: deposit not found or already unlocked");
-    users[_msgSender()].deposits[depositIndex].unlocked = 1;
+    users[_msgSender()].deposits[depositIndex.sub(1)].unlocked = 1;
   }
 
   function wormholeTransfer(

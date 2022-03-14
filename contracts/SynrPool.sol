@@ -191,6 +191,10 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
     return 0;
   }
 
+  function getDepositByIndex(address user, uint256 i) public view returns (Deposit memory) {
+    return users[user].deposits[i];
+  }
+
   // Stake/burn is done on chain A, SEED tokens are minted on chain B
   function wormholeTransfer(
     uint256 payload,
