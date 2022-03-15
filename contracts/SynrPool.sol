@@ -105,7 +105,7 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
    * @param deposit The deposit
    * @return the payload, a single uint256
    */
-  function fromInputPayloadToTransferPayload(Deposit memory deposit) public view returns (uint256) {
+  function fromDepositToTransferPayload(Deposit memory deposit) public view returns (uint256) {
     return
       uint256(deposit.tokenType).add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(
         uint256(deposit.tokenAmount).mul(1e21)
@@ -134,11 +134,11 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
     return [payload % 10, payload.div(10) % 1e4, payload.div(1e5)];
   }
 
-  function _updateUser(address user, uint256[3] memory payload) internal returns (Deposit memory) {
+  function _updateUser(uint256[3] memory payload) internal returns (Deposit memory) {
     if (payload[0] == 0) {
-      users[user].synrAmount += uint96(payload[2]);
+      users[_msgSender()].synrAmount += uint96(payload[2]);
     } else {
-      users[user].sSynrAmount += uint96(payload[2]);
+      users[_msgSender()].sSynrAmount += uint96(payload[2]);
     }
     Deposit memory deposit = Deposit({
       tokenType: uint8(payload[0]),
@@ -147,7 +147,7 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
       tokenAmount: uint96(payload[2]),
       unlocked: 0
     });
-    users[user].deposits.push(deposit);
+    users[_msgSender()].deposits.push(deposit);
     return deposit;
   }
 
@@ -160,13 +160,12 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
       // SynrPool must be whitelisted to receive sSYNR
       sSynr.transferFrom(_msgSender(), address(this), payloadArray[2]);
     }
-    return fromInputPayloadToTransferPayload(_updateUser(_msgSender(), payloadArray));
+    return fromDepositToTransferPayload(_updateUser(payloadArray));
   }
 
-  function _unlockSynr(uint256 depositIndex) internal {
-    Deposit storage deposit = users[_msgSender()].deposits[depositIndex];
-    require(block.timestamp > deposit.lockedUntil, "SynrPool: token still locked");
-    synr.safeTransferFrom(address(this), _msgSender(), deposit.tokenAmount, "");
+  function _unlockSynr(address user, uint256 depositIndex) internal {
+    Deposit storage deposit = users[user].deposits[depositIndex];
+    synr.safeTransferFrom(address(this), user, deposit.tokenAmount, "");
     deposit.unlocked = 1;
   }
 
@@ -176,7 +175,7 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
 
   function getDepositIndex(address user, uint256[4] memory payloadArray) public view returns (uint256) {
     for (uint256 i; i < users[user].deposits.length; i++) {
-      Deposit storage deposit =  users[user].deposits[i];
+      Deposit storage deposit = users[user].deposits[i];
       if (
         uint256(deposit.tokenType) == payloadArray[0] &&
         uint256(deposit.lockedFrom) == payloadArray[1] &&
@@ -202,7 +201,7 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
     bytes32 recipient,
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
-    require(_msgSender() == address(uint160(uint(recipient))), "SynrPool: only the sender can receive on other chain");
+    require(_msgSender() == address(uint160(uint256(recipient))), "SynrPool: only the sender can receive on other chain");
     require(minimumLockingTime() > 0, "SynrPool: contract not active");
     return
       _wormholeTransferWithValue(_makeDeposit(deserializeInputPayload(payload)), recipientChain, recipient, nonce, msg.value);
@@ -211,11 +210,14 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   // Unstake is initiated on chain B and completed on chain A
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
+    _onWormholeCompleteTransfer(to, payload);
+  }
+
+  function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
     uint256[4] memory payloadArray = deserializePayload(payload);
     require(payloadArray[0] == 0, "SynrPool: only SYNR can be unlocked");
     uint256 depositIndex = getDepositIndex(to, payloadArray);
     require(depositIndex > 0, "SeedFactory: deposit not found or already unlocked");
-    _unlockSynr(depositIndex.sub(1));
+    _unlockSynr(to, --depositIndex);
   }
 }
-

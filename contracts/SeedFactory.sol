@@ -58,9 +58,9 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
 
   function _updateUser(address user, uint256[4] memory payload) internal {
     if (payload[0] == 0) {
-      users[user].synrAmount += uint96(payload[2]);
+      users[user].synrAmount += uint96(payload[3]);
     } else {
-      users[user].sSynrAmount += uint96(payload[2]);
+      users[user].sSynrAmount += uint96(payload[3]);
     }
     Deposit memory deposit = Deposit({
       tokenType: uint8(payload[0]),
@@ -109,6 +109,18 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
     users[_msgSender()].deposits[depositIndex.sub(1)].unlocked = 1;
   }
 
+  /**
+ * @notice Converts the input payload to the transfer payload
+ * @param deposit The deposit
+ * @return the payload, a single uint256
+ */
+  function fromDepositToTransferPayload(Deposit memory deposit) public view returns (uint256) {
+    return
+    uint256(deposit.tokenType).add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(
+      uint256(deposit.tokenAmount).mul(1e21)
+    );
+  }
+
   function wormholeTransfer(
     // solhint-disable-next-line
     uint256 payload,
@@ -119,7 +131,7 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
     // solhint-disable-next-line
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
-    require(_msgSender() == address(bytes20(recipient)), "SeedFactory: only the sender can receive on other chain");
+    require(_msgSender() == address(uint160(uint(recipient))), "SeedFactory: only the sender can receive on other chain");
     uint256[4] memory payloadArray = deserializePayload(payload);
     _unlockDeposit(payloadArray);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
@@ -127,6 +139,10 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
 
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
+    _onWormholeCompleteTransfer(to, payload);
+  }
+
+  function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
     _mintSeedAndSaveDeposit(to, deserializePayload(payload));
   }
 }
