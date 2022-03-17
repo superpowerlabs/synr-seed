@@ -9,33 +9,43 @@ const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
+const wormholeConfig = require("./lib/wormholeConfig");
+const net = require("net");
 let deployUtils;
+const {bytes32Address} = require('../test/helpers')
 
-// TODO must be rewritten
-
-const wormholeRopsten = "0xF174F9A837536C449321df1Ca093Bb96948D5386";
-const wormholeBSCTest = "0x9dcF9D205C9De35334D646BeE44b2D2859712A09";
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  console.log("chainId", chainId);
 
-  const seed = deployed[chainId].SeedToken;
-  const seedFactory = deployed[chainId].SeedFactory;
-  const Synr = deployed[chainId].SyndicateERC20;
-  const sSynr = deployed[chainId].SyntheticSyndicateERC20SyndicateERC20;
+  const network =
+    chainId === 1
+      ? "ethereum"
+      : chainId === 3
+      ? "ropsten"
+      : chainId === 56
+      ? "bsc"
+      : chainId === 97
+      ? "bsc_testnet"
+      : "localhost";
+
+  if (network === "localhost") {
+    console.error("Network not supported");
+    process.exit(1);
+  }
+
+  const wormholeContract = wormholeConfig.byChainId[chainId];
   const synrPool = deployed[chainId].SynrPool;
+  const seedFactory = deployed[chainId].SeedFactory;
 
-  await sSynr.updateRole(synrPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
-
-  await seed.setManager(seedFactory.address);
-
-  await synrPool.wormholeInit(10001, wormholeRopsten);
-  await synrPool.wormholeRegisterContract(4, bytes32Address(seedFactory.address));
-
-  await seedFactory.wormholeInit(4, wormholeBSCTest);
-  await seedFactory.wormholeRegisterContract(10001, bytes32Address(synrPool.address));
+  if (chainId < 6) {
+    await synrPool.wormholeInit(wormholeContract[0], wormholeContract[1]);
+    await synrPool.wormholeRegisterContract(4, bytes32Address(seedFactory.address));
+  } else {
+    await seedFactory.wormholeInit(wormholeContract[0], wormholeContract[1]);
+    await seedFactory.wormholeRegisterContract(chainId === 56 ? 2 : 10001, bytes32Address(synrPool.address));
+  }
 }
 
 main()

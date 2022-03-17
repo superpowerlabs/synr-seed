@@ -8,7 +8,6 @@ require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
 require("@nomiclabs/hardhat-etherscan");
 require("@openzeppelin/hardhat-upgrades");
-// You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
 if (process.env.GAS_REPORT === "yes") {
@@ -37,19 +36,30 @@ module.exports = {
       chainId: 1337,
     },
     ethereum: {
-      url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY || ""}`,
-      accounts: [envJson.ethereum.privateKey],
+      url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      accounts: [envJson.mainnet.privateKey],
       chainId: 1,
     },
-    kovan: {
-      url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY || ""}`,
-      accounts: [envJson.kovan.privateKey],
-      chainId: 42,
+    bsc: {
+      url: "https://bsc-dataseed.binance.org",
+      chainId: 56,
+      gasPrice: 20000000000,
+      accounts: [envJson.mainnet.privateKey],
+    },
+    ropsten: {
+      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      accounts: [envJson.testnet.privateKey],
+    },
+    bsc_testnet: {
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+      chainId: 97,
+      gasPrice: 20000000000,
+      accounts: [envJson.testnet.privateKey],
     },
   },
   gasReporter: {
     currency: "USD",
-    coinmarketcap: process.env.coinmarketcap,
+    coinmarketcap: process.env.COINMARKETCAP,
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_KEY,

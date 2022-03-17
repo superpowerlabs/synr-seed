@@ -8,11 +8,7 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  let [, , localSuperAdmin] = await ethers.getSigners();
-
   const network = chainId === 56 ? "BSC" : chainId === 97 ? "BSCTestnet" : "localhost";
-
-  const superAdmin = chainId === 1337 ? localSuperAdmin.address : process.env.SUPER_ADMIN;
 
   console.log("Deploying SEED...");
   const SeedToken = await ethers.getContractFactory("SeedToken");
@@ -24,8 +20,7 @@ To verify SeedToken source code:
     
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
-      ${seed.address}  \\
-      ${superAdmin}
+      ${seed.address}
       
 `);
 

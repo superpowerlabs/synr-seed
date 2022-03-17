@@ -11,8 +11,6 @@ const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
 let deployUtils;
 
-// TODO must be rewritten
-
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
@@ -20,13 +18,18 @@ async function main() {
 
   const [owner] = await ethers.getSigners();
 
-  const synAddress = deployed[chainId].SyndicateERC20;
-  const ssynAddress = deployed[chainId].SyntheticSyndicateERC20;
+  const synrAddress = deployed[chainId].SyndicateERC20;
+  const sSynrAddress = deployed[chainId].SyntheticSyndicateERC20;
+
   console.log("Deploying SynrPool");
   const SynrPool = await ethers.getContractFactory("SynrPool");
 
-  const synrPool = await upgrades.deployProxy(SynrPool, [synr.address, sSynr.address]);
+  const synrPool = await upgrades.deployProxy(SynrPool, [synrAddress, sSynrAddress]);
   await synrPool.deployed();
+
+  const SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
+  const sSynr = await SyntheticSyndicateERC20.attach(sSynrAddress)
+  await sSynr.updateRole(synrPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
 
   console.log("SynrPool deployed at", synrPool.address);
 
@@ -38,8 +41,8 @@ To verify SynrPool source code:
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
       ${synrPool.address} \\
-      ${synAddress} \\
-      ${ssynAddress} \\  
+      ${synrAddress} \\
+      ${sSynrAddress}  
 `);
 
   console.log("SynrPool deployed at", synrPool.address);

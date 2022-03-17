@@ -11,22 +11,20 @@ const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
 let deployUtils;
 
-// TODO must be rewritten
-
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  console.log("chainId", chainId);
-
-  const [owner] = await ethers.getSigners();
-
-  const seed = deployed[chainId].SeedToken;
+  const seedAddress = deployed[chainId].SeedToken;
 
   console.log("Deploying SeedFactory");
   const SeedFactory = await ethers.getContractFactory("SeedFactory");
 
-  const seedFactory = await upgrades.deployProxy(SeedFactory, [seed.address]);
+  const seedFactory = await upgrades.deployProxy(SeedFactory, [seedAddress]);
   await seedFactory.deployed();
+
+  const SeedToken = await ethers.getContractFactory("SeedToken");
+  const seed = await SeedToken.attach(seedAddress)
+  await seed.setManager(seedFactory.address);
 
   console.log("SeedFactory deployed at", seedFactory.address);
 
@@ -37,7 +35,7 @@ To verify SeedFactory source code:
 
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
-      ${poolFactory.address} \\
+      ${seedFactory.address} \\
       ${seed.address} \\
 `);
 
