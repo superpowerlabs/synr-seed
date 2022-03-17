@@ -11,7 +11,7 @@ async function main() {
   let [, , localSuperAdmin] = await ethers.getSigners();
 
   const network = chainId === 1 ? 'ethereum'
-      : chainId === 42 ? 'kovan'
+      : chainId === 3 ? 'ropsten'
           : 'localhost'
 
   const superAdmin = chainId === 1337

@@ -31,7 +31,7 @@ async function main() {
   console.log('SynrPool deployed at', synrPool.address)
 
   const network = chainId === 1 ? 'ethereum'
-      : chainId === 42 ? 'kovan'
+      : chainId === 3 ? 'ropsten'
           : 'localhost'
 
   console.log(`
