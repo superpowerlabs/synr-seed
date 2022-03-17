@@ -34,15 +34,15 @@ async function main() {
   await seed.setManager(seedFactory.address)
 
 
-  await synrPool.wormholeInit(3, wormholeRopsten)
+  await synrPool.wormholeInit(10001, wormholeRopsten)
   await synrPool.wormholeRegisterContract(
-      97,
+      4,
       bytes32Address(seedFactory.address)
   )
 
-  await seedFactory.wormholeInit(97, wormholeBSCTest)
+  await seedFactory.wormholeInit(4, wormholeBSCTest)
   await seedFactory.wormholeRegisterContract(
-        3,
+    10001,
         bytes32Address(synrPool.address)
     )
 }
