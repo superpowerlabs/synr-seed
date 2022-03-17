@@ -92,9 +92,9 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
    * @return the payload, a single uint256
    */
   function getSerializedPayload(
-    uint256 type_, // uint8-like
-    uint256 lockupTime, // in days, uint16-like
-    uint256 amount // uint96-like
+    uint256 type_, // 1 digit
+    uint256 lockupTime, // 4 digits
+    uint256 amount
   ) public view returns (uint256) {
     validateInputPayload(type_, lockupTime, amount);
     return type_.add(lockupTime.mul(10)).add(amount.mul(1e5));
