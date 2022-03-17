@@ -8,7 +8,6 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-
   const network = chainId === 56 ? "BSC" : chainId === 97 ? "BSCTestnet" : "localhost";
 
   console.log("Deploying SEED...");

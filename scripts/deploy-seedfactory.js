@@ -14,8 +14,6 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  // console.log('chainId', chainId)
-
   const seedAddress = deployed[chainId].SeedToken;
 
   console.log("Deploying SeedFactory");

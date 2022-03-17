@@ -42,7 +42,7 @@ To verify SynrPool source code:
       --network ${network} \\
       ${synrPool.address} \\
       ${synrAddress} \\
-      ${sSynrAddress} \\  
+      ${sSynrAddress}  
 `);
 
   console.log("SynrPool deployed at", synrPool.address);

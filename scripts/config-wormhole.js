@@ -14,6 +14,7 @@ const net = require("net");
 let deployUtils;
 const {bytes32Address} = require('../test/helpers')
 
+
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();

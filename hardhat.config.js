@@ -8,7 +8,6 @@ require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
 require("@nomiclabs/hardhat-etherscan");
 require("@openzeppelin/hardhat-upgrades");
-// You need to export an object to set up your config.js
 // Go to https://hardhat.org/config/ to learn more
 
 if (process.env.GAS_REPORT === "yes") {
