@@ -20,5 +20,4 @@ contract SynrPoolMock is SynrPool {
   function mockWormholeCompleteTransfer(address to, uint256 payload) public {
     _onWormholeCompleteTransfer(to, payload);
   }
-
 }

@@ -1,21 +1,21 @@
-const {requirePath} = require('require-or-mock')
+const {requirePath} = require("require-or-mock");
 // if missed, it sets up a mock
-requirePath('.env')
-requirePath('.env.json')
+requirePath(".env");
+requirePath(".env.json");
 
-require('dotenv').config()
+require("dotenv").config();
 require("@nomiclabs/hardhat-waffle");
-require('hardhat-contract-sizer')
+require("hardhat-contract-sizer");
 require("@nomiclabs/hardhat-etherscan");
-require('@openzeppelin/hardhat-upgrades');
-// You need to export an object to set up your config
+require("@openzeppelin/hardhat-upgrades");
+// You need to export an object to set up your config.js
 // Go to https://hardhat.org/config/ to learn more
 
-if (process.env.GAS_REPORT === 'yes') {
+if (process.env.GAS_REPORT === "yes") {
   require("hardhat-gas-reporter");
 }
 
-const envJson = require('./.env.json')
+const envJson = require("./.env.json");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -26,35 +26,43 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 200,
       },
     },
   },
-  paths: {
-
-  },
+  paths: {},
   networks: {
     localhost: {
       url: "http://localhost:8545",
       chainId: 1337,
     },
     ethereum: {
-      url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,
-      accounts: [envJson.ethereum.privateKey],
+      url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      accounts: [envJson.mainnet.privateKey],
       chainId: 1,
     },
-    kovan: {
-      url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,
-      accounts: [envJson.kovan.privateKey],
-      chainId: 42,
+    bsc: {
+      url: "https://bsc-dataseed.binance.org",
+      chainId: 56,
+      gasPrice: 20000000000,
+      accounts: [envJson.mainnet.privateKey],
+    },
+    ropsten: {
+      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      accounts: [envJson.testnet.privateKey],
+    },
+    bsc_testnet: {
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+      chainId: 97,
+      gasPrice: 20000000000,
+      accounts: [envJson.testnet.privateKey],
     },
   },
   gasReporter: {
-    currency: 'USD',
-    coinmarketcap: process.env.coinmarketcap
+    currency: "USD",
+    coinmarketcap: process.env.COINMARKETCAP,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_KEY
-  }
+    apiKey: process.env.ETHERSCAN_KEY,
+  },
 };
-
