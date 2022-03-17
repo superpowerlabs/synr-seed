@@ -21,9 +21,9 @@ async function main() {
 
   abi('SyntheticSyndicateERC20', 'token')
   abi('SyndicateERC20', 'token')
-  abi('SynrSwapper', 'token')
-  abi('SyndicatePoolFactory', 'pools')
-  abi('SyndicateCorePool', 'pools')
+  abi('SynrPool', 'pools')
+  abi('SeedToken', 'seed')
+  abi('SeedFactory', 'factory')
 
   await fs.writeFile(path.resolve(__dirname, '../export/ABIs.json'), JSON.stringify(ABIs, null, 2))
 }

@@ -23,7 +23,7 @@ async function main() {
   const synAddress = deployed[chainId].SyndicateERC20
   const ssynAddress = deployed[chainId].SyntheticSyndicateERC20
   console.log('Deploying SynrPool')
-  const SynrPool = await ethers.getContractFactory("SynrPoolMock")
+  const SynrPool = await ethers.getContractFactory("SynrPool")
 
   const synrPool = await upgrades.deployProxy(SynrPool, [synr.address, sSynr.address]);
   await synrPool.deployed()
@@ -45,7 +45,7 @@ To verify SynrPool source code:
 `)
 
 console.log('SynrPool deployed at', synrPool.address)
-await deployUtils.saveDeployed(chainId, ['SynrPoolMock'], [synrPool.address])
+await deployUtils.saveDeployed(chainId, ['SynrPool'], [synrPool.address])
 }
 
 main()

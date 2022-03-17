@@ -24,20 +24,20 @@ async function main() {
   const seed = deployed[chainId].SeedToken
 
   console.log('Deploying SeedFactory')
-  const SeedFactory = await ethers.getContractFactory("SeedFactoryMock")
+  const SeedFactory = await ethers.getContractFactory("SeedFactory")
 
   const seedFactory = await upgrades.deployProxy(SeedFactory, [seed.address]);
   await seedFactory.deployed()
 
 
-  console.log('SeedFactoryMock deployed at', seedFactory.address)
+  console.log('SeedFactory deployed at', seedFactory.address)
 
   const network = chainId === 56 ? 'BSC'
       : chainId === 97 ? 'BSCTestnet'
           : 'localhost'
 
   console.log(`
-To verify SeedFactoryMock source code:
+To verify SeedFactory source code:
 
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
@@ -45,8 +45,8 @@ To verify SeedFactoryMock source code:
       ${seed.address} \\
 `)
 
-console.log('SeedFactoryMock deployed at', seedFactory.address)
-await deployUtils.saveDeployed(chainId, ['SeedFactoryMock'], [seedFactory.address])
+console.log('SeedFactory deployed at', seedFactory.address)
+await deployUtils.saveDeployed(chainId, ['SeedFactory'], [seedFactory.address])
 
 }
 
