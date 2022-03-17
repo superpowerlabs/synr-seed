@@ -110,15 +110,15 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
   }
 
   /**
- * @notice Converts the input payload to the transfer payload
- * @param deposit The deposit
- * @return the payload, a single uint256
- */
+   * @notice Converts the input payload to the transfer payload
+   * @param deposit The deposit
+   * @return the payload, a single uint256
+   */
   function fromDepositToTransferPayload(Deposit memory deposit) public view returns (uint256) {
     return
-    uint256(deposit.tokenType).add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(
-      uint256(deposit.tokenAmount).mul(1e21)
-    );
+      uint256(deposit.tokenType).add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(
+        uint256(deposit.tokenAmount).mul(1e21)
+      );
   }
 
   function wormholeTransfer(
@@ -131,7 +131,7 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
     // solhint-disable-next-line
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
-    require(_msgSender() == address(uint160(uint(recipient))), "SeedFactory: only the sender can receive on other chain");
+    require(_msgSender() == address(uint160(uint256(recipient))), "SeedFactory: only the sender can receive on other chain");
     uint256[4] memory payloadArray = deserializePayload(payload);
     _unlockDeposit(payloadArray);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
