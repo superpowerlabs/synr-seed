@@ -61,9 +61,9 @@ describe.only("#WormholeMock", function () {
     await seed.setManager(seedFactory.address)
 
     wormhole = await WormholeMock.deploy()
+    await synrPool.wormholeInit(2, wormhole.address)
     await wormhole.deployed()
 
-    await synrPool.wormholeInit(2, wormhole.address)
     await synrPool.wormholeRegisterContract(
         4,
         bytes32Address(seedFactory.address)
