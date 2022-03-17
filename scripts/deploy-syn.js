@@ -47,7 +47,7 @@ async function main() {
   await (await syn.updateFeatures(features)).wait()
 
   const network = chainId === 1 ? 'ethereum'
-      : chainId == 42 ? 'kovan'
+      : chainId == 3 ? 'ropsten'
           : 'localhost'
 
   console.log(`
