@@ -11,6 +11,8 @@ const deployed = requireOrMock('export/deployed.json')
 const DeployUtils = require('./lib/DeployUtils')
 let deployUtils
 
+// TODO must be rewritten
+
 async function main() {
   deployUtils = new DeployUtils(ethers)
   const chainId = await deployUtils.currentChainId()
