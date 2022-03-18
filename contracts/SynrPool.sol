@@ -106,10 +106,14 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
    * @return the payload, a single uint256
    */
   function fromDepositToTransferPayload(Deposit memory deposit) public view returns (uint256) {
-    return
-      uint256(deposit.tokenType).add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(
-        uint256(deposit.tokenAmount).mul(1e21)
-      );
+//    return
+//      uint256(deposit.tokenType)
+//      .add(uint256(deposit.lockedFrom) << 8)
+//      .add(uint256(deposit.lockedUntil) << 40).add(uint256(deposit.tokenAmount) << 72); // 8 + 32 // 8 + 32 + 32
+        return
+          uint256(deposit.tokenType).add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(
+            uint256(deposit.tokenAmount).mul(1e21)
+          );
   }
 
   function minimumLockingTime() public view returns (uint256) {
@@ -170,7 +174,7 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   }
 
   function deserializePayload(uint256 payload) public pure returns (uint256[4] memory) {
-    return [payload % 10, payload.div(10) % 1e10, payload.div(1e11) % 1e10, payload.div(1e21)];
+    return [payload.mod(10), payload.div(10).mod(1e10), payload.div(1e11).mod(1e10), payload.div(1e21)];
   }
 
   function getDepositIndex(address user, uint256[4] memory payloadArray) public view returns (uint256) {
