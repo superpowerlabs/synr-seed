@@ -57,7 +57,7 @@ describe.only("#WormholeMock", function () {
     seedFactory = await upgrades.deployProxy(SeedFactory, [seed.address]);
     await seedFactory.deployed();
 
-    await seed.setManager(seedFactory.address);
+    await seed.grantRole(await seed.MINTER_ROLE(), seedFactory.address);
 
     wormhole = await WormholeMock.deploy();
     await synrPool.wormholeInit(2, wormhole.address);

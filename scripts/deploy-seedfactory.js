@@ -24,19 +24,14 @@ async function main() {
 
   const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress)
-  await seed.setManager(seedFactory.address);
+  await seed.grantRole(await seed.MINTER_ROLE(), seedFactory.address);
 
   console.log("SeedFactory deployed at", seedFactory.address);
 
   const network = chainId === 56 ? "BSC" : chainId === 97 ? "BSCTestnet" : "localhost";
 
   console.log(`
-To verify SeedFactory source code:
-
-  npx hardhat verify --show-stack-traces \\
-      --network ${network} \\
-      ${seedFactory.address} \\
-      ${seed.address} \\
+To verify SeedFactory source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
 `);
 
   console.log("SeedFactory deployed at", seedFactory.address);

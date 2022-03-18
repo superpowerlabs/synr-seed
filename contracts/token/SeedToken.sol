@@ -3,12 +3,15 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract SeedToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract SeedToken is Initializable, ERC20Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+  bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+  bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
   using AddressUpgradeable for address;
   address public manager;
 
@@ -17,20 +20,24 @@ contract SeedToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable,
 
   function initialize() public initializer {
     __ERC20_init("Mobland Seed Token", "SEED");
-    __ERC20Burnable_init();
-    __Ownable_init();
+    __AccessControl_init();
     __UUPSUpgradeable_init();
+
+    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    _grantRole(UPGRADER_ROLE, msg.sender);
   }
 
-  function setManager(address manager_) external onlyOwner {
-    require(manager_.isContract(), "manager not a contract");
-    manager = manager_;
-  }
-
-  function mint(address to, uint256 amount) public {
-    require(owner() == _msgSender() || manager == _msgSender(), "Caller not authorized");
+  function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
     _mint(to, amount);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+  function burn(address to, uint256 amount) public onlyRole(BURNER_ROLE) {
+    _burn(to, amount);
+  }
+
+  function _authorizeUpgrade(address newImplementation)
+  internal
+  onlyRole(UPGRADER_ROLE)
+  override
+  {}
 }
