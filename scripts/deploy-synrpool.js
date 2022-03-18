@@ -36,13 +36,7 @@ async function main() {
   const network = chainId === 1 ? "ethereum" : chainId === 3 ? "ropsten" : "localhost";
 
   console.log(`
-To verify SynrPool source code:
-    
-  npx hardhat verify --show-stack-traces \\
-      --network ${network} \\
-      ${synrPool.address} \\
-      ${synrAddress} \\
-      ${sSynrAddress}  
+To verify SynrPool source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
 `);
 
   console.log("SynrPool deployed at", synrPool.address);

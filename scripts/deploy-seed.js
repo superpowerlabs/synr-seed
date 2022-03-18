@@ -16,12 +16,7 @@ async function main() {
   await seed.deployed();
 
   console.log(`
-To verify SeedToken source code:
-    
-  npx hardhat verify --show-stack-traces \\
-      --network ${network} \\
-      ${seed.address}
-      
+To verify SeedToken source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
 `);
 
   console.log("SeedToken deployed at", seed.address);
