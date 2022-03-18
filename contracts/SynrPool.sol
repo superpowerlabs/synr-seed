@@ -170,7 +170,7 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   }
 
   function deserializePayload(uint256 payload) public pure returns (uint256[4] memory) {
-    return [payload % 10, payload.div(10) % 1e10, payload.div(1e11) % 1e10, payload.div(1e21)];
+    return [payload.mod(10), payload.div(10).mod(1e10), payload.div(1e11).mod(1e10), payload.div(1e21)];
   }
 
   function getDepositIndex(address user, uint256[4] memory payloadArray) public view returns (uint256) {

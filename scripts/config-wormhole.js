@@ -12,8 +12,7 @@ const DeployUtils = require("./lib/DeployUtils");
 const wormholeConfig = require("./lib/wormholeConfig");
 const net = require("net");
 let deployUtils;
-const {bytes32Address} = require('../test/helpers')
-
+const {bytes32Address} = require("../test/helpers");
 
 async function main() {
   deployUtils = new DeployUtils(ethers);

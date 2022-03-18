@@ -23,7 +23,7 @@ async function main() {
   await seedFactory.deployed();
 
   const SeedToken = await ethers.getContractFactory("SeedToken");
-  const seed = await SeedToken.attach(seedAddress)
+  const seed = await SeedToken.attach(seedAddress);
   await seed.grantRole(await seed.MINTER_ROLE(), seedFactory.address);
 
   console.log("SeedFactory deployed at", seedFactory.address);

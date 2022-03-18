@@ -35,9 +35,5 @@ contract SeedToken is Initializable, ERC20Upgradeable, AccessControlUpgradeable,
     _burn(to, amount);
   }
 
-  function _authorizeUpgrade(address newImplementation)
-  internal
-  onlyRole(UPGRADER_ROLE)
-  override
-  {}
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }

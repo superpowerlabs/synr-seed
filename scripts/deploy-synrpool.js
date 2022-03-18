@@ -28,7 +28,7 @@ async function main() {
   await synrPool.deployed();
 
   const SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
-  const sSynr = await SyntheticSyndicateERC20.attach(sSynrAddress)
+  const sSynr = await SyntheticSyndicateERC20.attach(sSynrAddress);
   await sSynr.updateRole(synrPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
 
   console.log("SynrPool deployed at", synrPool.address);
