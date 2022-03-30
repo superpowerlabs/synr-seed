@@ -36,14 +36,14 @@ async function main() {
 
   const wormholeContract = wormholeConfig.byChainId[chainId];
   const synrPool = deployed[chainId].SynrPool;
-  const seedFactory = deployed[chainId].SeedFactory;
+  const seedFarm = deployed[chainId].SeedFarm;
 
   if (chainId < 6) {
     await synrPool.wormholeInit(wormholeContract[0], wormholeContract[1]);
-    await synrPool.wormholeRegisterContract(4, bytes32Address(seedFactory.address));
+    await synrPool.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
   } else {
-    await seedFactory.wormholeInit(wormholeContract[0], wormholeContract[1]);
-    await seedFactory.wormholeRegisterContract(chainId === 56 ? 2 : 10001, bytes32Address(synrPool.address));
+    await seedFarm.wormholeInit(wormholeContract[0], wormholeContract[1]);
+    await seedFarm.wormholeRegisterContract(chainId === 56 ? 2 : 10001, bytes32Address(synrPool.address));
   }
 }
 

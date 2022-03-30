@@ -15,7 +15,7 @@ describe.only("#WormholeMock", function () {
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
   let SynrPool, synrPool;
-  let SeedFactory, seedFactory;
+  let SeedFarm, seedFarm;
   let SeedToken, seed;
 
   let deployer, fundOwner, superAdmin, operator, user1, user2, marketplace, treasury;
@@ -26,7 +26,7 @@ describe.only("#WormholeMock", function () {
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
     SynrPool = await ethers.getContractFactory("SynrPoolMock");
-    SeedFactory = await ethers.getContractFactory("SeedFactoryMock");
+    SeedFarm = await ethers.getContractFactory("SeedFarmMock");
     SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
   });
@@ -54,20 +54,20 @@ describe.only("#WormholeMock", function () {
     seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
-    seedFactory = await upgrades.deployProxy(SeedFactory, [seed.address]);
-    await seedFactory.deployed();
+    seedFarm = await upgrades.deployProxy(SeedFarm, [seed.address]);
+    await seedFarm.deployed();
 
-    await seed.grantRole(await seed.MINTER_ROLE(), seedFactory.address);
+    await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
 
     wormhole = await WormholeMock.deploy();
     await synrPool.wormholeInit(2, wormhole.address);
     await wormhole.deployed();
 
-    await synrPool.wormholeRegisterContract(4, bytes32Address(seedFactory.address));
+    await synrPool.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
     await synrPool.initPool(30);
 
-    await seedFactory.wormholeInit(4, wormhole.address);
-    await seedFactory.wormholeRegisterContract(2, bytes32Address(synrPool.address));
+    await seedFarm.wormholeInit(4, wormhole.address);
+    await seedFarm.wormholeRegisterContract(2, bytes32Address(synrPool.address));
   }
 
   async function configure() {}
@@ -81,7 +81,7 @@ describe.only("#WormholeMock", function () {
       const amount = ethers.utils.parseEther("10000");
 
       // stake SYNR in the SynrPool
-      const payload = await synrPool.getSerializedPayload(
+      const payload = await synrPool.serializeInput(
         0, // SYNR
         365, // 1 year
         amount
@@ -104,19 +104,19 @@ describe.only("#WormholeMock", function () {
 
       expect(await synr.balanceOf(synrPool.address)).equal(amount);
 
-      await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
+      await seedFarm.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
 
       expect(await seed.balanceOf(fundOwner.address)).equal(ethers.utils.parseEther("10000"));
 
       await increaseBlockTimestampBy(366 * 24 * 3600);
 
-      let seedDeposit = await seedFactory.getDepositByIndex(fundOwner.address, 0);
+      let seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
       expect(seedDeposit.unlocked).equal(0);
-      const seedPayload = await seedFactory.fromDepositToTransferPayload(seedDeposit);
+      const seedPayload = await seedFarm.fromDepositToTransferPayload(seedDeposit);
 
       // unstake
-      await seedFactory.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
-      seedDeposit = await seedFactory.getDepositByIndex(fundOwner.address, 0);
+      await seedFarm.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
+      seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
       expect(seedDeposit.unlocked).equal(1);
 
       const synrBalanceBefore = await synr.balanceOf(fundOwner.address);

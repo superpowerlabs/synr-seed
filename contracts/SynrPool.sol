@@ -10,10 +10,11 @@ import "./interfaces/IERC20.sol";
 import "./token/SyndicateERC20.sol";
 import "./token/SyntheticSyndicateERC20.sol";
 import "./interfaces/IERC20Receiver.sol";
+import "./Payload.sol";
 
 import "hardhat/console.sol";
 
-contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
+contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -83,55 +84,22 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   }
 
   /**
-   * @notice Serialize the input data and returns a payload
-   * @dev The app calls this function to prepare the parameters
-   *      needed to call the transfer.
-   * @param type_ The type of token (0 > SYNR, 1 > sSYNR)
-   * @param lockupTime For how long the SYNR are staked
-   * @param amount Amount of tokens staked or burned (if sSYNR)
-   * @return the payload, a single uint256
-   */
-  function getSerializedPayload(
-    uint256 type_, // 1 digit
-    uint256 lockupTime, // 4 digits
-    uint256 amount
-  ) public view returns (uint256) {
-    validateInputPayload(type_, lockupTime, amount);
-    return type_.add(lockupTime.mul(10)).add(amount.mul(1e5));
-  }
-
-  /**
    * @notice Converts the input payload to the transfer payload
    * @param deposit The deposit
    * @return the payload, a single uint256
    */
   function fromDepositToTransferPayload(Deposit memory deposit) public view returns (uint256) {
     return
-      uint256(deposit.tokenType).add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(
-        uint256(deposit.tokenAmount).mul(1e21)
+      serializeDeposit(
+        uint256(deposit.tokenType),
+        uint256(deposit.lockedFrom),
+        uint256(deposit.lockedUntil),
+        uint256(deposit.tokenAmount)
       );
   }
 
   function minimumLockingTime() public view returns (uint256) {
     return encodedStatus % 1e5;
-  }
-
-  function validateInputPayload(
-    uint256 type_,
-    uint256 lockupTime,
-    uint256 amount
-  ) public view returns (bool) {
-    require(type_ < 2, "SynrPool: invalid token type");
-    require(amount < 1e28, "SynrPool: amount out of range");
-    require(lockupTime < type(uint32).max, "SynrPool: lockedTime out of range");
-    if (type_ == 0) {
-      require(lockupTime > minimumLockingTime(), "SynrPool: invalid lockupTime type");
-    }
-    return true;
-  }
-
-  function deserializeInputPayload(uint256 payload) public pure returns (uint256[3] memory) {
-    return [payload % 10, payload.div(10) % 1e4, payload.div(1e5)];
   }
 
   function _updateUser(uint256[3] memory payload) internal returns (Deposit memory) {
@@ -152,7 +120,10 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   }
 
   function _makeDeposit(uint256[3] memory payloadArray) internal returns (uint256) {
-    validateInputPayload(payloadArray[0], payloadArray[1], payloadArray[2]);
+    validateInput(payloadArray[0], payloadArray[1], payloadArray[2]);
+    if (payloadArray[0] == 0) {
+      require(payloadArray[1] > minimumLockingTime(), "SynrPool: invalid lockupTime type");
+    }
     // it will throw if the contract is not a token spender, or if the balance is insufficient
     if (payloadArray[0] == 0) {
       synr.safeTransferFrom(_msgSender(), address(this), payloadArray[2], "");
@@ -167,10 +138,6 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
     Deposit storage deposit = users[user].deposits[depositIndex];
     synr.safeTransferFrom(address(this), user, deposit.tokenAmount, "");
     deposit.unlocked = 1;
-  }
-
-  function deserializePayload(uint256 payload) public pure returns (uint256[4] memory) {
-    return [payload.mod(10), payload.div(10).mod(1e10), payload.div(1e11).mod(1e10), payload.div(1e21)];
   }
 
   function getDepositIndex(address user, uint256[4] memory payloadArray) public view returns (uint256) {
@@ -203,8 +170,7 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   ) public payable override whenNotPaused returns (uint64 sequence) {
     require(_msgSender() == address(uint160(uint256(recipient))), "SynrPool: only the sender can receive on other chain");
     require(minimumLockingTime() > 0, "SynrPool: contract not active");
-    return
-      _wormholeTransferWithValue(_makeDeposit(deserializeInputPayload(payload)), recipientChain, recipient, nonce, msg.value);
+    return _wormholeTransferWithValue(_makeDeposit(deserializeInput(payload)), recipientChain, recipient, nonce, msg.value);
   }
 
   // Unstake is initiated on chain B and completed on chain A
@@ -214,10 +180,20 @@ contract SynrPool is Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   }
 
   function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
-    uint256[4] memory payloadArray = deserializePayload(payload);
+    uint256[4] memory payloadArray = deserializeDeposit(payload);
     require(payloadArray[0] == 0, "SynrPool: only SYNR can be unlocked");
     uint256 depositIndex = getDepositIndex(to, payloadArray);
-    require(depositIndex > 0, "SeedFactory: deposit not found or already unlocked");
+    require(depositIndex > 0, "SeedFarm: deposit not found or already unlocked");
     _unlockSynr(to, --depositIndex);
+  }
+
+  function transferSSynrToTreasury(uint256 amount, address treasury) external onlyOwner {
+    uint256 availableAmount = sSynr.balanceOf(address(this));
+    require(amount <= availableAmount, "SynrPool: amount not available");
+    if (amount == 0) {
+      amount = availableAmount;
+    }
+    // beneficiary must be whitelisted to receive sSYNR
+    sSynr.transferFrom(address(this), treasury, amount);
   }
 }

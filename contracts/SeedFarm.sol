@@ -6,10 +6,11 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
+import "./Payload.sol";
 import "./token/SeedToken.sol";
 import "hardhat/console.sol";
 
-contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
+contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -52,10 +53,6 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-  function deserializePayload(uint256 payload) public pure returns (uint256[4] memory) {
-    return [payload % 10, payload.div(10) % 1e10, payload.div(1e11) % 1e10, payload.div(1e21)];
-  }
-
   function _updateUser(address user, uint256[4] memory payload) internal {
     if (payload[0] == 0) {
       users[user].synrAmount += uint96(payload[3]);
@@ -77,8 +74,8 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
     if (payloadArray[0] == 0) {
       seed.mint(to, payloadArray[3]);
     } else {
-      // SynrPool must be whitelisted to receive sSYNR
-      seed.mint(to, payloadArray[3]);
+      // give seed to the user
+      seed.mint(to, payloadArray[3].mul(1000));
     }
     _updateUser(to, payloadArray);
   }
@@ -105,7 +102,7 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
 
   function _unlockDeposit(uint256[4] memory payloadArray) internal {
     uint256 depositIndex = getDepositIndex(_msgSender(), payloadArray);
-    require(depositIndex > 0, "SeedFactory: deposit not found or already unlocked");
+    require(depositIndex > 0, "SeedFarm: deposit not found or already unlocked");
     users[_msgSender()].deposits[depositIndex.sub(1)].unlocked = 1;
   }
 
@@ -131,8 +128,8 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
     // solhint-disable-next-line
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
-    require(_msgSender() == address(uint160(uint256(recipient))), "SeedFactory: only the sender can receive on other chain");
-    uint256[4] memory payloadArray = deserializePayload(payload);
+    require(_msgSender() == address(uint160(uint256(recipient))), "SeedFarm: only the sender can receive on other chain");
+    uint256[4] memory payloadArray = deserializeDeposit(payload);
     _unlockDeposit(payloadArray);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
@@ -143,6 +140,6 @@ contract SeedFactory is Initializable, WormholeTunnelUpgradeable {
   }
 
   function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
-    _mintSeedAndSaveDeposit(to, deserializePayload(payload));
+    _mintSeedAndSaveDeposit(to, deserializeDeposit(payload));
   }
 }

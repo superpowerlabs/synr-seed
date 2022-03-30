@@ -16,30 +16,30 @@ async function main() {
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
 
-  console.log("Deploying SeedFactory");
-  const SeedFactory = await ethers.getContractFactory("SeedFactory");
+  console.log("Deploying SeedFarm");
+  const SeedFarm = await ethers.getContractFactory("SeedFarm");
 
-  const seedFactory = await upgrades.deployProxy(SeedFactory, [seedAddress]);
-  await seedFactory.deployed();
+  const seedFarm = await upgrades.deployProxy(SeedFarm, [seedAddress]);
+  await seedFarm.deployed();
 
   const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress);
-  await seed.grantRole(await seed.MINTER_ROLE(), seedFactory.address);
+  await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
 
-  console.log("SeedFactory deployed at", seedFactory.address);
+  console.log("SeedFarm deployed at", seedFarm.address);
 
   const network = chainId === 56 ? "BSC" : chainId === 97 ? "BSCTestnet" : "localhost";
 
   console.log(`
-To verify SeedFactory source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
+To verify SeedFarm source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
 
 The encoded arguments are:
 
 ${deployUtils.encodeArguments(["address"], [seedAddress])}
 `);
 
-  console.log("SeedFactory deployed at", seedFactory.address);
-  await deployUtils.saveDeployed(chainId, ["SeedFactory"], [seedFactory.address]);
+  console.log("SeedFarm deployed at", seedFarm.address);
+  await deployUtils.saveDeployed(chainId, ["SeedFarm"], [seedFarm.address]);
 }
 
 main()

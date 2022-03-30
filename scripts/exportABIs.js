@@ -22,7 +22,7 @@ async function main() {
   abi("SyndicateERC20", "token");
   abi("SeedToken", "token");
   abi("SynrPool", "");
-  abi("SeedFactory", "");
+  abi("SeedFarm", "");
 
   await fs.writeFile(path.resolve(__dirname, "../export/ABIs.json"), JSON.stringify(ABIs, null, 2));
 }
