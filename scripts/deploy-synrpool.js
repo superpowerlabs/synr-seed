@@ -37,6 +37,11 @@ async function main() {
 
   console.log(`
 To verify SynrPool source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
+
+The encoded arguments are:
+
+${deployUtils.encodeArguments(["address", "address"], [synrAddress, sSynrAddress])}
+
 `);
 
   console.log("SynrPool deployed at", synrPool.address);

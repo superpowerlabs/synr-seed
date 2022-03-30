@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs-extra");
 const {Contract} = require("@ethersproject/contracts");
+const abi = require('ethereumjs-abi')
 
 class DeployUtils {
   constructor(ethers) {
@@ -81,6 +82,10 @@ class DeployUtils {
     }
     // console.log(deployed)
     await fs.writeFile(deployedJson, JSON.stringify(deployed, null, 2));
+  }
+
+  encodeArguments(parameterTypes, parameterValues) {
+    return abi.rawEncode(parameterTypes, parameterValues).toString('hex');
   }
 }
 

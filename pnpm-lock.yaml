@@ -12,6 +12,7 @@ specifiers:
   chai: ^4.3.4
   dotenv: ^10.0.0
   ethereum-waffle: ^3.4.0
+  ethereumjs-abi: ^0.6.8
   ethers: ^5.5.2
   ethlint: ^1.2.5
   fs-extra: ^10.0.0
@@ -38,6 +39,7 @@ devDependencies:
   chai: 4.3.4
   dotenv: 10.0.0
   ethereum-waffle: 3.4.0_typescript@4.6.2
+  ethereumjs-abi: 0.6.8
   ethers: 5.5.2
   ethlint: 1.2.5_solium@1.2.5
   fs-extra: 10.0.0
