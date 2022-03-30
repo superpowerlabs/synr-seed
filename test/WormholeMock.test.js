@@ -26,7 +26,7 @@ describe.only("#WormholeMock", function () {
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
     SynrPool = await ethers.getContractFactory("SynrPoolMock");
-    SeedFarm = await ethers.getContractFactory("SeedFactoryMock");
+    SeedFarm = await ethers.getContractFactory("SeedFarmMock");
     SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
   });

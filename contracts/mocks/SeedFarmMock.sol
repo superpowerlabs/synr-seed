@@ -9,7 +9,7 @@ pragma solidity ^0.8.2;
 import "../SeedFarm.sol";
 import "hardhat/console.sol";
 
-contract SeedFactoryMock is SeedFarm {
+contract SeedFarmMock is SeedFarm {
   function mockWormholeCompleteTransfer(address to, uint256 payload) public {
     _onWormholeCompleteTransfer(to, payload);
   }
