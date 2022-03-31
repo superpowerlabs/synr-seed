@@ -172,6 +172,8 @@ describe.only("#WormholeMock", function () {
 
       await increaseBlockTimestampBy(150 * 24 * 3600);
 
+      expect(await seedFarm.canUnstakeWithoutTax(user1.address, 0)).equal(false)
+
       let seedDeposit = await seedFarm.getDepositByIndex(user1.address, 0);
       expect(seedDeposit.unlockedAt).equal(0);
       const seedPayload = await seedFarm.fromDepositToTransferPayload(seedDeposit);
