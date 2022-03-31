@@ -21,7 +21,7 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   SyndicateERC20 public synr;
   SyntheticSyndicateERC20 public sSynr;
 
-  uint public taxesAmount;
+  uint public collectedTaxes;
 
   uint256 public encodedConf;
 
@@ -110,7 +110,7 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     uint amount = uint(deposit.tokenAmount).sub(tax);
     synr.safeTransferFrom(address(this), user, amount, "");
     if (tax > 0) {
-      taxesAmount += tax;
+      collectedTaxes += tax;
     }
     deposit.unlockedAt = uint32(block.timestamp);
   }
@@ -192,9 +192,9 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   }
 
   function withdrawTaxes(uint256 amount, address to) external onlyOwner {
-    require(amount <= taxesAmount, "SynrPool: SYNR amount not available");
+    require(amount <= collectedTaxes, "SynrPool: SYNR amount not available");
     if (amount == 0) {
-      amount = taxesAmount;
+      amount = collectedTaxes;
     }
     synr.transferFrom(address(this), to, amount);
   }
