@@ -18,39 +18,16 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
-  struct Deposit {
-    // @dev token type (SYNR or sSYNR)
-    uint8 tokenType;
-    // @dev locking period - from
-    uint32 lockedFrom;
-    // @dev locking period - until
-    uint32 lockedUntil;
-    // @dev token amount staked
-    // SYNR maxTokenSupply is 10 billion * 18 decimals = 1e28
-    // which is less type(uint96).max (~79e28)
-    uint96 tokenAmount;
-    uint8 unlocked;
-    // space available for 10 more bytes
-  }
-
-  /// @dev Data structure representing token holder using a pool
-  struct User {
-    // @dev Total staked SYNR amount
-    uint96 synrAmount;
-    // @dev Total burned sSYNR amount
-    uint96 sSynrAmount;
-    Deposit[] deposits;
-  }
-
   SyndicateERC20 public synr;
   SyntheticSyndicateERC20 public sSynr;
 
-  // this is an encode value so that in the future we can encode
-  // values other than minimumLockingTime without breaking the storage
-  uint256 public encodedStatus;
+  uint public taxesAmount;
+
+  uint256 public encodedConf;
 
   // users and deposits
   mapping(address => User) public users;
+
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -65,9 +42,12 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-  function initPool(uint256 minimumLockingTime_) external onlyOwner {
+  function initPool(
+    uint256 minimumLockingTime_, // 5 digits
+    uint256 earlyUnStakeTax_ // 2 digits
+  ) external onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "SynrPool: contract cannot receive sSYNR");
-    encodedStatus = minimumLockingTime_;
+    encodedConf = minimumLockingTime_.add(earlyUnStakeTax_.mul(1e5));
   }
 
   function onERC20Received(
@@ -83,26 +63,15 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     return 0x4fc35859;
   }
 
-  /**
-   * @notice Converts the input payload to the transfer payload
-   * @param deposit The deposit
-   * @return the payload, a single uint256
-   */
-  function fromDepositToTransferPayload(Deposit memory deposit) public view returns (uint256) {
-    return
-      serializeDeposit(
-        uint256(deposit.tokenType),
-        uint256(deposit.lockedFrom),
-        uint256(deposit.lockedUntil),
-        uint256(deposit.tokenAmount)
-      );
-  }
-
   function minimumLockingTime() public view returns (uint256) {
-    return encodedStatus % 1e5;
+    return encodedConf.mod(1e5);
   }
 
-  function _updateUser(uint256[3] memory payload) internal returns (Deposit memory) {
+  function earlyUnStakeTax() public view returns (uint256) {
+    return encodedConf.div(1e5).mod(1e2);
+  }
+
+  function _updateUser(uint256[3] memory payload, uint16 otherChain) internal returns (Deposit memory) {
     if (payload[0] == 0) {
       users[_msgSender()].synrAmount += uint96(payload[2]);
     } else {
@@ -113,13 +82,14 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
       lockedFrom: payload[0] == 0 ? uint32(block.timestamp) : 0,
       lockedUntil: payload[0] == 0 ? uint32(block.timestamp.add(payload[1] * 1 days)) : 0,
       tokenAmount: uint96(payload[2]),
-      unlocked: 0
+      unlockedAt: 0,
+      otherChain: otherChain
     });
     users[_msgSender()].deposits.push(deposit);
     return deposit;
   }
 
-  function _makeDeposit(uint256[3] memory payloadArray) internal returns (uint256) {
+  function _makeDeposit(uint256[3] memory payloadArray, uint16 otherChain) internal returns (uint256) {
     validateInput(payloadArray[0], payloadArray[1], payloadArray[2]);
     if (payloadArray[0] == 0) {
       require(payloadArray[1] > minimumLockingTime(), "SynrPool: invalid lockupTime type");
@@ -131,13 +101,18 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
       // SynrPool must be whitelisted to receive sSYNR
       sSynr.transferFrom(_msgSender(), address(this), payloadArray[2]);
     }
-    return fromDepositToTransferPayload(_updateUser(payloadArray));
+    return fromDepositToTransferPayload(_updateUser(payloadArray, otherChain));
   }
 
   function _unlockSynr(address user, uint256 depositIndex) internal {
     Deposit storage deposit = users[user].deposits[depositIndex];
-    synr.safeTransferFrom(address(this), user, deposit.tokenAmount, "");
-    deposit.unlocked = 1;
+    uint tax = calculateTaxForEarlyUnstake(user, depositIndex);
+    uint amount = uint(deposit.tokenAmount).sub(tax);
+    synr.safeTransferFrom(address(this), user, amount, "");
+    if (tax > 0) {
+      taxesAmount += tax;
+    }
+    deposit.unlockedAt = uint32(block.timestamp);
   }
 
   function getDepositIndex(address user, uint256[4] memory payloadArray) public view returns (uint256) {
@@ -147,9 +122,8 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
         uint256(deposit.tokenType) == payloadArray[0] &&
         uint256(deposit.lockedFrom) == payloadArray[1] &&
         uint256(deposit.lockedUntil) == payloadArray[2] &&
-        uint256(deposit.lockedUntil) < block.timestamp &&
         uint256(deposit.tokenAmount) == payloadArray[3] &&
-        uint256(deposit.unlocked) == 0
+        uint256(deposit.unlockedAt) == 0
       ) {
         return i + 1;
       }
@@ -168,9 +142,29 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     bytes32 recipient,
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
-    require(_msgSender() == address(uint160(uint256(recipient))), "SynrPool: only the sender can receive on other chain");
+    uint256[3] memory payloadArray = deserializeInput(payload);
+    if (payloadArray[0] == 0) {
+      // this limitation is necessary to avoid problems during the unstake
+      require(_msgSender() == address(uint160(uint256(recipient))), "SynrPool: only the sender can receive on other chain");
+    }
     require(minimumLockingTime() > 0, "SynrPool: contract not active");
-    return _wormholeTransferWithValue(_makeDeposit(deserializeInput(payload)), recipientChain, recipient, nonce, msg.value);
+    return _wormholeTransferWithValue(_makeDeposit(payloadArray, recipientChain), recipientChain, recipient, nonce, msg.value);
+  }
+
+  function getVestedPercentage(uint256 lockedFrom, uint256 lockedUntil) public view returns (uint256) {
+    uint lockupTime = lockedUntil.sub(lockedFrom);
+    uint vestedTime = block.timestamp.sub(lockedFrom);
+    return vestedTime.mul(100).div(lockupTime);
+  }
+
+  function calculateTaxForEarlyUnstake(address user, uint256 i) public view returns (uint256) {
+    Deposit memory deposit = getDepositByIndex(user, i);
+    if (block.timestamp > uint256(deposit.lockedUntil)) {
+      return 0;
+    }
+    uint256 vestedPercentage = getVestedPercentage(uint256(deposit.lockedFrom), uint256(deposit.lockedUntil));
+    uint256 unvestedAmount = uint256(deposit.tokenAmount).mul(vestedPercentage).div(100);
+    return unvestedAmount.mul(earlyUnStakeTax()).div(100);
   }
 
   // Unstake is initiated on chain B and completed on chain A
@@ -187,13 +181,21 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     _unlockSynr(to, --depositIndex);
   }
 
-  function transferSSynrToTreasury(uint256 amount, address treasury) external onlyOwner {
+  function transferSSynrToTreasury(uint256 amount, address to) external onlyOwner {
     uint256 availableAmount = sSynr.balanceOf(address(this));
-    require(amount <= availableAmount, "SynrPool: amount not available");
+    require(amount <= availableAmount, "SynrPool: sSYNR amount not available");
     if (amount == 0) {
       amount = availableAmount;
     }
-    // beneficiary must be whitelisted to receive sSYNR
-    sSynr.transferFrom(address(this), treasury, amount);
+    // to must be whitelisted to receive sSYNR
+    sSynr.transferFrom(address(this), to, amount);
+  }
+
+  function withdrawTaxes(uint256 amount, address to) external onlyOwner {
+    require(amount <= taxesAmount, "SynrPool: SYNR amount not available");
+    if (amount == 0) {
+      amount = taxesAmount;
+    }
+    synr.transferFrom(address(this), to, amount);
   }
 }

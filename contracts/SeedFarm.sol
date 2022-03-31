@@ -16,30 +16,6 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
 
   SeedToken public seed;
 
-  struct Deposit {
-    // @dev token type (SYNR or sSYNR)
-    uint8 tokenType;
-    // @dev locking period - from
-    uint32 lockedFrom;
-    // @dev locking period - until
-    uint32 lockedUntil;
-    // @dev token amount staked
-    // SYNR maxTokenSupply is 10 billion * 18 decimals = 1e28
-    // which is less type(uint96).max (~79e28)
-    uint96 tokenAmount;
-    // space available for 11 more bytes
-    uint8 unlocked;
-  }
-
-  /// @dev Data structure representing token holder using a pool
-  struct User {
-    // @dev Total staked SYNR amount
-    uint96 synrAmount;
-    // @dev Total burned sSYNR amount
-    uint96 sSynrAmount;
-    Deposit[] deposits;
-  }
-
   mapping(address => User) public users;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -64,7 +40,8 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
       lockedFrom: uint32(payload[1]),
       lockedUntil: uint32(payload[2]),
       tokenAmount: uint96(payload[3]),
-      unlocked: 0
+      otherChain: 2, // they can come only from Ethereum Mainnet. On testnet we are fine
+      unlockedAt: 0
     });
     users[user].deposits.push(deposit);
   }
@@ -86,9 +63,8 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
         uint256(users[user].deposits[i].tokenType) == payloadArray[0] &&
         uint256(users[user].deposits[i].lockedFrom) == payloadArray[1] &&
         uint256(users[user].deposits[i].lockedUntil) == payloadArray[2] &&
-        uint256(users[user].deposits[i].lockedUntil) < block.timestamp &&
         uint256(users[user].deposits[i].tokenAmount) == payloadArray[3] &&
-        uint256(users[user].deposits[i].unlocked) == 0
+        uint256(users[user].deposits[i].unlockedAt) == 0
       ) {
         return i + 1;
       }
@@ -100,22 +76,14 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
     return users[user].deposits[i];
   }
 
+  function canUnstakeWithoutTax(address user, uint256 i) external view returns (bool) {
+    return users[user].deposits[i].lockedUntil > 0 && block.timestamp > uint256(users[user].deposits[i].lockedUntil);
+  }
+
   function _unlockDeposit(uint256[4] memory payloadArray) internal {
     uint256 depositIndex = getDepositIndex(_msgSender(), payloadArray);
     require(depositIndex > 0, "SeedFarm: deposit not found or already unlocked");
-    users[_msgSender()].deposits[depositIndex.sub(1)].unlocked = 1;
-  }
-
-  /**
-   * @notice Converts the input payload to the transfer payload
-   * @param deposit The deposit
-   * @return the payload, a single uint256
-   */
-  function fromDepositToTransferPayload(Deposit memory deposit) public view returns (uint256) {
-    return
-      uint256(deposit.tokenType).add(uint256(deposit.lockedFrom).mul(10)).add(uint256(deposit.lockedUntil).mul(1e11)).add(
-        uint256(deposit.tokenAmount).mul(1e21)
-      );
+    users[_msgSender()].deposits[depositIndex.sub(1)].unlockedAt = uint32(block.timestamp);
   }
 
   function wormholeTransfer(
@@ -128,6 +96,7 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
     // solhint-disable-next-line
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
+    // this limitation is necessary to avoid problems during the unstake
     require(_msgSender() == address(uint160(uint256(recipient))), "SeedFarm: only the sender can receive on other chain");
     uint256[4] memory payloadArray = deserializeDeposit(payload);
     _unlockDeposit(payloadArray);
