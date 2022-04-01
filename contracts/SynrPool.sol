@@ -21,7 +21,7 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   SyndicateERC20 public synr;
   SyntheticSyndicateERC20 public sSynr;
 
-  uint256 public collectedTaxes;
+  uint256 public collectedPenalties;
 
   uint256 public encodedConf;
 
@@ -43,10 +43,10 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
 
   function initPool(
     uint256 minimumLockingTime_, // 5 digits
-    uint256 earlyUnStakeTax_ // 2 digits
+    uint256 earlyUnstakePenalty_ // 2 digits
   ) external onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "SynrPool: contract cannot receive sSYNR");
-    encodedConf = minimumLockingTime_.add(earlyUnStakeTax_.mul(1e5));
+    encodedConf = minimumLockingTime_.add(earlyUnstakePenalty_.mul(1e5));
   }
 
   function version() external pure returns (uint) {
@@ -70,7 +70,7 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     return encodedConf.mod(1e5);
   }
 
-  function earlyUnStakeTax() public view returns (uint256) {
+  function earlyUnstakePenalty() public view returns (uint256) {
     return encodedConf.div(1e5).mod(1e2);
   }
 
@@ -109,16 +109,16 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
 
   function _unlockSynr(address user, uint256 depositIndex) internal {
     Deposit storage deposit = users[user].deposits[depositIndex];
-    uint256 tax = calculateTaxForEarlyUnstake(user, depositIndex);
-    uint256 amount = uint256(deposit.tokenAmount).sub(tax);
+    uint256 penalty = calculatePenaltyForEarlyUnstake(user, depositIndex);
+    uint256 amount = uint256(deposit.tokenAmount).sub(penalty);
     synr.safeTransferFrom(address(this), user, amount, "");
-    if (tax > 0) {
-      collectedTaxes += tax;
+    if (penalty > 0) {
+      collectedPenalties += penalty;
     }
     deposit.unlockedAt = uint32(block.timestamp);
   }
 
-  function getDepositIndex(address user, uint256[4] memory payloadArray) public view returns (uint256) {
+  function getDepositIndexPlus1(address user, uint256[4] memory payloadArray) public view returns (uint256) {
     for (uint256 i; i < users[user].deposits.length; i++) {
       Deposit storage deposit = users[user].deposits[i];
       if (
@@ -134,7 +134,7 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     return 0;
   }
 
-  function getDepositByIndex(address user, uint256 i) public view returns (Deposit memory) {
+  function getDepositByIndexPlus1(address user, uint256 i) public view returns (Deposit memory) {
     return users[user].deposits[i];
   }
 
@@ -160,14 +160,14 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     return vestedTime.mul(100).div(lockupTime);
   }
 
-  function calculateTaxForEarlyUnstake(address user, uint256 i) public view returns (uint256) {
-    Deposit memory deposit = getDepositByIndex(user, i);
+  function calculatePenaltyForEarlyUnstake(address user, uint256 i) public view returns (uint256) {
+    Deposit memory deposit = getDepositByIndexPlus1(user, i);
     if (block.timestamp > uint256(deposit.lockedUntil)) {
       return 0;
     }
     uint256 vestedPercentage = getVestedPercentage(uint256(deposit.lockedFrom), uint256(deposit.lockedUntil));
     uint256 unvestedAmount = uint256(deposit.tokenAmount).mul(vestedPercentage).div(100);
-    return unvestedAmount.mul(earlyUnStakeTax()).div(100);
+    return unvestedAmount.mul(earlyUnstakePenalty()).div(100);
   }
 
   // Unstake is initiated on chain B and completed on chain A
@@ -179,7 +179,7 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
     uint256[4] memory payloadArray = deserializeDeposit(payload);
     require(payloadArray[0] == 0, "SynrPool: only SYNR can be unlocked");
-    uint256 depositIndex = getDepositIndex(to, payloadArray);
+    uint256 depositIndex = getDepositIndexPlus1(to, payloadArray);
     require(depositIndex > 0, "SeedFarm: deposit not found or already unlocked");
     _unlockSynr(to, --depositIndex);
   }
@@ -194,10 +194,10 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     sSynr.transferFrom(address(this), to, amount);
   }
 
-  function withdrawTaxes(uint256 amount, address to) external onlyOwner {
-    require(amount <= collectedTaxes, "SynrPool: SYNR amount not available");
+  function withdrawPenalties(uint256 amount, address to) external onlyOwner {
+    require(amount <= collectedPenalties, "SynrPool: SYNR amount not available");
     if (amount == 0) {
-      amount = collectedTaxes;
+      amount = collectedPenalties;
     }
     synr.transferFrom(address(this), to, amount);
   }

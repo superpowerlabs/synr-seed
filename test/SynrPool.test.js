@@ -95,12 +95,12 @@ describe.only("#SynrPool", function () {
         1
       );
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
+      const deposit = await synrPool.getDepositByIndexPlus1(user1.address, 0);
       const unvested =
         ((100 - (await synrPool.getVestedPercentage(deposit.lockedFrom, deposit.lockedUntil))) / 100) * deposit.tokenAmount;
-      const percentage = (await synrPool.earlyUnStakeTax()) / 100;
-      const unvestedtax = unvested * percentage;
-      expect((await synrPool.calculateTaxForEarlyUnstake(user1.address, 0)) / 1).equal(unvestedtax);
+      const percentage = (await synrPool.earlyUnstakePenalty()) / 100;
+      const unvestedPenalty = unvested * percentage;
+      expect((await synrPool.calculatePenaltyForEarlyUnstake(user1.address, 0)) / 1).equal(unvestedPenalty);
     });
   });
 });
