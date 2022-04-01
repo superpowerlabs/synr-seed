@@ -202,7 +202,7 @@ describe.only("#WormholeMock", function () {
 
     });
 
-    it.only("should calculate taxes properly", async function () {
+    it("should calculate taxes properly", async function () {
       // console.log(await synr.balanceOf(user1.address))
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
