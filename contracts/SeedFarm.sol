@@ -7,14 +7,14 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./Payload.sol";
-import "./token/SeedToken.sol";
+import "./token/SideToken.sol";
 import "hardhat/console.sol";
 
 contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
-  SeedToken public seed;
+  SideToken public seed;
 
   mapping(address => User) public users;
 
@@ -24,7 +24,7 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
   function initialize(address seed_) public initializer {
     __WormholeTunnel_init();
     require(seed_.isContract(), "SEED not a contract");
-    seed = SeedToken(seed_);
+    seed = SideToken(seed_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}

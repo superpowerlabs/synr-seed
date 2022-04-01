@@ -186,10 +186,46 @@ describe.only("#WormholeMock", function () {
       await seedFarm.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
 
       const tax = await synrPool.calculateTaxForEarlyUnstake(user1.address, 0);
+
       expect(amount.sub(tax)).equal("8000000000000000000000")
       await synrPool.mockWormholeCompleteTransfer(user1.address, seedPayload);
+
       const synrBalanceAfter = await synr.balanceOf(user1.address);
       expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount.sub(tax));
+
+      expect(await synrPool.collectedTaxes()).equal(tax);
+      const synrBalanceBeforeTax = await synr.balanceOf(user2.address);
+      await synrPool.withdrawTaxes(tax, user2.address)
+      const synrBalanceAfterTax = await synr.balanceOf(user2.address);
+      expect(await synrBalanceAfterTax).equal(synrBalanceBeforeTax + tax);
+
+
+    });
+
+    it("should calculate taxes properly", async function () {
+      // console.log(await synr.balanceOf(user1.address))
+      const amount = ethers.utils.parseEther("10000");
+      await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
+      const payload = await synrPool.serializeInput(
+        0, // SYNR
+        365, // 1 year
+        amount
+      );
+      expect(payload).equal("1000000000000000000000003650");
+      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      await synrPool.connect(user1).wormholeTransfer(
+          payload,
+          4, // BSC
+          bytes32Address(user1.address),
+          1
+      );
+      await increaseBlockTimestampBy(182.5 * 24 * 3600);
+       const deposit = await synrPool.getDepositByIndex(user1.address,0)
+       const unvested = ((100 - await synrPool.getVestedPercentage(deposit.lockedFrom,deposit.lockedUntil))/100)*deposit.tokenAmount
+       const percentage = await synrPool.earlyUnStakeTax()/100;
+       const unvestedtax = unvested* percentage
+       expect((await synrPool.calculateTaxForEarlyUnstake(user1.address,0))/1).equal(unvestedtax)
+
     });
   });
 });
