@@ -91,11 +91,11 @@ contract Payload {
    */
   function fromDepositToTransferPayload(Deposit memory deposit) public pure returns (uint256) {
     return
-    serializeDeposit(
-      uint256(deposit.tokenType),
-      uint256(deposit.lockedFrom),
-      uint256(deposit.lockedUntil),
-      uint256(deposit.tokenAmount)
-    );
+      serializeDeposit(
+        uint256(deposit.tokenType),
+        uint256(deposit.lockedFrom),
+        uint256(deposit.lockedUntil),
+        uint256(deposit.tokenAmount)
+      );
   }
 }

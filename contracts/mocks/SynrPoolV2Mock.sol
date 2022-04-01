@@ -6,15 +6,15 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
-import "./interfaces/IERC20.sol";
-import "./token/SyndicateERC20.sol";
-import "./token/SyntheticSyndicateERC20.sol";
-import "./interfaces/IERC20Receiver.sol";
-import "./Payload.sol";
+import "../interfaces/IERC20.sol";
+import "../token/SyndicateERC20.sol";
+import "../token/SyntheticSyndicateERC20.sol";
+import "../interfaces/IERC20Receiver.sol";
+import "../Payload.sol";
 
 import "hardhat/console.sol";
 
-contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
+contract SynrPoolV2Mock is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -30,6 +30,10 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
+
+  function version() external pure returns (uint) {
+    return 2;
+  }
 
   function initialize(address synr_, address sSynr_) public initializer {
     __WormholeTunnel_init();
@@ -47,10 +51,6 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   ) external onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "SynrPool: contract cannot receive sSYNR");
     encodedConf = minimumLockingTime_.add(earlyUnStakeTax_.mul(1e5));
-  }
-
-  function version() external pure returns (uint) {
-    return 1;
   }
 
   function onERC20Received(
@@ -201,4 +201,9 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     }
     synr.transferFrom(address(this), to, amount);
   }
+
+  function mockWormholeCompleteTransfer(address to, uint256 payload) public {
+    _onWormholeCompleteTransfer(to, payload);
+  }
+
 }

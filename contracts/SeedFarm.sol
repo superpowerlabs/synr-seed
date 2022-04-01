@@ -29,6 +29,10 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+  function version() external pure returns (uint) {
+    return 1;
+  }
+
   function _updateUser(address user, uint256[4] memory payload) internal {
     if (payload[0] == 0) {
       users[user].synrAmount += uint96(payload[3]);
