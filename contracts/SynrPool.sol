@@ -41,12 +41,14 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+  // can be re-executed to update parameters
   function initPool(
-    uint256 minimumLockingTime_, // 5 digits
-    uint256 earlyUnstakePenalty_ // 2 digits
+    uint256 minimumLockingTime_, // 3 digits -- 7 days
+    uint256 maximumLockingTime_, // 3 digits -- 365 days
+    uint256 earlyUnstakePenalty_ // 2 digits -- 30%
   ) external onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "SynrPool: contract cannot receive sSYNR");
-    encodedConf = minimumLockingTime_.add(earlyUnstakePenalty_.mul(1e5));
+    encodedConf = minimumLockingTime_.add(maximumLockingTime_.mul(1e3)).add(earlyUnstakePenalty_.mul(1e6));
   }
 
   function version() external pure returns (uint) {
@@ -67,11 +69,15 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   }
 
   function minimumLockingTime() public view returns (uint256) {
-    return encodedConf.mod(1e5);
+    return encodedConf.mod(1e3);
+  }
+
+  function maximumLockingTime() public view returns (uint256) {
+    return encodedConf.div(1e3).mod(1e3);
   }
 
   function earlyUnstakePenalty() public view returns (uint256) {
-    return encodedConf.div(1e5).mod(1e2);
+    return encodedConf.div(1e6).mod(1e2);
   }
 
   function _updateUser(uint256[3] memory payload, uint16 otherChain) internal returns (Deposit memory) {
@@ -95,7 +101,7 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   function _makeDeposit(uint256[3] memory payloadArray, uint16 otherChain) internal returns (uint256) {
     validateInput(payloadArray[0], payloadArray[1], payloadArray[2]);
     if (payloadArray[0] == 0) {
-      require(payloadArray[1] > minimumLockingTime(), "SynrPool: invalid lockupTime type");
+      require(payloadArray[1] > minimumLockingTime() - 1 && payloadArray[1] < maximumLockingTime() + 1, "SynrPool: invalid lockupTime type");
     }
     // it will throw if the contract is not a token spender, or if the balance is insufficient
     if (payloadArray[0] == 0) {
