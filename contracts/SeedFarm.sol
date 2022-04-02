@@ -29,7 +29,7 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-  function version() external pure returns (uint) {
+  function version() external virtual pure returns (uint256) {
     return 1;
   }
 
@@ -44,7 +44,7 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
       lockedFrom: uint32(payload[1]),
       lockedUntil: uint32(payload[2]),
       tokenAmount: uint96(payload[3]),
-      otherChain: 2, // they can come only from Ethereum Mainnet. On testnet we are fine
+      otherChain: 2, // they can come only from Ethereum Mainnet. We ignore testnets to reduce gas costs
       unlockedAt: 0
     });
     users[user].deposits.push(deposit);
@@ -54,10 +54,10 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
     // this must be adjusted based on type of stake, time passed, etc.
     if (payloadArray[0] == 0) {
       seed.mint(to, payloadArray[3]);
-    } else {
+    } else if (payloadArray[0] == 1) {
       // give seed to the user
       seed.mint(to, payloadArray[3].mul(1000));
-    }
+    } // else no mint, SYNR Pass boosts rewards
     _updateUser(to, payloadArray);
   }
 
