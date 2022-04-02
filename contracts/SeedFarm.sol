@@ -29,6 +29,10 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+  function version() external pure returns (uint) {
+    return 1;
+  }
+
   function _updateUser(address user, uint256[4] memory payload) internal {
     if (payload[0] == 0) {
       users[user].synrAmount += uint96(payload[3]);
@@ -57,7 +61,7 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
     _updateUser(to, payloadArray);
   }
 
-  function getDepositIndex(address user, uint256[4] memory payloadArray) public view returns (uint256) {
+  function getDepositIndexPlus1(address user, uint256[4] memory payloadArray) public view returns (uint256) {
     for (uint256 i; i < users[user].deposits.length; i++) {
       if (
         uint256(users[user].deposits[i].tokenType) == payloadArray[0] &&
@@ -72,7 +76,7 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
     return 0;
   }
 
-  function getDepositByIndex(address user, uint256 i) public view returns (Deposit memory) {
+  function getDepositByIndexPlus1(address user, uint256 i) public view returns (Deposit memory) {
     return users[user].deposits[i];
   }
 
@@ -81,7 +85,7 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
   }
 
   function _unlockDeposit(uint256[4] memory payloadArray) internal {
-    uint256 depositIndex = getDepositIndex(_msgSender(), payloadArray);
+    uint256 depositIndex = getDepositIndexPlus1(_msgSender(), payloadArray);
     require(depositIndex > 0, "SeedFarm: deposit not found or already unlocked");
     users[_msgSender()].deposits[depositIndex.sub(1)].unlockedAt = uint32(block.timestamp);
   }

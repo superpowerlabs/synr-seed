@@ -6,15 +6,15 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
-import "./interfaces/IERC20.sol";
-import "./token/SyndicateERC20.sol";
-import "./token/SyntheticSyndicateERC20.sol";
-import "./interfaces/IERC20Receiver.sol";
-import "./Payload.sol";
+import "../interfaces/IERC20.sol";
+import "../token/SyndicateERC20.sol";
+import "../token/SyntheticSyndicateERC20.sol";
+import "../interfaces/IERC20Receiver.sol";
+import "../Payload.sol";
 
 import "hardhat/console.sol";
 
-contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
+contract SynrPoolV2Mock is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -30,6 +30,10 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
+
+  function version() external pure returns (uint) {
+    return 2;
+  }
 
   function initialize(address synr_, address sSynr_) public initializer {
     __WormholeTunnel_init();
@@ -47,10 +51,6 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   ) external onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "SynrPool: contract cannot receive sSYNR");
     encodedConf = minimumLockingTime_.add(earlyUnstakePenalty_.mul(1e5));
-  }
-
-  function version() external pure returns (uint) {
-    return 1;
   }
 
   function onERC20Received(
@@ -109,12 +109,11 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
 
   function _unlockSynr(address user, uint256 depositIndex) internal {
     Deposit storage deposit = users[user].deposits[depositIndex];
-    uint256 penalty = calculatePenaltyForEarlyUnstake(user, depositIndex);
-    uint256 amount = uint256(deposit.tokenAmount).sub(penalty);
+    // we set up a forced tax in Version2 for testing purposes
+    uint256 tax = uint256(deposit.tokenAmount).mul(30).div(100);
+    uint256 amount = uint256(deposit.tokenAmount).sub(tax);
     synr.safeTransferFrom(address(this), user, amount, "");
-    if (penalty > 0) {
-      collectedPenalties += penalty;
-    }
+    collectedPenalties += tax;
     deposit.unlockedAt = uint32(block.timestamp);
   }
 
@@ -179,9 +178,9 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
   function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
     uint256[4] memory payloadArray = deserializeDeposit(payload);
     require(payloadArray[0] == 0, "SynrPool: only SYNR can be unlocked");
-    uint256 depositIndex = getDepositIndexPlus1(to, payloadArray);
-    require(depositIndex > 0, "SeedFarm: deposit not found or already unlocked");
-    _unlockSynr(to, --depositIndex);
+    uint256 depositIndexPlus1 = getDepositIndexPlus1(to, payloadArray);
+    require(depositIndexPlus1 > 0, "SeedFarm: deposit not found or already unlocked");
+    _unlockSynr(to, --depositIndexPlus1);
   }
 
   function transferSSynrToTreasury(uint256 amount, address to) external onlyOwner {
@@ -201,4 +200,9 @@ contract SynrPool is Payload, Initializable, IERC20Receiver, WormholeTunnelUpgra
     }
     synr.transferFrom(address(this), to, amount);
   }
+
+  function mockWormholeCompleteTransfer(address to, uint256 payload) public {
+    _onWormholeCompleteTransfer(to, payload);
+  }
+
 }

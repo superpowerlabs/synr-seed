@@ -1,6 +1,7 @@
 const {expect, assert} = require("chai");
 
 const {initEthers, assertThrowsMessage, getTimestamp, increaseBlockTimestampBy, bytes32Address} = require("./helpers");
+const {upgrades} = require('hardhat');
 
 // tests to be fixed
 
@@ -15,6 +16,7 @@ describe.only("#WormholeMock", function () {
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
   let SynrPool, synrPool;
+  let SynrPoolV2, synrPoolV2;
   let SeedFarm, seedFarm;
   let SideToken, seed, weed;
 
@@ -26,6 +28,7 @@ describe.only("#WormholeMock", function () {
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
     SynrPool = await ethers.getContractFactory("SynrPoolMock");
+    SynrPoolV2 = await ethers.getContractFactory("SynrPoolV2Mock");
     SeedFarm = await ethers.getContractFactory("SeedFarmMock");
     SideToken = await ethers.getContractFactory("SideToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
@@ -73,7 +76,6 @@ describe.only("#WormholeMock", function () {
   async function configure() {}
 
   describe("integrations test", async function () {
-
     beforeEach(async function () {
       await initAndDeploy();
     });
@@ -99,10 +101,10 @@ describe.only("#WormholeMock", function () {
         1
       );
 
-      let deposit = await synrPool.getDepositByIndex(fundOwner.address, 0);
+      let deposit = await synrPool.getDepositByIndexPlus1(fundOwner.address, 0);
       expect(deposit.tokenAmount).equal(amount);
-      expect(deposit.tokenType).equal(0)
-      expect(deposit.otherChain).equal(4)
+      expect(deposit.tokenType).equal(0);
+      expect(deposit.otherChain).equal(4);
 
       const finalPayload = await synrPool.fromDepositToTransferPayload(deposit);
 
@@ -114,15 +116,15 @@ describe.only("#WormholeMock", function () {
 
       await increaseBlockTimestampBy(366 * 24 * 3600);
 
-      let seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
+      let seedDeposit = await seedFarm.getDepositByIndexPlus1(fundOwner.address, 0);
       expect(seedDeposit.unlockedAt).equal(0);
       const seedPayload = await seedFarm.fromDepositToTransferPayload(seedDeposit);
 
-      const ts = await getTimestamp()
+      const ts = await getTimestamp();
 
       // unstake
       await seedFarm.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
-      seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
+      seedDeposit = await seedFarm.getDepositByIndexPlus1(fundOwner.address, 0);
 
       expect(seedDeposit.unlockedAt).greaterThan(ts);
 
@@ -133,17 +135,15 @@ describe.only("#WormholeMock", function () {
       expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount);
     });
 
-
     it("should verify early unstake", async function () {
-
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
 
       // stake SYNR in the SynrPool
       const payload = await synrPool.serializeInput(
-          0, // SYNR
-          300,
-          amount
+        0, // SYNR
+        300,
+        amount
       );
 
       expect(payload).equal("1000000000000000000000003000");
@@ -151,16 +151,16 @@ describe.only("#WormholeMock", function () {
       await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
 
       await synrPool.connect(user1).wormholeTransfer(
-          payload,
-          4, // BSC
-          bytes32Address(user1.address),
-          1
+        payload,
+        4, // BSC
+        bytes32Address(user1.address),
+        1
       );
 
-      let deposit = await synrPool.getDepositByIndex(user1.address, 0);
+      let deposit = await synrPool.getDepositByIndexPlus1(user1.address, 0);
       expect(deposit.tokenAmount).equal(amount);
-      expect(deposit.tokenType).equal(0)
-      expect(deposit.otherChain).equal(4)
+      expect(deposit.tokenType).equal(0);
+      expect(deposit.otherChain).equal(4);
 
       const finalPayload = await synrPool.fromDepositToTransferPayload(deposit);
 
@@ -172,60 +172,99 @@ describe.only("#WormholeMock", function () {
 
       await increaseBlockTimestampBy(150 * 24 * 3600);
 
-      expect(await seedFarm.canUnstakeWithoutTax(user1.address, 0)).equal(false)
+      expect(await seedFarm.canUnstakeWithoutTax(user1.address, 0)).equal(false);
 
-      let seedDeposit = await seedFarm.getDepositByIndex(user1.address, 0);
+      let seedDeposit = await seedFarm.getDepositByIndexPlus1(user1.address, 0);
       expect(seedDeposit.unlockedAt).equal(0);
       const seedPayload = await seedFarm.fromDepositToTransferPayload(seedDeposit);
 
-      const ts = await getTimestamp()
+      const ts = await getTimestamp();
 
       const synrBalanceBefore = await synr.balanceOf(user1.address);
 
       // unstake
       await seedFarm.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
 
-      const tax = await synrPool.calculateTaxForEarlyUnstake(user1.address, 0);
+      const tax = await synrPool.calculatePenaltyForEarlyUnstake(user1.address, 0);
 
-      expect(amount.sub(tax)).equal("8000000000000000000000")
+      expect(amount.sub(tax)).equal("8000000000000000000000");
       await synrPool.mockWormholeCompleteTransfer(user1.address, seedPayload);
 
       const synrBalanceAfter = await synr.balanceOf(user1.address);
       expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount.sub(tax));
 
-      expect(await synrPool.collectedTaxes()).equal(tax);
-      const synrBalanceBeforeTax = await synr.balanceOf(user2.address);
-      await synrPool.withdrawTaxes(tax, user2.address)
-      const synrBalanceAfterTax = await synr.balanceOf(user2.address);
-      expect(await synrBalanceAfterTax).equal(synrBalanceBeforeTax + tax);
-
-
+      expect(await synrPool.collectedPenalties()).equal(tax);
+      const synrBalanceBeforePenalty = await synr.balanceOf(user2.address);
+      await synrPool.withdrawPenalties(tax, user2.address);
+      const synrBalanceAfterPenalty = await synr.balanceOf(user2.address);
+      expect(await synrBalanceAfterPenalty).equal(synrBalanceBeforePenalty + tax);
     });
 
-    it("should calculate taxes properly", async function () {
-      // console.log(await synr.balanceOf(user1.address))
+    it("should start the process, upgrade the contract and complete the flow", async function () {
       const amount = ethers.utils.parseEther("10000");
-      await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
+
+      // stake SYNR in the SynrPool
       const payload = await synrPool.serializeInput(
-        0, // SYNR
-        365, // 1 year
-        amount
+          0, // SYNR
+          365, // 1 year
+          amount
       );
+
       expect(payload).equal("1000000000000000000000003650");
-      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
-      await synrPool.connect(user1).wormholeTransfer(
+
+      await synr.connect(fundOwner).approve(synrPool.address, ethers.utils.parseEther("10000"));
+
+      await synrPool.connect(fundOwner).wormholeTransfer(
           payload,
           4, // BSC
-          bytes32Address(user1.address),
+          bytes32Address(fundOwner.address),
           1
       );
-      await increaseBlockTimestampBy(182.5 * 24 * 3600);
-       const deposit = await synrPool.getDepositByIndex(user1.address,0)
-       const unvested = ((100 - await synrPool.getVestedPercentage(deposit.lockedFrom,deposit.lockedUntil))/100)*deposit.tokenAmount
-       const percentage = await synrPool.earlyUnStakeTax()/100;
-       const unvestedtax = unvested* percentage
-       expect((await synrPool.calculateTaxForEarlyUnstake(user1.address,0))/1).equal(unvestedtax)
 
+      let deposit = await synrPool.getDepositByIndexPlus1(fundOwner.address, 0);
+      expect(deposit.tokenAmount).equal(amount);
+      expect(deposit.tokenType).equal(0);
+      expect(deposit.otherChain).equal(4);
+
+      const finalPayload = await synrPool.fromDepositToTransferPayload(deposit);
+
+      expect(await synr.balanceOf(synrPool.address)).equal(amount);
+
+      await seedFarm.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
+
+      expect(await seed.balanceOf(fundOwner.address)).equal(ethers.utils.parseEther("10000"));
+
+      await increaseBlockTimestampBy(366 * 24 * 3600);
+
+      // upgrade contract
+
+
+      expect(await synrPool.version()).equal(1)
+
+      synrPool = await upgrades.upgradeProxy(synrPool.address, SynrPoolV2)
+
+      expect(await synrPool.version()).equal(2)
+
+
+      let seedDeposit = await seedFarm.getDepositByIndexPlus1(fundOwner.address, 0);
+      expect(seedDeposit.unlockedAt).equal(0);
+      const seedPayload = await seedFarm.fromDepositToTransferPayload(seedDeposit);
+
+      const ts = await getTimestamp();
+      // unstake
+      await seedFarm.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
+      seedDeposit = await seedFarm.getDepositByIndexPlus1(fundOwner.address, 0);
+
+      expect(seedDeposit.unlockedAt).greaterThan(ts);
+
+      const synrBalanceBefore = await synr.balanceOf(fundOwner.address);
+
+      await synrPool.mockWormholeCompleteTransfer(fundOwner.address, seedPayload);
+      const synrBalanceAfter = await synr.balanceOf(fundOwner.address);
+      expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount.mul(70).div(100));
     });
+
   });
+
+
 });
