@@ -1,6 +1,7 @@
 const {expect, assert} = require("chai");
 
 const {initEthers, assertThrowsMessage, getTimestamp, increaseBlockTimestampBy, bytes32Address} = require("./helpers");
+const {upgrades} = require('hardhat');
 
 // tests to be fixed
 
@@ -15,20 +16,24 @@ describe.only("#SynrPool", function () {
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
   let SynrPool, synrPool;
+  let SynrPoolV2;
   let SeedFarm, seedFarm;
-  let SideToken, seed, weed;
+  let SideToken, seed;
+  let SynCityPasses, pass;
 
-  let deployer, fundOwner, superAdmin, operator, user1, user2, marketplace, treasury;
+  let deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury;
 
   before(async function () {
     initEthers(ethers);
-    [deployer, fundOwner, superAdmin, operator, user1, user2, marketplace, treasury] = await ethers.getSigners();
+    [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
     SynrPool = await ethers.getContractFactory("SynrPoolMock");
+    SynrPoolV2 = await ethers.getContractFactory("SynrPoolV2Mock");
     SeedFarm = await ethers.getContractFactory("SeedFarmMock");
     SideToken = await ethers.getContractFactory("SideToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
+    SynCityPasses = await ethers.getContractFactory("SynCityPasses");
   });
 
   async function initAndDeploy() {
@@ -36,17 +41,20 @@ describe.only("#SynrPool", function () {
     synr = await SyndicateERC20.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
     await synr.deployed();
     let features =
-      (await synr.FEATURE_TRANSFERS_ON_BEHALF()) +
-      (await synr.FEATURE_TRANSFERS()) +
-      (await synr.FEATURE_UNSAFE_TRANSFERS()) +
-      (await synr.FEATURE_DELEGATIONS()) +
-      (await synr.FEATURE_DELEGATIONS_ON_BEHALF());
+        (await synr.FEATURE_TRANSFERS_ON_BEHALF()) +
+        (await synr.FEATURE_TRANSFERS()) +
+        (await synr.FEATURE_UNSAFE_TRANSFERS()) +
+        (await synr.FEATURE_DELEGATIONS()) +
+        (await synr.FEATURE_DELEGATIONS_ON_BEHALF());
     await synr.updateFeatures(features);
 
     sSynr = await SyntheticSyndicateERC20.deploy(superAdmin.address);
     await sSynr.deployed();
 
-    synrPool = await upgrades.deployProxy(SynrPool, [synr.address, sSynr.address]);
+    pass = await SynCityPasses.deploy(validator.address);
+    await pass.deployed();
+
+    synrPool = await upgrades.deployProxy(SynrPool, [synr.address, sSynr.address, pass.address]);
     await synrPool.deployed();
 
     await sSynr.updateRole(synrPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
@@ -64,7 +72,7 @@ describe.only("#SynrPool", function () {
     await wormhole.deployed();
 
     await synrPool.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
-    await synrPool.initPool(30, 40);
+    await synrPool.initPool(7, 365, 40);
 
     await seedFarm.wormholeInit(4, wormhole.address);
     await seedFarm.wormholeRegisterContract(2, bytes32Address(synrPool.address));

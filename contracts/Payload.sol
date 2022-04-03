@@ -30,6 +30,8 @@ contract Payload {
     uint96 synrAmount;
     // @dev Total burned sSYNR amount
     uint96 sSynrAmount;
+    // @dev Total passes staked
+    uint16 passAmount;
     Deposit[] deposits;
   }
 
@@ -57,9 +59,13 @@ contract Payload {
     uint256 lockupTime,
     uint256 tokenAmount
   ) public pure returns (bool) {
-    require(tokenType < 2, "Payload: invalid token type");
-    require(tokenAmount < 1e28, "Payload: tokenAmount out of range");
-    require(lockupTime < type(uint32).max, "Payload: lockedTime out of range");
+    require(tokenType < 3, "Payload: invalid token type");
+    if (tokenType == 2) {
+      require(tokenAmount < 889, "Payload: Not a Mobland SYNR Pass token ID");
+    } else {
+      require(tokenAmount < 1e28, "Payload: tokenAmount out of range");
+    }
+    require(lockupTime < 1e4, "Payload: lockedTime out of range");
     return true;
   }
 
