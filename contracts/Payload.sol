@@ -5,46 +5,17 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 
 import "./interfaces/IERC20Receiver.sol";
+import "./interfaces/IPayload.sol";
 
 import "hardhat/console.sol";
 
-contract Payload is IERC20Receiver, IERC721ReceiverUpgradeable {
+contract Payload is IPayload, IERC20Receiver, IERC721ReceiverUpgradeable {
   using SafeMathUpgradeable for uint256;
-
-  struct Deposit {
-    // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
-    uint8 tokenType;
-    // @dev locking period - from
-    uint32 lockedFrom;
-    // @dev locking period - until
-    uint32 lockedUntil;
-    // @dev token amount staked
-    // SYNR maxTokenSupply is 10 billion * 18 decimals = 1e28
-    // which is less type(uint96).max (~79e28)
-    uint96 tokenAmount;
-    uint32 unlockedAt;
-    uint16 otherChain;
-    // since the process is asyncronous, the same deposit can be at a different index
-    // on the main net and on the sidechain.
-    uint16 index;
-    // more space available
-  }
-
-  /// @dev Data structure representing token holder using a pool
-  struct User {
-    // @dev Total staked SYNR amount
-    uint96 synrAmount;
-    // @dev Total burned sSYNR amount
-    uint96 sSynrAmount;
-    // @dev Total passes staked
-    uint16 passAmount;
-    Deposit[] deposits;
-  }
 
   // users and deposits
   mapping(address => User) public users;
 
-  function version() external pure virtual returns (uint256) {
+  function version() external pure virtual override returns (uint256) {
     return 1;
   }
 
@@ -53,7 +24,7 @@ contract Payload is IERC20Receiver, IERC721ReceiverUpgradeable {
     uint256 tokenType, // 1 digit
     uint256 lockupTime, // 4 digits
     uint256 tokenAmount
-  ) public pure returns (uint256) {
+  ) public pure override returns (uint256) {
     validateInput(tokenType, lockupTime, tokenAmount);
     return tokenType.add(lockupTime.mul(10)).add(tokenAmount.mul(1e5));
   }
@@ -62,7 +33,7 @@ contract Payload is IERC20Receiver, IERC721ReceiverUpgradeable {
     uint256 tokenType,
     uint256 lockupTime,
     uint256 tokenAmount
-  ) public pure returns (bool) {
+  ) public pure override returns (bool) {
     require(tokenType < 3, "Payload: invalid token type");
     if (tokenType == 2) {
       require(tokenAmount < 889, "Payload: Not a Mobland SYNR Pass token ID");
@@ -76,6 +47,7 @@ contract Payload is IERC20Receiver, IERC721ReceiverUpgradeable {
   function deserializeInput(uint256 payload)
     public
     pure
+    override
     returns (
       uint256 tokenType,
       uint256 lockupTime,
@@ -90,6 +62,7 @@ contract Payload is IERC20Receiver, IERC721ReceiverUpgradeable {
   function deserializeDeposit(uint256 payload)
     public
     pure
+    override
     returns (
       uint256 tokenType,
       uint256 lockedFrom,
@@ -110,7 +83,7 @@ contract Payload is IERC20Receiver, IERC721ReceiverUpgradeable {
    * @param deposit The deposit
    * @return the payload, an encoded uint256
    */
-  function fromDepositToTransferPayload(Deposit memory deposit) public pure returns (uint256) {
+  function fromDepositToTransferPayload(Deposit memory deposit) public pure override returns (uint256) {
     require(deposit.tokenType < 3, "Payload: invalid token type");
     require(deposit.lockedFrom < deposit.lockedUntil, "Payload: invalid interval");
     require(deposit.lockedUntil < 1e10, "Payload: lockedTime out of range");
@@ -178,12 +151,12 @@ contract Payload is IERC20Receiver, IERC721ReceiverUpgradeable {
     return deposit;
   }
 
-  function getDepositByIndex(address user, uint256 index) public view returns (Deposit memory) {
+  function getDepositByIndex(address user, uint256 index) public view override returns (Deposit memory) {
     require(users[user].deposits[index].lockedFrom > 0, "Payload: deposit not found");
     return users[user].deposits[index];
   }
 
-  function getDepositsLength(address user) public view returns (uint256) {
+  function getDepositsLength(address user) public view override returns (uint256) {
     return users[user].deposits.length;
   }
 }

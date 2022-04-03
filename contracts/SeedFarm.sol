@@ -6,11 +6,12 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
+import "./interfaces/ISeedFarm.sol";
 import "./Payload.sol";
 import "./token/SideToken.sol";
 import "hardhat/console.sol";
 
-contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
+contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -61,12 +62,12 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
     return deposit;
   }
 
-  function canUnstakeWithoutTax(address user, uint256 index) external view returns (bool) {
+  function canUnstakeWithoutTax(address user, uint256 index) external view override returns (bool) {
     Deposit memory deposit = users[user].deposits[index];
     return deposit.lockedUntil > 0 && block.timestamp > uint256(deposit.lockedUntil);
   }
 
-  function getDepositIndexByOriginalIndex(address user, uint256 index) public view returns (uint256) {
+  function getDepositIndexByOriginalIndex(address user, uint256 index) public view override returns (uint256) {
     for (uint256 i; i < users[user].deposits.length; i++) {
       if (uint256(users[user].deposits[i].index) == index && users[user].deposits[i].lockedFrom > 0) {
         return i;
