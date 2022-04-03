@@ -125,13 +125,13 @@ contract SynrPool is Payload, Initializable, WormholeTunnelUpgradeable {
     uint256 index,
     uint256 tokenAmount
   ) internal {
-    index = getDepositIndexByOriginalIndex(user, index);
     Deposit storage deposit = users[user].deposits[index];
     require(
+      uint(deposit.index) == index &&
       uint256(deposit.tokenType) == tokenType &&
-        uint256(deposit.lockedFrom) == lockedFrom &&
-        uint256(deposit.lockedUntil) == lockedUntil &&
-        uint256(deposit.tokenAmount) == tokenAmount,
+      uint256(deposit.lockedFrom) == lockedFrom &&
+      uint256(deposit.lockedUntil) == lockedUntil &&
+      uint256(deposit.tokenAmount) == tokenAmount,
       "SynrPool: deposit not found"
     );
     require(deposit.tokenType > 0, "SynrPool: sSYNR can not be unlocked");
@@ -163,13 +163,13 @@ contract SynrPool is Payload, Initializable, WormholeTunnelUpgradeable {
     }
     require(minimumLockingTime() > 0, "SynrPool: contract not active");
     return
-      _wormholeTransferWithValue(
-        _makeDeposit(tokenType, lockupTime, tokenAmount, recipientChain),
-        recipientChain,
-        recipient,
-        nonce,
-        msg.value
-      );
+    _wormholeTransferWithValue(
+      _makeDeposit(tokenType, lockupTime, tokenAmount, recipientChain),
+      recipientChain,
+      recipient,
+      nonce,
+      msg.value
+    );
   }
 
   function getVestedPercentage(uint256 lockedFrom, uint256 lockedUntil) public view returns (uint256) {

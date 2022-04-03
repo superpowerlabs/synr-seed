@@ -66,6 +66,15 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
     return deposit.lockedUntil > 0 && block.timestamp > uint256(deposit.lockedUntil);
   }
 
+  function getDepositIndexByOriginalIndex(address user, uint256 index) public view returns (uint256) {
+    for (uint256 i; i < users[user].deposits.length; i++) {
+      if (uint256(users[user].deposits[i].index) == index && users[user].deposits[i].lockedFrom > 0) {
+        return i;
+      }
+    }
+    revert("Payload: deposit not found");
+  }
+
   function _unlockDeposit(
     uint256 tokenType,
     uint256 lockedFrom,

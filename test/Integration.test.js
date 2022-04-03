@@ -76,7 +76,6 @@ describe("#Integration test", function () {
 
     await seedFarm.wormholeInit(4, wormhole.address);
     await seedFarm.wormholeRegisterContract(2, bytes32Address(synrPool.address));
-
   }
 
   async function configure() {}
