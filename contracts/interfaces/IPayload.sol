@@ -74,6 +74,8 @@ interface IPayload {
    */
   function fromDepositToTransferPayload(Deposit memory deposit) external pure returns (uint256);
 
+  function getIndexFromPayload(uint256 payload) external pure returns (uint);
+
   function getDepositByIndex(address user, uint256 index) external view returns (Deposit memory);
 
   function getDepositsLength(address user) external view returns (uint256);

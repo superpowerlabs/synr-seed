@@ -74,8 +74,12 @@ contract Payload is IPayload, IERC20Receiver, IERC721ReceiverUpgradeable {
     tokenType = payload.mod(10);
     lockedFrom = payload.div(10).mod(1e10);
     lockedUntil = payload.div(1e11).mod(1e10);
-    index = payload.div(1e21).mod(1e5);
+    index = getIndexFromPayload(payload);
     tokenAmount = payload.div(1e26);
+  }
+
+  function getIndexFromPayload(uint256 payload) public pure override returns (uint) {
+    return payload.div(1e21).mod(1e5);
   }
 
   /**

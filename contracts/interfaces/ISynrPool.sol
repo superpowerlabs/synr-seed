@@ -4,12 +4,9 @@ pragma solidity ^0.8.2;
 import "./IPayload.sol";
 
 interface ISynrPool {
-  event DepositSaved(address user,
-    uint tokenType,
-    uint lockupTime,
-    uint tokenAmount,
-    uint16 otherChain
-  );
+  event DepositSaved(address user, uint16 index);
+
+  event DepositUnlocked(address user, uint16 index);
 
   // can be re-executed to update parameters
   function initPool(
@@ -24,9 +21,9 @@ interface ISynrPool {
 
   function earlyUnstakePenalty() external view returns (uint256);
 
-  function getVestedPercentage(uint256 lockedFrom, uint256 lockedUntil) external view returns (uint256);
+  function getVestedPercentage(uint when, uint256 lockedFrom, uint256 lockedUntil) external view returns (uint256);
 
-  function calculatePenaltyForEarlyUnstake(IPayload.Deposit memory deposit) external view returns (uint256);
+  function calculatePenaltyForEarlyUnstake(uint when, IPayload.Deposit memory deposit) external view returns (uint256);
 
   function transferSSynrToTreasury(uint256 amount, address to) external;
 

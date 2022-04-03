@@ -140,7 +140,7 @@ contract SynrPool is ISynrPool, Payload, Initializable, WormholeTunnelUpgradeabl
     if (tokenType == 2) {
       pass.safeTransferFrom(address(this), _msgSender(), uint256(tokenAmount));
     } else {
-      uint256 penalty = calculatePenaltyForEarlyUnstake(deposit);
+      uint256 penalty = calculatePenaltyForEarlyUnstake(block.timestamp, deposit);
       uint256 amount = uint256(tokenAmount).sub(penalty);
       synr.safeTransferFrom(address(this), user, amount, "");
       if (penalty > 0) {
@@ -148,6 +148,7 @@ contract SynrPool is ISynrPool, Payload, Initializable, WormholeTunnelUpgradeabl
       }
     }
     deposit.unlockedAt = uint32(block.timestamp);
+    emit DepositUnlocked(user, uint16(index));
   }
 
   // Stake/burn is done on chain A, SEED tokens are minted on chain B
@@ -164,28 +165,21 @@ contract SynrPool is ISynrPool, Payload, Initializable, WormholeTunnelUpgradeabl
     }
     require(minimumLockingTime() > 0, "SynrPool: contract not active");
     payload = _makeDeposit(tokenType, lockupTime, tokenAmount, recipientChain);
-    emit DepositSaved(_msgSender(), tokenType, lockupTime, tokenAmount, recipientChain);
-    return
-      _wormholeTransferWithValue(
-        payload,
-        recipientChain,
-        recipient,
-        nonce,
-        msg.value
-      );
+    emit DepositSaved(_msgSender(), uint16(getIndexFromPayload(payload)));
+    return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
-  function getVestedPercentage(uint256 lockedFrom, uint256 lockedUntil) public view override returns (uint256) {
+  function getVestedPercentage(uint when, uint256 lockedFrom, uint256 lockedUntil) public view override returns (uint256) {
     uint256 lockupTime = lockedUntil.sub(lockedFrom);
-    uint256 vestedTime = block.timestamp.sub(lockedFrom);
+    uint256 vestedTime = when.sub(lockedFrom);
     return vestedTime.mul(100).div(lockupTime);
   }
 
-  function calculatePenaltyForEarlyUnstake(Deposit memory deposit) public view override returns (uint256) {
-    if (block.timestamp > uint256(deposit.lockedUntil)) {
+  function calculatePenaltyForEarlyUnstake(uint when, Deposit memory deposit) public view override returns (uint256) {
+    if (when > uint256(deposit.lockedUntil)) {
       return 0;
     }
-    uint256 vestedPercentage = getVestedPercentage(uint256(deposit.lockedFrom), uint256(deposit.lockedUntil));
+    uint256 vestedPercentage = getVestedPercentage(when, uint256(deposit.lockedFrom), uint256(deposit.lockedUntil));
     uint256 unvestedAmount = uint256(deposit.tokenAmount).mul(vestedPercentage).div(100);
     return unvestedAmount.mul(earlyUnstakePenalty()).div(100);
   }

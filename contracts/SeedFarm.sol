@@ -111,6 +111,7 @@ contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeabl
       payload
     );
     _unlockDeposit(tokenType, lockedFrom, lockedUntil, index, tokenAmount);
+    emit DepositUnlocked(_msgSender(), uint16(index));
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
@@ -124,5 +125,6 @@ contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeabl
       payload
     );
     _mintSeedAndSaveDeposit(to, tokenType, lockedFrom, lockedUntil, index, tokenAmount);
+    emit DepositSaved(to, uint16(index));
   }
 }
