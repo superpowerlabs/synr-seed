@@ -48,10 +48,6 @@ contract Payload is IERC20Receiver, IERC721ReceiverUpgradeable {
     return 1;
   }
 
-  function who() public pure virtual returns (uint8) {
-    return 0;
-  }
-
   // can be called by web2 app for consistency
   function serializeInput(
     uint256 tokenType, // 1 digit

@@ -59,10 +59,6 @@ contract SynrPool is Payload, Initializable, WormholeTunnelUpgradeable {
     return 1;
   }
 
-  function who() public pure virtual override returns (uint8) {
-    return 1;
-  }
-
   function minimumLockingTime() public view returns (uint256) {
     return encodedConf.mod(1e3);
   }

@@ -31,10 +31,6 @@ contract SeedFarm is Payload, Initializable, WormholeTunnelUpgradeable {
     return 1;
   }
 
-  function who() public pure virtual override returns (uint8) {
-    return 2;
-  }
-
   function _mintSeedAndSaveDeposit(
     address to,
     uint256 tokenType,
