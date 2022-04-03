@@ -4,6 +4,13 @@ pragma solidity ^0.8.2;
 import "./IPayload.sol";
 
 interface ISynrPool {
+  event DepositSaved(address user,
+    uint tokenType,
+    uint lockupTime,
+    uint tokenAmount,
+    uint16 otherChain
+  );
+
   // can be re-executed to update parameters
   function initPool(
     uint256 minimumLockingTime_, // 3 digits -- 7 days

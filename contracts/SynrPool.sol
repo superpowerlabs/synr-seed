@@ -163,9 +163,11 @@ contract SynrPool is ISynrPool, Payload, Initializable, WormholeTunnelUpgradeabl
       require(_msgSender() == address(uint160(uint256(recipient))), "SynrPool: only the sender can receive on other chain");
     }
     require(minimumLockingTime() > 0, "SynrPool: contract not active");
+    payload = _makeDeposit(tokenType, lockupTime, tokenAmount, recipientChain);
+    emit DepositSaved(_msgSender(), tokenType, lockupTime, tokenAmount, recipientChain);
     return
       _wormholeTransferWithValue(
-        _makeDeposit(tokenType, lockupTime, tokenAmount, recipientChain),
+        payload,
         recipientChain,
         recipient,
         nonce,

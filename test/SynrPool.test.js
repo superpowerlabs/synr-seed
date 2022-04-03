@@ -96,12 +96,16 @@ describe("#SynrPool", function () {
       );
       expect(payload).equal("1000000000000000000000003651");
       await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
-      await synrPool.connect(user1).wormholeTransfer(
-        payload,
-        4, // BSC
-        bytes32Address(user1.address),
-        1
-      );
+      expect(
+        await synrPool.connect(user1).wormholeTransfer(
+          payload,
+          4, // BSC
+          bytes32Address(user1.address),
+          1
+        )
+      )
+        .emit(synrPool, "DepositSaved")
+        .withArgs(user1.address, 1, 365, amount, 4);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
       const deposit = await synrPool.getDepositByIndex(user1.address, 0);
       const unvested =
