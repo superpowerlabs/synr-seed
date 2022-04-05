@@ -30,23 +30,6 @@ contract SynrPoolMock is SynrPool {
     uint16 otherChain,
     uint256 index
   ) external returns (Deposit memory) {
-    if (tokenType == 0) {
-      users[user].sSynrAmount += uint96(tokenAmount);
-    } else if (tokenType == 1) {
-      users[user].synrAmount += uint96(tokenAmount);
-    } else {
-      users[user].passAmount += 1;
-    }
-    Deposit memory deposit = Deposit({
-      tokenType: uint8(tokenType),
-      lockedFrom: uint32(lockedFrom),
-      lockedUntil: uint32(lockedUntil),
-      tokenAmount: uint96(tokenAmount),
-      unlockedAt: 0,
-      otherChain: otherChain,
-      index: uint16(index)
-    });
-    users[user].deposits.push(deposit);
-    return deposit;
+    return _updateUserAndAddDeposit(user, tokenType, lockedFrom, lockedUntil, tokenAmount, otherChain, index);
   }
 }

@@ -152,6 +152,7 @@ contract Payload is IPayload, IERC20Receiver, IERC721ReceiverUpgradeable {
       index: uint16(index)
     });
     users[user].deposits.push(deposit);
+    console.log(users[user].deposits.length);
     return deposit;
   }
 
