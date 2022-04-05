@@ -223,5 +223,34 @@ describe.only("#Payload", function () {
       expect(parseInt(deserialize)).equal(1, deposit.lockedFrom, deposit.lockedUntil, index, amount)
       });
 
+      it.only("should return updated user", async function () {
+        const amount = ethers.utils.parseEther("10000");
+      await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
+      const payload = await synrPool.serializeInput(
+        1, // SYNR
+        365, // 1 year
+        amount
+      );
+      const index = synrPool.getIndexFromPayload(payload);
+      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      expect(
+        await synrPool.connect(user1).wormholeTransfer(
+          payload,
+          4, // BSC
+          bytes32Address(user1.address),
+          1
+        )
+      )
+        .emit(synrPool, "DepositSaved")
+        .withArgs(user1.address, 0);
+      await increaseBlockTimestampBy(182.5 * 24 * 3600);
+      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
+      await synrPool.updateUserAndAddDeposit(user1.address, 1, 1000000000, 3000000000, amount, 44, 0)
+      //Update user pushes new deposit, it therefore changes the index of the intended new update deposite to the last one in the list.
+      //unsure if that is the intended behavior of UPDATE USER
+      const depositAfter = await synrPool.getDepositByIndex(user1.address, 1);
+      expect(depositAfter.tokenType,depositAfter.lockedFrom,depositAfter.lockedUntil,depositAfter.otherChain).equal(1,1000000000,3000000000,44)
+      });
+
 })
 });
