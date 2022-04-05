@@ -148,6 +148,55 @@ describe.only("#Payload", function () {
         expect(parseInt(deserialize)).equal(1, 365, amount)
     })
 
+    it("should return lenght of deposit", async function () {
+    const amount = ethers.utils.parseEther("10000");
+      await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
+      const payload = await synrPool.serializeInput(
+        1, // SYNR
+        365, // 1 year
+        amount
+      );
+      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      expect(
+        await synrPool.connect(user1).wormholeTransfer(
+          payload,
+          4, // BSC
+          bytes32Address(user1.address),
+          1
+        )
+      )
+        .emit(synrPool, "DepositSaved")
+        .withArgs(user1.address, 0);
+      await increaseBlockTimestampBy(182.5 * 24 * 3600);
+      const lenght = await synrPool.getDepositsLength(user1.address)
+      expect(parseInt(lenght)).equal(1)
+      });
+
+    it("should return deposit by index", async function () {
+        const amount = ethers.utils.parseEther("10000");
+      await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
+      const payload = await synrPool.serializeInput(
+        1, // SYNR
+        365, // 1 year
+        amount
+      );
+      const index = synrPool.getIndexFromPayload(payload);
+      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      expect(
+        await synrPool.connect(user1).wormholeTransfer(
+          payload,
+          4, // BSC
+          bytes32Address(user1.address),
+          1
+        )
+      )
+        .emit(synrPool, "DepositSaved")
+        .withArgs(user1.address, 0);
+      await increaseBlockTimestampBy(182.5 * 24 * 3600);
+      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
+      expect(parseInt(deposit)).equal(1, deposit.lockedFrom, deposit.lockedUntil, index, amount)
+      });
+
     it("should deserialize deposit", async function () {
         const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
@@ -173,5 +222,6 @@ describe.only("#Payload", function () {
       const deserialize = await synrPool.deserializeDeposit(parseInt(deposit))
       expect(parseInt(deserialize)).equal(1, deposit.lockedFrom, deposit.lockedUntil, index, amount)
       });
+
 })
 });
