@@ -115,15 +115,15 @@ describe.only("#Payload", function () {
           )).revertedWith("Payload: Not a Mobland SYNR Pass token ID")
     })
 
-    // it("should throw amount of range", async function () {
-    //     const amount = ethers.utils.parseEther("10000");
+    it.only("should throw amount of range", async function () {
+        const amount = ethers.utils.parseEther("1000000000000");
 
-    //     expect(synrPool.serializeInput(
-    //         1,
-    //         1e5,
-    //         1e29
-    //       )).revertedWith("Payload: tokenAmount out of range")
-    // })
+        expect(synrPool.serializeInput(
+            1,
+            365,
+            amount
+          )).revertedWith("Payload: tokenAmount out of range")
+    })
 
     it("should throw lockedTime out of range", async function () {
         const amount = ethers.utils.parseEther("10000");
@@ -223,7 +223,7 @@ describe.only("#Payload", function () {
       expect(parseInt(deserialize)).equal(1, deposit.lockedFrom, deposit.lockedUntil, index, amount)
       });
 
-      it.only("should return updated user", async function () {
+      it("should return updated user", async function () {
         const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = await synrPool.serializeInput(
