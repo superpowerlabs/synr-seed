@@ -149,7 +149,6 @@ describe.only("#Payload", function () {
     })
 
     it("should deserialize deposit", async function () {
-        // console.log(await synr.balanceOf(user1.address))
         const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = await synrPool.serializeInput(
@@ -157,7 +156,6 @@ describe.only("#Payload", function () {
         365, // 1 year
         amount
       );
-      expect(payload).equal("1000000000000000000000003651");
       const index = synrPool.getIndexFromPayload(payload);
       await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
       expect(
@@ -172,13 +170,8 @@ describe.only("#Payload", function () {
         .withArgs(user1.address, 0);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
       const deposit = await synrPool.getDepositByIndex(user1.address, 0);
-      const unvested =
-        ((100 - (await synrPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil))) / 100) *
-        deposit.tokenAmount;
-      const percentage = (await synrPool.earlyUnstakePenalty()) / 100;
-      const unvestedPenalty = unvested * percentage;
-      expect((await synrPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)) / 1).equal(unvestedPenalty);
-      expect(synrPool.deserializeDeposit(payload)).equal(1, deposit.lockedFrom, deposit.lockedUntil, index, amount)
+      const deserialize = await synrPool.deserializeDeposit(parseInt(deposit))
+      expect(parseInt(deserialize)).equal(1, deposit.lockedFrom, deposit.lockedUntil, index, amount)
       });
 })
 });
