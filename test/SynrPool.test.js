@@ -1,7 +1,7 @@
 const {expect, assert} = require("chai");
 
 const {initEthers, assertThrowsMessage, getTimestamp, increaseBlockTimestampBy, bytes32Address} = require("./helpers");
-const {upgrades} = require('hardhat');
+const {upgrades} = require("hardhat");
 
 // tests to be fixed
 
@@ -11,7 +11,7 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe.only("#SynrPool", function () {
+describe("#SynrPool", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
@@ -41,11 +41,11 @@ describe.only("#SynrPool", function () {
     synr = await SyndicateERC20.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
     await synr.deployed();
     let features =
-        (await synr.FEATURE_TRANSFERS_ON_BEHALF()) +
-        (await synr.FEATURE_TRANSFERS()) +
-        (await synr.FEATURE_UNSAFE_TRANSFERS()) +
-        (await synr.FEATURE_DELEGATIONS()) +
-        (await synr.FEATURE_DELEGATIONS_ON_BEHALF());
+      (await synr.FEATURE_TRANSFERS_ON_BEHALF()) +
+      (await synr.FEATURE_TRANSFERS()) +
+      (await synr.FEATURE_UNSAFE_TRANSFERS()) +
+      (await synr.FEATURE_DELEGATIONS()) +
+      (await synr.FEATURE_DELEGATIONS_ON_BEHALF());
     await synr.updateFeatures(features);
 
     sSynr = await SyntheticSyndicateERC20.deploy(superAdmin.address);
@@ -80,7 +80,7 @@ describe.only("#SynrPool", function () {
 
   async function configure() {}
 
-  describe("integrations test", async function () {
+  describe("#calculatePenaltyForEarlyUnstake", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });
@@ -90,25 +90,30 @@ describe.only("#SynrPool", function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = await synrPool.serializeInput(
-        0, // SYNR
+        1, // SYNR
         365, // 1 year
         amount
       );
-      expect(payload).equal("1000000000000000000000003650");
+      expect(payload).equal("1000000000000000000000003651");
       await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
-      await synrPool.connect(user1).wormholeTransfer(
-        payload,
-        4, // BSC
-        bytes32Address(user1.address),
-        1
-      );
+      expect(
+        await synrPool.connect(user1).wormholeTransfer(
+          payload,
+          4, // BSC
+          bytes32Address(user1.address),
+          1
+        )
+      )
+        .emit(synrPool, "DepositSaved")
+        .withArgs(user1.address, 0);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      const deposit = await synrPool.getDepositByIndexPlus1(user1.address, 0);
+      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
       const unvested =
-        ((100 - (await synrPool.getVestedPercentage(deposit.lockedFrom, deposit.lockedUntil))) / 100) * deposit.tokenAmount;
+        ((100 - (await synrPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil))) / 100) *
+        deposit.tokenAmount;
       const percentage = (await synrPool.earlyUnstakePenalty()) / 100;
       const unvestedPenalty = unvested * percentage;
-      expect((await synrPool.calculatePenaltyForEarlyUnstake(user1.address, 0)) / 1).equal(unvestedPenalty);
+      expect((await synrPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)) / 1).equal(unvestedPenalty);
     });
   });
 });
