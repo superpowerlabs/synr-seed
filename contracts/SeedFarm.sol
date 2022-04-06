@@ -1,101 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
-import "./interfaces/ISeedFarm.sol";
 import "./SidePool.sol";
-import "./token/SideToken.sol";
-import "./token/SynCityCouponsTestNet.sol";
 import "hardhat/console.sol";
 
-contract SeedFarm is ISeedFarm, SidePool, Initializable, WormholeTunnelUpgradeable {
+contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
-
-  SideToken public poolToken;
-  SynCityCouponsTestNet public blueprint;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
   function initialize(address seed_) public initializer {
+    __SidePool_init(seed_);
     __WormholeTunnel_init();
-    require(seed_.isContract(), "SEED not a contract");
-    poolToken = SideToken(seed_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
-
-  function version() external pure virtual override returns (uint256) {
-    return 1;
-  }
-
-  function _mintSeedAndSaveDeposit(
-    address to,
-    uint256 tokenType,
-    uint256 lockedFrom,
-    uint256 lockedUntil,
-    uint256 mainIndex,
-    uint256 tokenAmountOrID
-  ) internal {
-    // this must be adjusted based on type of stake, time passed, etc.
-    if (tokenType == 0) {
-      // give seed to the user
-      poolToken.mint(to, tokenAmountOrID.mul(1000));
-    } else if (tokenType == 1) {
-      poolToken.mint(to, tokenAmountOrID);
-    } // else no mint, SYNR Pass boosts rewards
-    _updateUser(to, tokenType, lockedFrom, lockedUntil, tokenAmountOrID, mainIndex);
-  }
-
-  function _updateUser(
-    address user,
-    uint256 tokenType,
-    uint256 lockedFrom,
-    uint256 lockedUntil,
-    uint256 tokenAmountOrID,
-    uint256 mainIndex
-  ) internal returns (Deposit memory) {
-    Deposit memory deposit = _updateUserAndAddDeposit(user, tokenType, lockedFrom, lockedUntil, tokenAmountOrID, 2, mainIndex);
-    return deposit;
-  }
-
-  function canUnstakeWithoutTax(address user, uint256 mainIndex) external view override returns (bool) {
-    Deposit memory deposit = users[user].deposits[mainIndex];
-    return deposit.lockedUntil > 0 && block.timestamp > uint256(deposit.lockedUntil);
-  }
-
-  function getDepositIndexByOriginalIndex(address user, uint256 mainIndex) public view override returns (uint256) {
-    for (uint256 i; i < users[user].deposits.length; i++) {
-      if (uint256(users[user].deposits[i].mainIndex) == mainIndex && users[user].deposits[i].lockedFrom > 0) {
-        return i;
-      }
-    }
-    revert("Payload: deposit not found");
-  }
-
-  function _unlockDeposit(
-    uint256 tokenType,
-    uint256 lockedFrom,
-    uint256 lockedUntil,
-    uint256 mainIndex,
-    uint256 tokenAmountOrID
-  ) internal {
-    mainIndex = getDepositIndexByOriginalIndex(_msgSender(), mainIndex);
-    Deposit storage deposit = users[_msgSender()].deposits[mainIndex];
-    require(
-      uint256(deposit.tokenType) == tokenType &&
-        uint256(deposit.lockedFrom) == lockedFrom &&
-        uint256(deposit.lockedUntil) == lockedUntil &&
-        uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
-      "SeedFarm: deposit not found"
-    );
-    deposit.unlockedAt = uint32(block.timestamp);
-  }
 
   function wormholeTransfer(
     // solhint-disable-next-line

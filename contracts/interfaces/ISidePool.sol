@@ -2,6 +2,10 @@
 pragma solidity ^0.8.2;
 
 interface ISidePool {
+  event DepositSaved(address user, uint16 mainIndex);
+
+  event DepositUnlocked(address user, uint16 mainIndex);
+
   struct Deposit {
     // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
     uint8 tokenType;
@@ -32,7 +36,6 @@ interface ISidePool {
   struct User {
     // @dev Total blueprints staked
     uint16 blueprintsAmount;
-
     // TODO as above, see if possible to optimize storage
     // @dev Total staked amount
     uint256 tokenAmount;
@@ -55,6 +58,10 @@ interface ISidePool {
   function getDepositByIndex(address user, uint256 mainIndex) external view returns (Deposit memory);
 
   function getDepositsLength(address user) external view returns (uint256);
+
+  function canUnstakeWithoutTax(address user, uint256 mainIndex) external view returns (bool);
+
+  function getDepositIndexByOriginalIndex(address user, uint256 mainIndex) external view returns (uint256);
 
   // pool functions
 

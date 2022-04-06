@@ -2,6 +2,10 @@
 pragma solidity ^0.8.2;
 
 interface IMainPool {
+  event DepositSaved(address user, uint16 mainIndex);
+
+  event DepositUnlocked(address user, uint16 mainIndex);
+
   struct Deposit {
     // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
     uint8 tokenType;
@@ -41,4 +45,29 @@ interface IMainPool {
   function getDepositByIndex(address user, uint256 mainIndex) external view returns (Deposit memory);
 
   function getDepositsLength(address user) external view returns (uint256);
+
+  // can be re-executed to update parameters
+  function initPool(
+    uint256 minimumLockingTime_, // 3 digits -- ex. 7 days
+    uint256 maximumLockingTime_, // 3 digits -- ex. 365 days
+    uint256 earlyUnstakePenalty_ // 2 digits -- ex: 30%
+  ) external;
+
+  function minimumLockingTime() external view returns (uint256);
+
+  function maximumLockingTime() external view returns (uint256);
+
+  function earlyUnstakePenalty() external view returns (uint256);
+
+  function getVestedPercentage(
+    uint256 when,
+    uint256 lockedFrom,
+    uint256 lockedUntil
+  ) external view returns (uint256);
+
+  function calculatePenaltyForEarlyUnstake(uint256 when, IMainPool.Deposit memory deposit) external view returns (uint256);
+
+  function transferSSynrToTreasury(uint256 amount, address to) external;
+
+  function withdrawPenalties(uint256 amount, address to) external;
 }
