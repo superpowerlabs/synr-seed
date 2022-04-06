@@ -152,7 +152,7 @@ describe("#Payload", function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = "1000000000000000000000003651"
-      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(
           payload,
@@ -163,7 +163,7 @@ describe("#Payload", function () {
       )
         .emit(synrBridge, "DepositSaved")
         .withArgs(user1.address, 0);
-      const lenght = await synrPool.getDepositsLength(user1.address);
+      const lenght = await synrBridge.getDepositsLength(user1.address);
       expect(parseInt(lenght)).equal(1);
     });
 
@@ -171,7 +171,7 @@ describe("#Payload", function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = "1000000000000000000000003651"
-      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(
           payload,
@@ -182,7 +182,7 @@ describe("#Payload", function () {
       )
         .emit(synrBridge, "DepositSaved")
         .withArgs(user1.address, 0);
-      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
+      const deposit = await synrBridge.getDepositByIndex(user1.address, 0);
       expect(parseInt(deposit)).equal(1, deposit.lockedFrom, deposit.lockedUntil, 0, amount);
     });
   });
@@ -207,7 +207,7 @@ describe("#Payload", function () {
           .add(await BNMulBy(lockedUntil, 1, 11))
           .add(await BNMulBy(0, 1, 21))
           .add(await BNMulBy(amount, 1, 26));
-      const payload = await synrPool.fromDepositToTransferPayload(deposit);
+      const payload = await synrBridge.fromDepositToTransferPayload(deposit);
       expect(payload).equal(expected)
     });
 
@@ -219,12 +219,12 @@ describe("#Payload", function () {
         tokenType: 3,
         lockedFrom,
         lockedUntil,
-        tokenAmount: amount,
+        tokenAmountOrID: amount,
         unlockedAt: 0,
         otherChain: 4,
-        index: 0,
+        mainIndex: 0,
       };
-      expect(synrPool.fromDepositToTransferPayload(deposit)).revertedWith("Payload: invalid token type")
+      expect(synrBridge.fromDepositToTransferPayload(deposit)).revertedWith("Payload: invalid token type")
     });
 
     it("should throw invalid interval", async function () {
@@ -235,12 +235,12 @@ describe("#Payload", function () {
         tokenType: 1,
         lockedFrom,
         lockedUntil,
-        tokenAmount: amount,
+        tokenAmountOrID: amount,
         unlockedAt: 0,
         otherChain: 4,
-        index: 0,
+        mainIndex: 0,
       };
-      expect(synrPool.fromDepositToTransferPayload(deposit)).revertedWith("Payload: invalid interval")
+      expect(synrBridge.fromDepositToTransferPayload(deposit)).revertedWith("Payload: invalid interval")
     });
 
     it("should throw tokenAmount out of range", async function () {
@@ -251,12 +251,12 @@ describe("#Payload", function () {
         tokenType: 1,
         lockedFrom,
         lockedUntil,
-        tokenAmount: amount,
+        tokenAmountOrID: amount,
         unlockedAt: 0,
         otherChain: 4,
-        index: 0,
+        mainIndex: 0,
       };
-      expect(synrPool.fromDepositToTransferPayload(deposit)).revertedWith("Payload: tokenAmount out of range")
+      expect(synrBridge.fromDepositToTransferPayload(deposit)).revertedWith("Payload: tokenAmountOrID out of range")
     });
   });
 
@@ -269,7 +269,7 @@ describe("#Payload", function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = "1000000000000000000000003651"
-      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(
           payload,
@@ -280,8 +280,8 @@ describe("#Payload", function () {
       )
         .emit(synrBridge, "DepositSaved")
         .withArgs(user1.address, 0);
-      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
-      const deserialize = await synrPool.deserializeDeposit(parseInt(deposit));
+      const deposit = await synrBridge.getDepositByIndex(user1.address, 0);
+      const deserialize = await synrBridge.deserializeDeposit(parseInt(deposit));
       expect(parseInt(deserialize)).equal(1, deposit.lockedFrom, deposit.lockedUntil, 0, amount);
     });
   });
@@ -295,7 +295,7 @@ describe("#Payload", function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = "1000000000000000000000003651"
-      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(
           payload,
@@ -307,7 +307,7 @@ describe("#Payload", function () {
         .emit(synrBridge, "DepositSaved")
         .withArgs(user1.address, 0);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      await synrPool.updateUserAndAddDeposit(user1.address, 1, 1000000000, 3000000000, amount, 44, 0);
+      await synrBridge.updateUserAndAddDeposit(user1.address, 1, 1000000000, 3000000000, amount, 44, 0);
       //Update user pushes new deposit, it therefore changes the index of the intended new update deposite to the last one in the list.
       //unsure if that is the intended behavior of UPDATE USER
       const depositAfter = await synrBridge.getDepositByIndex(user1.address, 1);
