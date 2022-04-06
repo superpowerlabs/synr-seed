@@ -79,18 +79,16 @@ interface ISidePool {
   //
   //  function balanceOf(address _user) external view returns (uint256);
   //
-  //  function stake(
-  //    uint256 _amount,
-  //    uint64 _lockedUntil,
-  //    bool useSSYN
-  //  ) external;
-  //
-  //  function unstake(
-  //    uint256 _depositId,
-  //    uint256 _amount,
-  //    bool useSSYN
-  //  ) external;
-  //
+  function stake(
+    uint256 amount,
+    uint64 lockedUntil
+  ) external;
+
+//  function unstake(
+//    uint256 depositIndex,
+//    uint256 amount
+//  ) external;
+
   //  function sync() external;
   //
   //  function processRewards(bool useSSYN) external;
