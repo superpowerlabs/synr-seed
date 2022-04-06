@@ -3,7 +3,7 @@ pragma solidity ^0.8.2;
 
 import "./IMainPool.sol";
 
-interface ISynrPool {
+interface ISynrBridge {
   event DepositSaved(address user, uint16 mainIndex);
 
   event DepositUnlocked(address user, uint16 mainIndex);

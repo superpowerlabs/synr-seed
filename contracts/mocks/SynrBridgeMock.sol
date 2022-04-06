@@ -9,11 +9,11 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 //import "./interfaces/IERC20.sol";
 //import "./token/SyndicateERC20.sol";
 //import "./token/SyntheticSyndicateERC20.sol";
-import "../SynrPool.sol";
+import "../SynrBridge.sol";
 
 import "hardhat/console.sol";
 
-contract SynrPoolMock is SynrPool {
+contract SynrBridgeMock is SynrBridge {
   using SafeMathUpgradeable for uint256;
 
   // fake function that is always successful

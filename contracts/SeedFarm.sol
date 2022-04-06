@@ -16,7 +16,7 @@ contract SeedFarm is ISeedFarm, SidePool, Initializable, WormholeTunnelUpgradeab
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
-  SideToken public seed;
+  SideToken public poolToken;
   SynCityCouponsTestNet public blueprint;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -25,7 +25,7 @@ contract SeedFarm is ISeedFarm, SidePool, Initializable, WormholeTunnelUpgradeab
   function initialize(address seed_) public initializer {
     __WormholeTunnel_init();
     require(seed_.isContract(), "SEED not a contract");
-    seed = SideToken(seed_);
+    poolToken = SideToken(seed_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -45,9 +45,9 @@ contract SeedFarm is ISeedFarm, SidePool, Initializable, WormholeTunnelUpgradeab
     // this must be adjusted based on type of stake, time passed, etc.
     if (tokenType == 0) {
       // give seed to the user
-      seed.mint(to, tokenAmountOrID.mul(1000));
+      poolToken.mint(to, tokenAmountOrID.mul(1000));
     } else if (tokenType == 1) {
-      seed.mint(to, tokenAmountOrID);
+      poolToken.mint(to, tokenAmountOrID);
     } // else no mint, SYNR Pass boosts rewards
     _updateUser(to, tokenType, lockedFrom, lockedUntil, tokenAmountOrID, mainIndex);
   }

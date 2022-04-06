@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./interfaces/IERC20.sol";
-import "./interfaces/ISynrPool.sol";
+import "./interfaces/ISynrBridge.sol";
 import "./token/SyndicateERC20.sol";
 import "./token/SyntheticSyndicateERC20.sol";
 import "./token/SynCityPasses.sol";
@@ -15,7 +15,7 @@ import "./MainPool.sol";
 
 import "hardhat/console.sol";
 
-contract SynrPool is ISynrPool, MainPool, Initializable, WormholeTunnelUpgradeable {
+contract SynrBridge is ISynrBridge, MainPool, Initializable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -52,7 +52,7 @@ contract SynrPool is ISynrPool, MainPool, Initializable, WormholeTunnelUpgradeab
     uint256 maximumLockingTime_, // 3 digits -- 365 days
     uint256 earlyUnstakePenalty_ // 2 digits -- ex: 30%
   ) external override onlyOwner {
-    require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "SynrPool: contract cannot receive sSYNR");
+    require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "SynrBridge: contract cannot receive sSYNR");
     encodedConf = minimumLockingTime_.add(maximumLockingTime_.mul(1e3)).add(earlyUnstakePenalty_.mul(1e6));
   }
 
@@ -82,7 +82,7 @@ contract SynrPool is ISynrPool, MainPool, Initializable, WormholeTunnelUpgradeab
     if (tokenType == 1) {
       require(
         lockupTime > minimumLockingTime() - 1 && lockupTime < maximumLockingTime() + 1,
-        "SynrPool: invalid lockupTime type"
+        "SynrBridge: invalid lockupTime type"
       );
     }
     // Contract must be approved as spender.
@@ -129,7 +129,7 @@ contract SynrPool is ISynrPool, MainPool, Initializable, WormholeTunnelUpgradeab
     if (tokenType == 1) {
       users[user].synrAmount = uint96(uint256(users[user].synrAmount).sub(tokenAmountOrID));
     } else {
-      users[user].passAmount = uint96(uint256(users[user].passAmount).sub(1));
+      users[user].passAmount = uint16(uint256(users[user].passAmount).sub(1));
     }
 
     Deposit storage deposit = users[user].deposits[mainIndex];
@@ -139,10 +139,10 @@ contract SynrPool is ISynrPool, MainPool, Initializable, WormholeTunnelUpgradeab
         uint256(deposit.lockedFrom) == lockedFrom &&
         uint256(deposit.lockedUntil) == lockedUntil &&
         uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
-      "SynrPool: deposit not found"
+      "SynrBridge: deposit not found"
     );
-    require(deposit.tokenType > 0, "SynrPool: sSYNR can not be unlocked");
-    require(deposit.unlockedAt == 0, "SynrPool: deposit already unlocked");
+    require(deposit.tokenType > 0, "SynrBridge: sSYNR can not be unlocked");
+    require(deposit.unlockedAt == 0, "SynrBridge: deposit already unlocked");
     if (tokenType == 2) {
       pass.safeTransferFrom(address(this), _msgSender(), uint256(tokenAmountOrID));
     } else {
@@ -167,9 +167,9 @@ contract SynrPool is ISynrPool, MainPool, Initializable, WormholeTunnelUpgradeab
     (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
     if (tokenType > 0) {
       // this limitation is necessary to avoid problems during the unstake
-      require(_msgSender() == address(uint160(uint256(recipient))), "SynrPool: only the sender can receive on other chain");
+      require(_msgSender() == address(uint160(uint256(recipient))), "SynrBridge: only the sender can receive on other chain");
     }
-    require(minimumLockingTime() > 0, "SynrPool: contract not active");
+    require(minimumLockingTime() > 0, "SynrBridge: contract not active");
     payload = _makeDeposit(tokenType, lockupTime, tokenAmountOrID, recipientChain);
     emit DepositSaved(_msgSender(), uint16(getIndexFromPayload(payload)));
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
@@ -208,13 +208,13 @@ contract SynrPool is ISynrPool, MainPool, Initializable, WormholeTunnelUpgradeab
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    require(tokenType > 0, "SynrPool: sSYNR can't be unlocked");
+    require(tokenType > 0, "SynrBridge: sSYNR can't be unlocked");
     _unlockDeposit(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
   function transferSSynrToTreasury(uint256 amount, address to) external override onlyOwner {
     uint256 availableAmount = sSynr.balanceOf(address(this));
-    require(amount <= availableAmount, "SynrPool: sSYNR amount not available");
+    require(amount <= availableAmount, "SynrBridge: sSYNR amount not available");
     if (amount == 0) {
       amount = availableAmount;
     }
@@ -223,7 +223,7 @@ contract SynrPool is ISynrPool, MainPool, Initializable, WormholeTunnelUpgradeab
   }
 
   function withdrawPenalties(uint256 amount, address to) external override onlyOwner {
-    require(amount <= collectedPenalties, "SynrPool: SYNR amount not available");
+    require(amount <= collectedPenalties, "SynrBridge: SYNR amount not available");
     if (amount == 0) {
       amount = collectedPenalties;
     }
