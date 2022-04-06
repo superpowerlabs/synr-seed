@@ -20,4 +20,16 @@ contract SynrPoolMock is SynrPool {
   function mockWormholeCompleteTransfer(address to, uint256 payload) public {
     _onWormholeCompleteTransfer(to, payload);
   }
+
+  function updateUserAndAddDeposit(
+    address user,
+    uint256 tokenType,
+    uint256 lockedFrom,
+    uint256 lockedUntil,
+    uint256 tokenAmount,
+    uint16 otherChain,
+    uint256 index
+  ) external returns (Deposit memory) {
+    return _updateUserAndAddDeposit(user, tokenType, lockedFrom, lockedUntil, tokenAmount, otherChain, index);
+  }
 }
