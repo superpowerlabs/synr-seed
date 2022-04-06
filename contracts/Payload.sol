@@ -90,7 +90,6 @@ contract Payload is IPayload, IERC20Receiver, IERC721ReceiverUpgradeable {
   function fromDepositToTransferPayload(Deposit memory deposit) public pure override returns (uint256) {
     require(deposit.tokenType < 3, "Payload: invalid token type");
     require(deposit.lockedFrom < deposit.lockedUntil, "Payload: invalid interval");
-    require(deposit.lockedUntil < 1e10, "Payload: lockedTime out of range");
     require(deposit.tokenAmount < 1e28, "Payload: tokenAmount out of range");
     return
       uint256(deposit.tokenType)
