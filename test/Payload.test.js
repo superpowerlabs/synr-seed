@@ -21,6 +21,8 @@ describe("#Payload", function () {
   let SideToken, seed;
   let SynCityPasses, pass;
 
+  const BN = ethers.BigNumber.from;
+
   let deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury;
 
   before(async function () {
@@ -189,9 +191,31 @@ describe("#Payload", function () {
       )
         .emit(synrPool, "DepositSaved")
         .withArgs(user1.address, 0);
-      await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
+      const deposit = await synrPool.getDepositByIndex(user1.address, index);
       expect(parseInt(deposit)).equal(1, deposit.lockedFrom, deposit.lockedUntil, index, amount);
+    });
+
+    it.only("should from deposit to transfer payload", async function () {
+      const amount = ethers.utils.parseEther("10000");
+      const lockedFrom = await getTimestamp();
+      const lockedUntil = lockedFrom + 3600 * 24 * 180;
+      const deposit = {
+        tokenType: 1,
+        lockedFrom,
+        lockedUntil,
+        tokenAmount: amount,
+        unlockedAt: 0,
+        otherChain: 4,
+        index: 0,
+      };
+
+      const expected = BN("1")
+          .add(BN(lockedFrom.toString()).mul(10))
+          .add(BN(lockedUntil.toString()).mul(BN(1 + "0".repeat(11))))
+          .add(BN("0").mul(BN(1 + "0".repeat(21))))
+          .add(amount.mul(BN(1 + "0".repeat(26))));
+      const payload = await synrPool.fromDepositToTransferPayload(deposit);
+      expect(payload).equal(expected)
     });
   });
 
