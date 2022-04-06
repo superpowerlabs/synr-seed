@@ -189,10 +189,38 @@ describe.only("#Payload", function () {
       )
         .emit(synrPool, "DepositSaved")
         .withArgs(user1.address, 0);
-      await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
+      const deposit = await synrPool.getDepositByIndex(user1.address, index);
       expect(parseInt(deposit)).equal(1, deposit.lockedFrom, deposit.lockedUntil, index, amount);
     });
+
+    // it("should from deposit to transfer payload", async function () {
+    //   const amount = ethers.utils.parseEther("10000");
+    //   await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
+    //   const payload = await synrPool.serializeInput(
+    //     1, // SYNR
+    //     365, // 1 year
+    //     amount
+    //   );
+    //   const index = synrPool.getIndexFromPayload(payload);
+    //   await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+    //   expect(
+    //     await synrPool.connect(user1).wormholeTransfer(
+    //       payload,
+    //       4, // BSC
+    //       bytes32Address(user1.address),
+    //       1
+    //     )
+    //   )
+    //     .emit(synrPool, "DepositSaved")
+    //     .withArgs(user1.address, 0);
+    //   const deposit = await synrPool.getDepositByIndex(user1.address, index);
+    //   //trying to replicate the calculation from the function to see if it matches
+    //   const total = deposit.tokenType + (deposit.lockedFrom * (10)) + (deposit.lockedUntil * (1e11)) + (deposit.index * (1e21)) + (deposit.tokenAmount * (1e26))
+    //   const transfer = await synrPool.fromDepositToTransferPayload(deposit)
+    //   //ethers.utils.parseEther says it must be a string
+    //   console.log(ethers.utils.parseEther(transfer), total)
+    //   expect(transfer).equal(total)
+    // });
   });
 
   describe.only("#deserializeDeposit", async function () {
