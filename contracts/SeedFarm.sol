@@ -7,15 +7,17 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./interfaces/ISeedFarm.sol";
-import "./Payload.sol";
+import "./SidePool.sol";
 import "./token/SideToken.sol";
+import "./token/SynCityCouponsTestNet.sol";
 import "hardhat/console.sol";
 
-contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeable {
+contract SeedFarm is ISeedFarm, SidePool, Initializable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
   SideToken public seed;
+  SynCityCouponsTestNet public blueprint;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -37,17 +39,17 @@ contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeabl
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
-    uint256 index,
-    uint256 tokenAmount
+    uint256 mainIndex,
+    uint256 tokenAmountOrID
   ) internal {
     // this must be adjusted based on type of stake, time passed, etc.
     if (tokenType == 0) {
       // give seed to the user
-      seed.mint(to, tokenAmount.mul(1000));
+      seed.mint(to, tokenAmountOrID.mul(1000));
     } else if (tokenType == 1) {
-      seed.mint(to, tokenAmount);
+      seed.mint(to, tokenAmountOrID);
     } // else no mint, SYNR Pass boosts rewards
-    _updateUser(to, tokenType, lockedFrom, lockedUntil, tokenAmount, index);
+    _updateUser(to, tokenType, lockedFrom, lockedUntil, tokenAmountOrID, mainIndex);
   }
 
   function _updateUser(
@@ -55,21 +57,21 @@ contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeabl
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
-    uint256 tokenAmount,
-    uint256 index
+    uint256 tokenAmountOrID,
+    uint256 mainIndex
   ) internal returns (Deposit memory) {
-    Deposit memory deposit = _updateUserAndAddDeposit(user, tokenType, lockedFrom, lockedUntil, tokenAmount, 2, index);
+    Deposit memory deposit = _updateUserAndAddDeposit(user, tokenType, lockedFrom, lockedUntil, tokenAmountOrID, 2, mainIndex);
     return deposit;
   }
 
-  function canUnstakeWithoutTax(address user, uint256 index) external view override returns (bool) {
-    Deposit memory deposit = users[user].deposits[index];
+  function canUnstakeWithoutTax(address user, uint256 mainIndex) external view override returns (bool) {
+    Deposit memory deposit = users[user].deposits[mainIndex];
     return deposit.lockedUntil > 0 && block.timestamp > uint256(deposit.lockedUntil);
   }
 
-  function getDepositIndexByOriginalIndex(address user, uint256 index) public view override returns (uint256) {
+  function getDepositIndexByOriginalIndex(address user, uint256 mainIndex) public view override returns (uint256) {
     for (uint256 i; i < users[user].deposits.length; i++) {
-      if (uint256(users[user].deposits[i].index) == index && users[user].deposits[i].lockedFrom > 0) {
+      if (uint256(users[user].deposits[i].mainIndex) == mainIndex && users[user].deposits[i].lockedFrom > 0) {
         return i;
       }
     }
@@ -80,16 +82,16 @@ contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeabl
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
-    uint256 index,
-    uint256 tokenAmount
+    uint256 mainIndex,
+    uint256 tokenAmountOrID
   ) internal {
-    index = getDepositIndexByOriginalIndex(_msgSender(), index);
-    Deposit storage deposit = users[_msgSender()].deposits[index];
+    mainIndex = getDepositIndexByOriginalIndex(_msgSender(), mainIndex);
+    Deposit storage deposit = users[_msgSender()].deposits[mainIndex];
     require(
       uint256(deposit.tokenType) == tokenType &&
         uint256(deposit.lockedFrom) == lockedFrom &&
         uint256(deposit.lockedUntil) == lockedUntil &&
-        uint256(deposit.tokenAmount) == tokenAmount,
+        uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
       "SeedFarm: deposit not found"
     );
     deposit.unlockedAt = uint32(block.timestamp);
@@ -107,11 +109,15 @@ contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeabl
   ) public payable override whenNotPaused returns (uint64 sequence) {
     // this limitation is necessary to avoid problems during the unstake
     require(_msgSender() == address(uint160(uint256(recipient))), "SeedFarm: only the sender can receive on other chain");
-    (uint256 tokenType, uint256 lockedFrom, uint256 lockedUntil, uint256 index, uint256 tokenAmount) = deserializeDeposit(
-      payload
-    );
-    _unlockDeposit(tokenType, lockedFrom, lockedUntil, index, tokenAmount);
-    emit DepositUnlocked(_msgSender(), uint16(index));
+    (
+      uint256 tokenType,
+      uint256 lockedFrom,
+      uint256 lockedUntil,
+      uint256 mainIndex,
+      uint256 tokenAmountOrID
+    ) = deserializeDeposit(payload);
+    _unlockDeposit(tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    emit DepositUnlocked(_msgSender(), uint16(mainIndex));
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
@@ -121,10 +127,14 @@ contract SeedFarm is ISeedFarm, Payload, Initializable, WormholeTunnelUpgradeabl
   }
 
   function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
-    (uint256 tokenType, uint256 lockedFrom, uint256 lockedUntil, uint256 index, uint256 tokenAmount) = deserializeDeposit(
-      payload
-    );
-    _mintSeedAndSaveDeposit(to, tokenType, lockedFrom, lockedUntil, index, tokenAmount);
-    emit DepositSaved(to, uint16(index));
+    (
+      uint256 tokenType,
+      uint256 lockedFrom,
+      uint256 lockedUntil,
+      uint256 mainIndex,
+      uint256 tokenAmountOrID
+    ) = deserializeDeposit(payload);
+    _mintSeedAndSaveDeposit(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    emit DepositSaved(to, uint16(mainIndex));
   }
 }

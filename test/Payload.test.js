@@ -11,7 +11,7 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe.only("#Payload", function () {
+describe("#Payload", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
@@ -78,7 +78,7 @@ describe.only("#Payload", function () {
     await seedFarm.wormholeRegisterContract(2, bytes32Address(synrPool.address));
   }
 
-  describe.only("#serializeInput", async function () {
+  describe("#serializeInput", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });
@@ -109,7 +109,7 @@ describe.only("#Payload", function () {
     it("should throw amount of range", async function () {
       const amount = ethers.utils.parseEther("1000000000000");
 
-      expect(synrPool.serializeInput(1, 365, amount)).revertedWith("Payload: tokenAmount out of range");
+      expect(synrPool.serializeInput(1, 365, amount)).revertedWith("Payload: tokenAmountOrID out of range");
     });
 
     it("should throw lockedTime out of range", async function () {
@@ -119,7 +119,7 @@ describe.only("#Payload", function () {
     });
   });
 
-  describe.only("#deserializeInput", async function () {
+  describe("#deserializeInput", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });
@@ -140,7 +140,7 @@ describe.only("#Payload", function () {
     // TODO add a fake payload and verify if it fails
   });
 
-  describe.only("#Deposit", async function () {
+  describe("#Deposit", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });
@@ -195,7 +195,7 @@ describe.only("#Payload", function () {
     });
   });
 
-  describe.only("#deserializeDeposit", async function () {
+  describe("#deserializeDeposit", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });
@@ -227,7 +227,7 @@ describe.only("#Payload", function () {
     });
   });
 
-  describe.only("#_updateUserAndAddDeposit", async function () {
+  describe("#_updateUserAndAddDeposit", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });

@@ -110,7 +110,7 @@ describe("#SynrPool", function () {
       const deposit = await synrPool.getDepositByIndex(user1.address, 0);
       const unvested =
         ((100 - (await synrPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil))) / 100) *
-        deposit.tokenAmount;
+        deposit.tokenAmountOrID;
       const percentage = (await synrPool.earlyUnstakePenalty()) / 100;
       const unvestedPenalty = unvested * percentage;
       expect((await synrPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)) / 1).equal(unvestedPenalty);

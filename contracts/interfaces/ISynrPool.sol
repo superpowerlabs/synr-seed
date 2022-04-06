@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "./IPayload.sol";
+import "./IMainPool.sol";
 
 interface ISynrPool {
-  event DepositSaved(address user, uint16 index);
+  event DepositSaved(address user, uint16 mainIndex);
 
-  event DepositUnlocked(address user, uint16 index);
+  event DepositUnlocked(address user, uint16 mainIndex);
 
   // can be re-executed to update parameters
   function initPool(
@@ -21,9 +21,13 @@ interface ISynrPool {
 
   function earlyUnstakePenalty() external view returns (uint256);
 
-  function getVestedPercentage(uint when, uint256 lockedFrom, uint256 lockedUntil) external view returns (uint256);
+  function getVestedPercentage(
+    uint256 when,
+    uint256 lockedFrom,
+    uint256 lockedUntil
+  ) external view returns (uint256);
 
-  function calculatePenaltyForEarlyUnstake(uint when, IPayload.Deposit memory deposit) external view returns (uint256);
+  function calculatePenaltyForEarlyUnstake(uint256 when, IMainPool.Deposit memory deposit) external view returns (uint256);
 
   function transferSSynrToTreasury(uint256 amount, address to) external;
 

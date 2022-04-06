@@ -109,7 +109,7 @@ describe("#Integration test", function () {
       .emit(synrPool, "DepositSaved")
       .withArgs(fundOwner.address, 0);
     let deposit = await synrPool.getDepositByIndex(fundOwner.address, 0);
-    expect(deposit.tokenAmount).equal(amount);
+    expect(deposit.tokenAmountOrID).equal(amount);
     expect(deposit.tokenType).equal(1);
     expect(deposit.otherChain).equal(4);
 
@@ -171,7 +171,7 @@ describe("#Integration test", function () {
     );
 
     let deposit = await synrPool.getDepositByIndex(user1.address, 0);
-    expect(deposit.tokenAmount).equal(amount);
+    expect(deposit.tokenAmountOrID).equal(amount);
     expect(deposit.tokenType).equal(1);
     expect(deposit.otherChain).equal(4);
 
@@ -235,7 +235,7 @@ describe("#Integration test", function () {
     );
 
     let deposit = await synrPool.getDepositByIndex(fundOwner.address, 0);
-    expect(deposit.tokenAmount).equal(amount);
+    expect(deposit.tokenAmountOrID).equal(amount);
     expect(deposit.tokenType).equal(1);
     expect(deposit.otherChain).equal(4);
 

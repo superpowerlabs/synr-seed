@@ -61,7 +61,7 @@ contract WormholeMock {
   //  }
   //
   //  function parseVM(bytes memory encodedVM) public pure virtual returns (VM memory vm) {
-  //    uint256 index = 0;
+  //    uint256 mainIndex = 0;
   //
   //    vm.version = encodedVM.toUint8(index);
   //    index += 1;
