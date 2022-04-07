@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
-import "./SidePool.sol";
+import "./pool/SidePool.sol";
 import "hardhat/console.sol";
 
 contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
@@ -41,7 +41,7 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    _unlockDeposit(tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    _unstake(tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     emit DepositUnlocked(_msgSender(), uint16(mainIndex));
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
@@ -59,7 +59,7 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    _mintSeedAndSaveDeposit(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    _stake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     emit DepositSaved(to, uint16(mainIndex));
   }
 }

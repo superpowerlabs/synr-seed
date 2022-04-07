@@ -28,11 +28,15 @@ interface IMainPool {
   struct User {
     // @dev Total staked SYNR amount
     uint96 synrAmount;
-    // @dev Total burned sSYNR amount
-    uint96 sSynrAmount;
     // @dev Total passes staked
     uint16 passAmount;
     Deposit[] deposits;
+  }
+
+  struct Conf {
+    uint16 minimumLockupTime;
+    uint16 maximumLockupTime;
+    uint16 earlyUnstakePenalty;
   }
 
   /**
@@ -46,18 +50,7 @@ interface IMainPool {
 
   function getDepositsLength(address user) external view returns (uint256);
 
-  // can be re-executed to update parameters
-  function initPool(
-    uint256 minimumLockingTime_, // 3 digits -- ex. 7 days
-    uint256 maximumLockingTime_, // 3 digits -- ex. 365 days
-    uint256 earlyUnstakePenalty_ // 2 digits -- ex: 30%
-  ) external;
-
-  function minimumLockingTime() external view returns (uint256);
-
-  function maximumLockingTime() external view returns (uint256);
-
-  function earlyUnstakePenalty() external view returns (uint256);
+  function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external;
 
   function getVestedPercentage(
     uint256 when,
@@ -67,7 +60,7 @@ interface IMainPool {
 
   function calculatePenaltyForEarlyUnstake(uint256 when, IMainPool.Deposit memory deposit) external view returns (uint256);
 
-  function transferSSynrToTreasury(uint256 amount, address to) external;
+  function withdrawSSynr(uint256 amount, address to) external;
 
   function withdrawPenalties(uint256 amount, address to) external;
 }

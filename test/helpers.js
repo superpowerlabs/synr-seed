@@ -28,12 +28,12 @@ const Helpers = {
     return (await this.ethers.provider.getBlock()).timestamp;
   },
 
-  async BNMulBy(param, num, repeat) {
+  async BNMulBy(param, num = 1, repeat = 0) {
     const BN = ethers.BigNumber.from;
     if (repeat) {
-      return (BN(param.toString()).mul(BN(num + "0".repeat(repeat))))
+      return BN(param.toString()).mul(BN(num + "0".repeat(repeat)))
     }
-    return ((BN(param.toString()).mul(num)))
+    return BN(param.toString()).mul(num)
   },
 
   async increaseBlockTimestampBy(offset) {

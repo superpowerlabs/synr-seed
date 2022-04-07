@@ -74,7 +74,7 @@ describe("#Payload", function () {
     await wormhole.deployed();
 
     await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
-    await synrBridge.initPool(7, 365, 40);
+    await synrBridge.initPool(7, 4000);
 
     await seedFarm.wormholeInit(4, wormhole.address);
     await seedFarm.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
@@ -94,7 +94,7 @@ describe("#Payload", function () {
         amount
       );
 
-      expect(payload).equal("1000000000000000000000003651");
+      expect(payload).equal("100000000000000000000003651");
     });
 
     it("should throw invalid token", async function () {
@@ -151,7 +151,7 @@ describe("#Payload", function () {
     it("should return length of deposits", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "1000000000000000000000003651"
+      const payload = "100000000000000000000003651"
       await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(
@@ -170,7 +170,7 @@ describe("#Payload", function () {
     it("should return deposit by index", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "1000000000000000000000003651"
+      const payload = "100000000000000000000003651"
       await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(
@@ -268,7 +268,7 @@ describe("#Payload", function () {
     it("should deserialize deposit", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "1000000000000000000000003651"
+      const payload = "100000000000000000000003651"
       await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(
@@ -294,7 +294,7 @@ describe("#Payload", function () {
     it("should return updated user", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "1000000000000000000000003651"
+      const payload = "100000000000000000000003651"
       await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(

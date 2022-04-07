@@ -5,30 +5,28 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "./interfaces/IERC20Receiver.sol";
-
-import "./Payload.sol";
-import "./interfaces/IMainPool.sol";
-import "./token/SyndicateERC20.sol";
-import "./token/SyntheticSyndicateERC20.sol";
-import "./token/SynCityPasses.sol";
+import "../token/TokenReceiver.sol";
+import "../utils/Payload.sol";
+import "../interfaces/IMainPool.sol";
+import "../token/SyndicateERC20.sol";
+import "../token/SyntheticSyndicateERC20.sol";
+import "../token/SynCityPasses.sol";
 
 import "hardhat/console.sol";
 
-contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradeable, Initializable, OwnableUpgradeable {
+contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
   // users and deposits
   mapping(address => User) public users;
+  Conf public conf;
 
   SyndicateERC20 public synr;
   SyntheticSyndicateERC20 public sSynr;
   SynCityPasses public pass;
 
   uint256 public collectedPenalties;
-  uint256 public encodedConf;
 
   // solhint-disable-next-line
   function __MainPool_init(
@@ -43,6 +41,16 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
     synr = SyndicateERC20(synr_);
     sSynr = SyntheticSyndicateERC20(sSynr_);
     pass = SynCityPasses(pass_);
+  }
+
+  function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external override onlyOwner {
+    require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "MainPool: contract cannot receive sSYNR");
+    require(conf.maximumLockupTime == 0, "MainPool: already initiated");
+    conf = Conf({minimumLockupTime: minimumLockupTime_, maximumLockupTime: 365, earlyUnstakePenalty: earlyUnstakePenalty_});
+  }
+
+  function version() external pure virtual override returns (uint256) {
+    return 1;
   }
 
   /**
@@ -63,32 +71,6 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
         .add(uint256(deposit.tokenAmountOrID).mul(1e26));
   }
 
-  function onERC20Received(
-    // solhint-disable-next-line
-    address _operator,
-    // solhint-disable-next-line
-    address _from,
-    // solhint-disable-next-line
-    uint256 _value,
-    // solhint-disable-next-line
-    bytes calldata _data
-  ) external pure override returns (bytes4) {
-    return 0x4fc35859;
-  }
-
-  function onERC721Received(
-    // solhint-disable-next-line
-    address operator,
-    // solhint-disable-next-line
-    address from,
-    // solhint-disable-next-line
-    uint256 tokenId,
-    // solhint-disable-next-line
-    bytes calldata data
-  ) external override returns (bytes4) {
-    return 0xf0b9e5ba;
-  }
-
   function _updateUserAndAddDeposit(
     address user,
     uint256 tokenType,
@@ -98,11 +80,9 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
     uint16 otherChain,
     uint256 mainIndex
   ) internal returns (Deposit memory) {
-    if (tokenType == 0) {
-      users[user].sSynrAmount += uint96(tokenAmountOrID);
-    } else if (tokenType == 1) {
+    if (tokenType == 1) {
       users[user].synrAmount += uint96(tokenAmountOrID);
-    } else {
+    } else if (tokenType == 2) {
       users[user].passAmount += 1;
     }
     Deposit memory deposit = Deposit({
@@ -127,32 +107,6 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
     return users[user].deposits.length;
   }
 
-  // can be re-executed to update parameters
-  function initPool(
-    uint256 minimumLockingTime_, // 3 digits -- 7 days
-    uint256 maximumLockingTime_, // 3 digits -- 365 days
-    uint256 earlyUnstakePenalty_ // 2 digits -- ex: 30%
-  ) external override onlyOwner {
-    require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "SynrBridge: contract cannot receive sSYNR");
-    encodedConf = minimumLockingTime_.add(maximumLockingTime_.mul(1e3)).add(earlyUnstakePenalty_.mul(1e6));
-  }
-
-  function version() external pure virtual override returns (uint256) {
-    return 1;
-  }
-
-  function minimumLockingTime() public view override returns (uint256) {
-    return encodedConf.mod(1e3);
-  }
-
-  function maximumLockingTime() public view override returns (uint256) {
-    return encodedConf.div(1e3).mod(1e3);
-  }
-
-  function earlyUnstakePenalty() public view override returns (uint256) {
-    return encodedConf.div(1e6).mod(1e2);
-  }
-
   function _makeDeposit(
     uint256 tokenType,
     uint256 lockupTime,
@@ -162,8 +116,8 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
     validateInput(tokenType, lockupTime, tokenAmountOrID);
     if (tokenType == 1) {
       require(
-        lockupTime > minimumLockingTime() - 1 && lockupTime < maximumLockingTime() + 1,
-        "SynrBridge: invalid lockupTime type"
+        lockupTime > conf.minimumLockupTime - 1 && lockupTime < conf.maximumLockupTime + 1,
+        "MainPool: invalid lockupTime type"
       );
     }
     // Contract must be approved as spender.
@@ -199,7 +153,7 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
     return deposit;
   }
 
-  function _unlockDeposit(
+  function _unstake(
     address user,
     uint256 tokenType,
     uint256 lockedFrom,
@@ -207,12 +161,12 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal {
+    require(tokenType > 0, "MainPool: sSYNR can not be unlocked");
     if (tokenType == 1) {
       users[user].synrAmount = uint96(uint256(users[user].synrAmount).sub(tokenAmountOrID));
     } else {
       users[user].passAmount = uint16(uint256(users[user].passAmount).sub(1));
     }
-
     Deposit storage deposit = users[user].deposits[mainIndex];
     require(
       uint256(deposit.mainIndex) == mainIndex &&
@@ -220,10 +174,9 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
         uint256(deposit.lockedFrom) == lockedFrom &&
         uint256(deposit.lockedUntil) == lockedUntil &&
         uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
-      "SynrBridge: deposit not found"
+      "MainPool: deposit not found"
     );
-    require(deposit.tokenType > 0, "SynrBridge: sSYNR can not be unlocked");
-    require(deposit.unlockedAt == 0, "SynrBridge: deposit already unlocked");
+    require(deposit.unlockedAt == 0, "MainPool: deposit already unlocked");
     if (tokenType == 2) {
       pass.safeTransferFrom(address(this), _msgSender(), uint256(tokenAmountOrID));
     } else {
@@ -254,24 +207,32 @@ contract MainPool is IMainPool, Payload, IERC20Receiver, IERC721ReceiverUpgradea
     }
     uint256 vestedPercentage = getVestedPercentage(when, uint256(deposit.lockedFrom), uint256(deposit.lockedUntil));
     uint256 unvestedAmount = uint256(deposit.tokenAmountOrID).mul(vestedPercentage).div(100);
-    return unvestedAmount.mul(earlyUnstakePenalty()).div(100);
+    return unvestedAmount.mul(conf.earlyUnstakePenalty).div(10000);
   }
 
-  function transferSSynrToTreasury(uint256 amount, address to) external override onlyOwner {
+  function withdrawSSynr(uint256 amount, address beneficiary) external override onlyOwner {
     uint256 availableAmount = sSynr.balanceOf(address(this));
-    require(amount <= availableAmount, "SynrBridge: sSYNR amount not available");
+    require(amount <= availableAmount, "MainPool: sSYNR amount not available");
     if (amount == 0) {
       amount = availableAmount;
     }
-    // to must be whitelisted to receive sSYNR
-    sSynr.transferFrom(address(this), to, amount);
+    // beneficiary must be whitelisted to receive sSYNR
+    sSynr.transferFrom(address(this), beneficiary, amount);
   }
 
-  function withdrawPenalties(uint256 amount, address to) external override onlyOwner {
-    require(amount <= collectedPenalties, "SynrBridge: SYNR amount not available");
+  function withdrawPenalties(uint256 amount, address beneficiary) external override onlyOwner {
+    require(amount <= collectedPenalties, "MainPool: amount not available");
     if (amount == 0) {
       amount = collectedPenalties;
     }
-    synr.transferFrom(address(this), to, amount);
+    collectedPenalties -= amount;
+    synr.transferFrom(address(this), beneficiary, amount);
+  }
+
+  function _stake(uint256 payload, uint16 recipientChain) internal {
+    (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
+    require(conf.minimumLockupTime > 0, "MainPool: pool not alive");
+    payload = _makeDeposit(tokenType, lockupTime, tokenAmountOrID, recipientChain);
+    emit DepositSaved(_msgSender(), uint16(getIndexFromPayload(payload)));
   }
 }
