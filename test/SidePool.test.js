@@ -74,7 +74,7 @@ describe("#SidePool", function () {
         tokenAmount: amount.mul(100),
         unlockedAt: 0,
         mainIndex: 0,
-        lastRewardsAt: 0,
+        lastRewardsAt: lockedFrom,
         rewardsFactor: 1000
       };
     });
@@ -109,6 +109,34 @@ describe("#SidePool", function () {
       await increaseBlockTimestampBy(3 * 24 * 3600);
       expect(await sidePool.shouldUpdateRatio()).equal(false);
     });
+  });
+
+  describe("#calculateRewards", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+      const amount = ethers.utils.parseEther("9650");
+      const lockedFrom = await getTimestamp();
+      const lockedUntil = lockedFrom + 3600 * 24 * 180;
+      deposit = {
+        tokenType: 1,
+        lockedFrom,
+        lockedUntil,
+        tokenAmountOrID: amount,
+        tokenAmount: amount.mul(100),
+        unlockedAt: 0,
+        mainIndex: 0,
+        lastRewardsAt: lockedFrom,
+        rewardsFactor: 1000
+      };
+
+    });
+
+    it("should calculate the rewards", async function () {
+      await increaseBlockTimestampBy(23 * 24 * 3600);
+      expect(await sidePool.calculateRewards(deposit))
+          .equal("1233055555555555555555555");
+    });
+
   });
 
   describe("#updateRatio", async function () {

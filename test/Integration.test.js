@@ -129,7 +129,7 @@ describe("#Integration test", function () {
     await seedFarm.connect(fundOwner).collectRewards()
     let seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.lastRewardsAt).equal(await getTimestamp());
-    expect((await seed.balanceOf(fundOwner.address)).div(ethers.BigNumber.from(normalize(1, 21)))).equal("523830");
+    expect(await seed.balanceOf(fundOwner.address)).equal("821918442415017757483510");
 
     await increaseBlockTimestampBy(336 * 24 * 3600);
     expect(seedDeposit.unlockedAt).equal(0);

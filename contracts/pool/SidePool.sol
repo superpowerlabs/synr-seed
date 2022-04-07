@@ -115,8 +115,10 @@ contract SidePool is Payload, ISidePool, TokenReceiver, Initializable, OwnableUp
   }
 
   function calculateRewards(Deposit memory deposit) public view returns(uint) {
-    return uint(deposit.tokenAmount).mul(deposit.rewardsFactor).div(100).mul(block.timestamp.sub(deposit.lastRewardsAt))
-  .div(uint(deposit.lockedUntil).sub(deposit.lockedFrom));
+    uint lockedUntil = uint(deposit.lockedUntil);
+    uint now = lockedUntil > block.timestamp ? block.timestamp : lockedUntil;
+    return uint(deposit.tokenAmount).mul(deposit.rewardsFactor).div(100).mul(now.sub(deposit.lastRewardsAt))
+  .div(lockedUntil.sub(deposit.lockedFrom));
   }
 
   function collectRewards() external {
@@ -197,7 +199,7 @@ contract SidePool is Payload, ISidePool, TokenReceiver, Initializable, OwnableUp
       unlockedAt: 0,
       mainIndex: uint16(mainIndex),
       tokenAmount: uint128(tokenAmount),
-      lastRewardsAt: 0,
+      lastRewardsAt: uint32(lockedFrom),
       rewardsFactor: conf.rewardsFactor
     });
     users[user].deposits.push(deposit);
