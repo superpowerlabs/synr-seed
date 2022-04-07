@@ -5,47 +5,47 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
-import "./SidePool.sol";
+import "./MainPool.sol";
+
 import "hardhat/console.sol";
 
-contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
+contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(address seed_) public initializer {
-    __SidePool_init(seed_);
+  function initialize(
+    address synr_,
+    address sSynr_,
+    address pass_
+  ) public initializer {
+    __MainPool_init(synr_, sSynr_, pass_);
     __WormholeTunnel_init();
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+  // Stake/burn is done on chain A, SEED tokens are minted on chain B
   function wormholeTransfer(
-    // solhint-disable-next-line
     uint256 payload,
-    // solhint-disable-next-line
     uint16 recipientChain,
-    // solhint-disable-next-line
     bytes32 recipient,
-    // solhint-disable-next-line
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
-    // this limitation is necessary to avoid problems during the unstake
-    require(_msgSender() == address(uint160(uint256(recipient))), "SeedFarm: only the sender can receive on other chain");
-    (
-      uint256 tokenType,
-      uint256 lockedFrom,
-      uint256 lockedUntil,
-      uint256 mainIndex,
-      uint256 tokenAmountOrID
-    ) = deserializeDeposit(payload);
-    _unlockDeposit(tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
-    emit DepositUnlocked(_msgSender(), uint16(mainIndex));
+    (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
+    if (tokenType > 0) {
+      // this limitation is necessary to avoid problems during the unstake
+      require(_msgSender() == address(uint160(uint256(recipient))), "SynrBridge: only the sender can receive on other chain");
+    }
+    require(minimumLockingTime() > 0, "SynrBridge: contract not active");
+    payload = _makeDeposit(tokenType, lockupTime, tokenAmountOrID, recipientChain);
+    emit DepositSaved(_msgSender(), uint16(getIndexFromPayload(payload)));
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
+  // Unstake is initiated on chain B and completed on chain A
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
     _onWormholeCompleteTransfer(to, payload);
@@ -59,7 +59,7 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    _mintSeedAndSaveDeposit(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
-    emit DepositSaved(to, uint16(mainIndex));
+    require(tokenType > 0, "SynrBridge: sSYNR can't be unlocked");
+    _unlockDeposit(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 }

@@ -9,11 +9,11 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 //import "./interfaces/IERC20.sol";
 //import "./token/SyndicateERC20.sol";
 //import "./token/SyntheticSyndicateERC20.sol";
-import "../SynrPool.sol";
+import "../SynrBridge.sol";
 
 import "hardhat/console.sol";
 
-contract SynrPoolMock is SynrPool {
+contract SynrBridgeMock is SynrBridge {
   using SafeMathUpgradeable for uint256;
 
   // fake function that is always successful
@@ -26,10 +26,10 @@ contract SynrPoolMock is SynrPool {
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
-    uint256 tokenAmount,
+    uint256 tokenAmountOrID,
     uint16 otherChain,
-    uint256 index
+    uint256 mainIndex
   ) external returns (Deposit memory) {
-    return _updateUserAndAddDeposit(user, tokenType, lockedFrom, lockedUntil, tokenAmount, otherChain, index);
+    return _updateUserAndAddDeposit(user, tokenType, lockedFrom, lockedUntil, tokenAmountOrID, otherChain, mainIndex);
   }
 }

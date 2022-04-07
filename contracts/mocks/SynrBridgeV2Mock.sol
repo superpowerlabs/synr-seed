@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "../SynrPool.sol";
+import "../SynrBridge.sol";
 
 import "hardhat/console.sol";
 
-contract SynrPoolV2Mock is SynrPool {
+contract SynrBridgeV2Mock is SynrBridge {
   function version() external pure override returns (uint256) {
     return 2;
   }

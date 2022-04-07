@@ -21,22 +21,22 @@ async function main() {
   const synrAddress = deployed[chainId].SyndicateERC20;
   const sSynrAddress = deployed[chainId].SyntheticSyndicateERC20;
 
-  console.log("Deploying SynrPool");
-  const SynrPool = await ethers.getContractFactory("SynrPool");
+  console.log("Deploying SynrBridge");
+  const SynrBridge = await ethers.getContractFactory("SynrBridge");
 
-  const synrPool = await upgrades.deployProxy(SynrPool, [synrAddress, sSynrAddress]);
-  await synrPool.deployed();
+  const synrBridge = await upgrades.deployProxy(SynrBridge, [synrAddress, sSynrAddress]);
+  await synrBridge.deployed();
 
   const SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
   const sSynr = await SyntheticSyndicateERC20.attach(sSynrAddress);
-  await sSynr.updateRole(synrPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+  await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
 
-  console.log("SynrPool deployed at", synrPool.address);
+  console.log("SynrBridge deployed at", synrBridge.address);
 
   const network = chainId === 1 ? "ethereum" : chainId === 3 ? "ropsten" : "localhost";
 
   console.log(`
-To verify SynrPool source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
+To verify SynrBridge source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
 
 The encoded arguments are:
 
@@ -44,8 +44,8 @@ ${deployUtils.encodeArguments(["address", "address"], [synrAddress, sSynrAddress
 
 `);
 
-  console.log("SynrPool deployed at", synrPool.address);
-  await deployUtils.saveDeployed(chainId, ["SynrPool"], [synrPool.address]);
+  console.log("SynrBridge deployed at", synrBridge.address);
+  await deployUtils.saveDeployed(chainId, ["SynrBridge"], [synrBridge.address]);
 }
 
 main()

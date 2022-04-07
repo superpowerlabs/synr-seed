@@ -11,12 +11,12 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe("#SynrPool", function () {
+describe("#SynrBridge", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
-  let SynrPool, synrPool;
-  let SynrPoolV2;
+  let SynrBridge, synrBridge;
+  let SynrBridgeV2;
   let SeedFarm, seedFarm;
   let SideToken, seed;
   let SynCityPasses, pass;
@@ -28,8 +28,8 @@ describe("#SynrPool", function () {
     [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
-    SynrPool = await ethers.getContractFactory("SynrPoolMock");
-    SynrPoolV2 = await ethers.getContractFactory("SynrPoolV2Mock");
+    SynrBridge = await ethers.getContractFactory("SynrBridgeMock");
+    SynrBridgeV2 = await ethers.getContractFactory("SynrBridgeV2Mock");
     SeedFarm = await ethers.getContractFactory("SeedFarmMock");
     SideToken = await ethers.getContractFactory("SideToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
@@ -54,10 +54,10 @@ describe("#SynrPool", function () {
     pass = await SynCityPasses.deploy(validator.address);
     await pass.deployed();
 
-    synrPool = await upgrades.deployProxy(SynrPool, [synr.address, sSynr.address, pass.address]);
-    await synrPool.deployed();
+    synrBridge = await upgrades.deployProxy(SynrBridge, [synr.address, sSynr.address, pass.address]);
+    await synrBridge.deployed();
 
-    await sSynr.updateRole(synrPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+    await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
 
     seed = await upgrades.deployProxy(SideToken, ["Mobland SEED Token", "SEED"]);
     await seed.deployed();
@@ -68,14 +68,14 @@ describe("#SynrPool", function () {
     await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
 
     wormhole = await WormholeMock.deploy();
-    await synrPool.wormholeInit(2, wormhole.address);
+    await synrBridge.wormholeInit(2, wormhole.address);
     await wormhole.deployed();
 
-    await synrPool.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
-    await synrPool.initPool(7, 365, 40);
+    await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
+    await synrBridge.initPool(7, 365, 40);
 
     await seedFarm.wormholeInit(4, wormhole.address);
-    await seedFarm.wormholeRegisterContract(2, bytes32Address(synrPool.address));
+    await seedFarm.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
   }
 
   async function configure() {}
@@ -89,31 +89,31 @@ describe("#SynrPool", function () {
       // console.log(await synr.balanceOf(user1.address))
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = await synrPool.serializeInput(
+      const payload = await synrBridge.serializeInput(
         1, // SYNR
         365, // 1 year
         amount
       );
       expect(payload).equal("1000000000000000000000003651");
-      await synr.connect(user1).approve(synrPool.address, ethers.utils.parseEther("10000"));
+      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
-        await synrPool.connect(user1).wormholeTransfer(
+        await synrBridge.connect(user1).wormholeTransfer(
           payload,
           4, // BSC
           bytes32Address(user1.address),
           1
         )
       )
-        .emit(synrPool, "DepositSaved")
+        .emit(synrBridge, "DepositSaved")
         .withArgs(user1.address, 0);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      const deposit = await synrPool.getDepositByIndex(user1.address, 0);
+      const deposit = await synrBridge.getDepositByIndex(user1.address, 0);
       const unvested =
-        ((100 - (await synrPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil))) / 100) *
-        deposit.tokenAmount;
-      const percentage = (await synrPool.earlyUnstakePenalty()) / 100;
+        ((100 - (await synrBridge.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil))) / 100) *
+        deposit.tokenAmountOrID;
+      const percentage = (await synrBridge.earlyUnstakePenalty()) / 100;
       const unvestedPenalty = unvested * percentage;
-      expect((await synrPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)) / 1).equal(unvestedPenalty);
+      expect((await synrBridge.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)) / 1).equal(unvestedPenalty);
     });
   });
 });
