@@ -72,7 +72,7 @@ describe("#SynrBridge", function () {
     await wormhole.deployed();
 
     await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
-    await synrBridge.initPool(7, 365, 40);
+    await synrBridge.initPool(7, 4000);
 
     await seedFarm.wormholeInit(4, wormhole.address);
     await seedFarm.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
@@ -94,7 +94,7 @@ describe("#SynrBridge", function () {
         365, // 1 year
         amount
       );
-      expect(payload).equal("1000000000000000000000003651");
+      expect(payload).equal("100000000000000000000003651");
       await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
       expect(
         await synrBridge.connect(user1).wormholeTransfer(
@@ -108,12 +108,13 @@ describe("#SynrBridge", function () {
         .withArgs(user1.address, 0);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
       const deposit = await synrBridge.getDepositByIndex(user1.address, 0);
-      const unvested =
-        ((100 - (await synrBridge.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil))) / 100) *
-        deposit.tokenAmountOrID;
-      const percentage = (await synrBridge.earlyUnstakePenalty()) / 100;
-      const unvestedPenalty = unvested * percentage;
-      expect((await synrBridge.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)) / 1).equal(unvestedPenalty);
+      // console.log(deposit.lockedFrom, deposit.lockedUntil);
+      const vestedPercentage = await synrBridge.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil)
+      expect(vestedPercentage).equal(50);
+      const unvested = ethers.BigNumber.from(deposit.tokenAmountOrID.toString()).mul(100 - vestedPercentage).div(100);
+      const percentage = (await synrBridge.conf()).earlyUnstakePenalty / 100;
+      const unvestedPenalty = unvested.mul(percentage).div(100);
+      expect(await synrBridge.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)).equal(unvestedPenalty);
     });
   });
 });

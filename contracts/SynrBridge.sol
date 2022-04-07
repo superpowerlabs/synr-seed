@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
-import "./MainPool.sol";
+import "./pool/MainPool.sol";
 
 import "hardhat/console.sol";
 
@@ -34,14 +34,8 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
     bytes32 recipient,
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
-    (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
-    if (tokenType > 0) {
-      // this limitation is necessary to avoid problems during the unstake
-      require(_msgSender() == address(uint160(uint256(recipient))), "SynrBridge: only the sender can receive on other chain");
-    }
-    require(minimumLockingTime() > 0, "SynrBridge: contract not active");
-    payload = _makeDeposit(tokenType, lockupTime, tokenAmountOrID, recipientChain);
-    emit DepositSaved(_msgSender(), uint16(getIndexFromPayload(payload)));
+    require(_msgSender() == address(uint160(uint256(recipient))), "SynrBridge: only the sender can receive on other chain");
+    _stake(payload, recipientChain);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
@@ -60,6 +54,6 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
     require(tokenType > 0, "SynrBridge: sSYNR can't be unlocked");
-    _unlockDeposit(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    _unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 }

@@ -18,35 +18,50 @@ interface ISidePool {
     // which is less type(uint96).max (~79e28)
     uint96 tokenAmountOrID;
     uint32 unlockedAt;
-    uint16 otherChain;
-    // since the process is asyncronous, the same deposit can be at a different mainIndex
-    // on the main net and on the sidechain.
+    // @dev mainIndex Since the process is asyncronous, the same deposit can be at a different index
+    // on the main net and on the sidechain. This guarantees alignment
     uint16 mainIndex;
-    // more space available
-    // @dev stake weight
-
-    // TODO see if we can optimize with lower storage size; uint128 or less
-    // @dev side token amount staked
-    uint256 tokenAmount;
-    // @dev stake weight
-    uint256 weight;
+    // @dev pool token amount staked
+    uint128 tokenAmount; //
+    // @dev when claimed rewards last time
+    uint32 lastRewardsAt;
+    // @dev rewards ratio when staked
+    uint32 rewardsFactor;
   }
 
   /// @dev Data structure representing token holder using a pool
   struct User {
     // @dev Total blueprints staked
     uint16 blueprintsAmount;
-    // TODO as above, see if possible to optimize storage
     // @dev Total staked amount
     uint256 tokenAmount;
-    // @dev Total weight
-    uint256 totalWeight;
-    // @dev Auxiliary variable for yield calculation
-    uint256 subYieldRewards;
-    // @dev Auxiliary variable for vault rewards calculation
-    uint256 subVaultRewards;
     Deposit[] deposits;
   }
+
+  struct Conf {
+    uint16 maximumLockupTime;
+    uint32 poolInitAt; // the moment that the pool start operating, i.e., when initPool is first launched
+    uint32 rewardsFactor; // initial ratio, decaying every decayInterval of a decayFactor
+    uint32 decayInterval; // ex. 7 * 24 * 3600, 7 days
+    uint16 decayFactor; // ex. 9850 >> decays of 1.5% every 7 days
+    uint32 lastRatioUpdateAt;
+    uint16 swapFactor;
+    uint16 stakeFactor;
+  }
+
+  function initPool(
+    uint32 rewardsFactor_,
+    uint32 decayInterval_,
+    uint16 decayFactor_,
+    uint16 swapFactor_,
+    uint16 stakeFactor_
+  ) external;
+
+  function multiplier() external pure returns (uint256);
+
+  function lockupTime(Deposit memory deposit) external view returns (uint256);
+
+  function yieldWeight(Deposit memory deposit) external view returns (uint256);
 
   /**
    * @notice Converts the input payload to the transfer payload
@@ -61,7 +76,9 @@ interface ISidePool {
 
   function canUnstakeWithoutTax(address user, uint256 mainIndex) external view returns (bool);
 
-  function getDepositIndexByOriginalIndex(address user, uint256 mainIndex) external view returns (uint256);
+  function getDepositIndexByMainIndex(address user, uint256 mainIndex) external view returns (uint256);
+
+  function withdrawPenalties(uint256 amount, address beneficiary) external;
 
   // pool functions
 
@@ -80,17 +97,15 @@ interface ISidePool {
   //  function balanceOf(address _user) external view returns (uint256);
   //
   //  function stake(
-  //    uint256 _amount,
-  //    uint64 _lockedUntil,
-  //    bool useSSYN
+  //    uint256 amount,
+  //    uint64 lockedUntil
   //  ) external;
-  //
+
   //  function unstake(
-  //    uint256 _depositId,
-  //    uint256 _amount,
-  //    bool useSSYN
+  //    uint256 depositIndex,
+  //    uint256 amount
   //  ) external;
-  //
+
   //  function sync() external;
   //
   //  function processRewards(bool useSSYN) external;

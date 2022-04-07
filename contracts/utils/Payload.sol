@@ -3,7 +3,7 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
-import "./interfaces/IPayload.sol";
+import "../interfaces/IPayload.sol";
 
 import "hardhat/console.sol";
 
@@ -17,11 +17,11 @@ contract Payload is IPayload {
   // can be called by web2 app for consistency
   function serializeInput(
     uint256 tokenType, // 1 digit
-    uint256 lockupTime, // 4 digits
+    uint256 lockupTime, // 3 digits
     uint256 tokenAmountOrID
   ) public pure override returns (uint256) {
     validateInput(tokenType, lockupTime, tokenAmountOrID);
-    return tokenType.add(lockupTime.mul(10)).add(tokenAmountOrID.mul(1e5));
+    return tokenType.add(lockupTime.mul(10)).add(tokenAmountOrID.mul(1e4));
   }
 
   function validateInput(
@@ -35,7 +35,7 @@ contract Payload is IPayload {
     } else {
       require(tokenAmountOrID < 1e28, "Payload: tokenAmountOrID out of range");
     }
-    require(lockupTime < 1e4, "Payload: lockedTime out of range");
+    require(lockupTime < 1e3, "Payload: lockedTime out of range");
     return true;
   }
 
@@ -50,8 +50,8 @@ contract Payload is IPayload {
     )
   {
     tokenType = payload.mod(10);
-    lockupTime = payload.div(10).mod(1e4);
-    tokenAmountOrID = payload.div(1e5);
+    lockupTime = payload.div(10).mod(1e3);
+    tokenAmountOrID = payload.div(1e4);
   }
 
   function deserializeDeposit(uint256 payload)
