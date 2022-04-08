@@ -14,7 +14,10 @@ function normalize(val, n = 18) {
 describe("#SidePool", function () {
   let WormholeMock, wormhole;
   let SideToken, seed;
+  let coupon
   let SidePool, sidePool;
+  let SynCityCouponsSimplified, blueprint;
+  let week = 7 * 24 * 3600;
 
   let deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury;
 
@@ -23,17 +26,21 @@ describe("#SidePool", function () {
     [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
     SideToken = await ethers.getContractFactory("SideToken");
     SidePool  = await ethers.getContractFactory("SidePoolMock");
-  });
+    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");  });
 
   async function initAndDeploy(initPool) {
     seed = await upgrades.deployProxy(SideToken, ["Mobland SEED Token", "SEED"]);
     await seed.deployed();
 
-    sidePool = await upgrades.deployProxy(SidePool, [seed.address]);
+    blueprint = await SynCityCouponsSimplified.deploy(8000);
+    await blueprint.deployed()
+
+    sidePool = await upgrades.deployProxy(SidePool, [seed.address, blueprint.address]);
     await sidePool.deployed();
 
     if (initPool) {
-      await sidePool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100);
+      await sidePool.initPool(1000, week, 9800, 1000, 100, 800);
+      await sidePool.updateNftConf(100000, 1500, 120000, 150, 1000);
     }
   }
 
@@ -45,16 +52,16 @@ describe("#SidePool", function () {
     });
 
     it("should revert if already initiated", async function () {
-      await sidePool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100);
-      expect(sidePool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100)).revertedWith('SidePool: already initiated')
+      await sidePool.initPool(1000, week, 9800, 1000, 100, 800);
+      expect(sidePool.initPool(1000, week, 9800, 1000, 100, 1000)).revertedWith('SidePool: already initiated')
     });
 
     it("should revert if wrong parameters", async function () {
-      await assertThrowsMessage(sidePool.initPool(1000, 7 * 24 * 3600, 129800, 1000, 100),
+      await assertThrowsMessage(sidePool.initPool(1000, week, 129800, 1000, 100, 800),
           "value out-of-bounds")
-      await assertThrowsMessage(sidePool.initPool(1000, 1e12, 9800, 1000, 100),
+      await assertThrowsMessage(sidePool.initPool(1000, 1e12, 9800, 1000, 100, 800),
           "value out-of-bounds")
-      await assertThrowsMessage(sidePool.initPool(1e10, 7 * 24 * 3600, 9800, 1000, 100),
+      await assertThrowsMessage(sidePool.initPool(1e10, week, 9800, 1000, 100, 800),
           "value out-of-bounds")
     });
   });
@@ -72,7 +79,7 @@ describe("#SidePool", function () {
         lockedUntil,
         tokenAmountOrID: amount,
         tokenAmount: amount.mul(100),
-        unlockedAt: 0,
+        unstakedAt: 0,
         mainIndex: 0,
         lastRewardsAt: lockedFrom,
         rewardsFactor: 1000
@@ -111,7 +118,7 @@ describe("#SidePool", function () {
     });
   });
 
-  describe("#calculateRewards", async function () {
+  describe("#calculateUntaxedRewards", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
       const amount = ethers.utils.parseEther("9650");
@@ -123,7 +130,7 @@ describe("#SidePool", function () {
         lockedUntil,
         tokenAmountOrID: amount,
         tokenAmount: amount.mul(100),
-        unlockedAt: 0,
+        unstakedAt: 0,
         mainIndex: 0,
         lastRewardsAt: lockedFrom,
         rewardsFactor: 1000
@@ -133,8 +140,8 @@ describe("#SidePool", function () {
 
     it("should calculate the rewards", async function () {
       await increaseBlockTimestampBy(23 * 24 * 3600);
-      expect(await sidePool.calculateRewards(deposit))
-          .equal("1233055555555555555555555");
+      expect(await sidePool.calculateUntaxedRewards(deposit))
+          .equal("1840951944444444444444443");
     });
 
   });

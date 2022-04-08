@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
+// Author: Francesco Sullo <francesco@sullo.co>
+// (c) 2022+ SuperPower Labs Inc.
+
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
@@ -15,13 +18,14 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(address seed_) public initializer {
-    __SidePool_init(seed_);
+  function initialize(address seed_, address blueprint_) public initializer {
+    __SidePool_init(seed_, blueprint_);
     __WormholeTunnel_init();
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+  // UNSTAKE starts on the side chain and completes on the main chain
   function wormholeTransfer(
     // solhint-disable-next-line
     uint256 payload,
@@ -41,11 +45,13 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
+    require(tokenType < 4, "SeedFarm: blueprints' unstake does not require bridge");
     _unstake(tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     emit DepositUnlocked(_msgSender(), uint16(mainIndex));
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
+  // STAKE starts on the main chain and completes on the side chain
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
     _onWormholeCompleteTransfer(to, payload);

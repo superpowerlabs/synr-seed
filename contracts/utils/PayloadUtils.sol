@@ -1,27 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
+// Author: Francesco Sullo <francesco@sullo.co>
+// (c) 2022+ SuperPower Labs Inc.
+
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
-import "../interfaces/IPayload.sol";
+import "../interfaces/IPayloadUtils.sol";
 
 import "hardhat/console.sol";
 
-contract Payload is IPayload {
+contract PayloadUtils is IPayloadUtils {
   using SafeMathUpgradeable for uint256;
 
   function version() external pure virtual override returns (uint256) {
     return 1;
   }
 
-  // can be called by web2 app for consistency
+  // can be called by tests and web2 app
   function serializeInput(
     uint256 tokenType, // 1 digit
     uint256 lockupTime, // 3 digits
     uint256 tokenAmountOrID
-  ) public pure override returns (uint256) {
+  ) external pure override returns (uint256 payload) {
     validateInput(tokenType, lockupTime, tokenAmountOrID);
-    return tokenType.add(lockupTime.mul(10)).add(tokenAmountOrID.mul(1e4));
+    payload = tokenType.add(lockupTime.mul(10)).add(tokenAmountOrID.mul(1e4));
   }
 
   function validateInput(
@@ -29,13 +32,13 @@ contract Payload is IPayload {
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) public pure override returns (bool) {
-    require(tokenType < 3, "Payload: invalid token type");
-    if (tokenType == 2) {
-      require(tokenAmountOrID < 889, "Payload: Not a Mobland SYNR Pass token ID");
+    require(tokenType < 4, "PayloadUtils: invalid token type");
+    if (tokenType == 2 || tokenType == 3) {
+      require(tokenAmountOrID < 889, "PayloadUtils: Not a Mobland SYNR Pass token ID");
     } else {
-      require(tokenAmountOrID < 1e28, "Payload: tokenAmountOrID out of range");
+      require(tokenAmountOrID < 1e28, "PayloadUtils: tokenAmountOrID out of range");
     }
-    require(lockupTime < 1e3, "Payload: lockedTime out of range");
+    require(lockupTime < 1e3, "PayloadUtils: lockedTime out of range");
     return true;
   }
 
@@ -69,7 +72,7 @@ contract Payload is IPayload {
     tokenType = payload.mod(10);
     lockedFrom = payload.div(10).mod(1e10);
     lockedUntil = payload.div(1e11).mod(1e10);
-    mainIndex = getIndexFromPayload(payload);
+    mainIndex = payload.div(1e21).mod(1e5);
     tokenAmountOrID = payload.div(1e26);
   }
 

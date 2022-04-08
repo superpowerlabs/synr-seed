@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
+// Author: Francesco Sullo <francesco@sullo.co>
+// (c) 2022+ SuperPower Labs Inc.
+
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
@@ -27,7 +30,7 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-  // Stake/burn is done on chain A, SEED tokens are minted on chain B
+  // STAKE/BURN starts on the main chain and completes on the side chain
   function wormholeTransfer(
     uint256 payload,
     uint16 recipientChain,
@@ -39,7 +42,7 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
-  // Unstake is initiated on chain B and completed on chain A
+  // STAKE/BURN starts on the side chain and completes on the main chain
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
     _onWormholeCompleteTransfer(to, payload);
@@ -53,7 +56,7 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    require(tokenType > 0, "SynrBridge: sSYNR can't be unlocked");
+    require(tokenType > 0, "SynrBridge: sSYNR can't be unstaked");
     _unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 }
