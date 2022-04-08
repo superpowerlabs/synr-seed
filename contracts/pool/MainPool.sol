@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
+// Author: Francesco Sullo <francesco@sullo.co>
+// (c) 2022+ SuperPower Labs Inc.
+
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "../token/TokenReceiver.sol";
-import "../utils/Payload.sol";
+import "../utils/PayloadUtils.sol";
 import "../interfaces/IMainPool.sol";
 import "../token/SyndicateERC20.sol";
 import "../token/SyntheticSyndicateERC20.sol";
@@ -14,7 +17,7 @@ import "../token/SynCityPasses.sol";
 
 import "hardhat/console.sol";
 
-contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUpgradeable {
+contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, OwnableUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -26,7 +29,7 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
   SyntheticSyndicateERC20 public sSynr;
   SynCityPasses public pass;
 
-  uint256 public collectedPenalties;
+  uint256 public penalties;
 
   // solhint-disable-next-line
   function __MainPool_init(
@@ -59,10 +62,10 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
    * @return the payload, an encoded uint256
    */
   function fromDepositToTransferPayload(Deposit memory deposit) public pure override returns (uint256) {
-    require(deposit.tokenType < 3, "Payload: invalid token type");
-    require(deposit.lockedFrom < deposit.lockedUntil, "Payload: invalid interval");
-    require(deposit.lockedUntil < 1e10, "Payload: lockedTime out of range");
-    require(deposit.tokenAmountOrID < 1e28, "Payload: tokenAmountOrID out of range");
+    require(deposit.tokenType < 4, "PayloadUtils: invalid token type");
+    require(deposit.lockedFrom < deposit.lockedUntil, "PayloadUtils: invalid interval");
+    require(deposit.lockedUntil < 1e10, "PayloadUtils: lockedTime out of range");
+    require(deposit.tokenAmountOrID < 1e28, "PayloadUtils: tokenAmountOrID out of range");
     return
       uint256(deposit.tokenType)
         .add(uint256(deposit.lockedFrom).mul(10))
@@ -83,14 +86,14 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
     if (tokenType == 1) {
       users[user].synrAmount += uint96(tokenAmountOrID);
     } else if (tokenType == 2) {
-      users[user].passAmount += 1;
+      users[user].passAmount++;
     }
     Deposit memory deposit = Deposit({
       tokenType: uint8(tokenType),
       lockedFrom: uint32(lockedFrom),
       lockedUntil: uint32(lockedUntil),
       tokenAmountOrID: uint96(tokenAmountOrID),
-      unlockedAt: 0,
+      unstakedAt: 0,
       otherChain: otherChain,
       mainIndex: uint16(mainIndex)
     });
@@ -99,7 +102,7 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
   }
 
   function getDepositByIndex(address user, uint256 mainIndex) public view override returns (Deposit memory) {
-    require(users[user].deposits[mainIndex].lockedFrom > 0, "Payload: deposit not found");
+    require(users[user].deposits[mainIndex].lockedFrom > 0, "PayloadUtils: deposit not found");
     return users[user].deposits[mainIndex];
   }
 
@@ -123,15 +126,21 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
     // Contract must be approved as spender.
     // It will throw if the balance is insufficient
     if (tokenType == 0) {
-      // InputPool must be whitelisted to receive sSYNR
+      // MainPool must be whitelisted to receive sSYNR
       sSynr.transferFrom(_msgSender(), address(this), tokenAmountOrID);
     } else if (tokenType == 1) {
       synr.safeTransferFrom(_msgSender(), address(this), tokenAmountOrID, "");
     } else {
+      // tokenType 2 and 3
       // SYNR Pass
+      // MainPool must be approved to make the transfer
       pass.safeTransferFrom(_msgSender(), address(this), tokenAmountOrID);
     }
     return fromDepositToTransferPayload(_updateUser(_msgSender(), tokenType, lockupTime, tokenAmountOrID, otherChain));
+  }
+
+  function depositsLength(address user) public view returns (uint256) {
+    return users[user].deposits.length;
   }
 
   function _updateUser(
@@ -141,14 +150,15 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
     uint256 tokenAmountOrID,
     uint16 otherChain
   ) internal returns (Deposit memory) {
+    uint256 lockedUntil = tokenType == 1 || tokenType == 3 ? uint32(block.timestamp.add(lockupTime * 1 days)) : 0;
     Deposit memory deposit = _updateUserAndAddDeposit(
       user,
       tokenType,
       uint32(block.timestamp),
-      tokenType == 1 ? uint32(block.timestamp.add(lockupTime * 1 days)) : 0,
+      lockedUntil,
       tokenAmountOrID,
       otherChain,
-      users[user].deposits.length
+      depositsLength(user)
     );
     return deposit;
   }
@@ -161,7 +171,10 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal {
-    require(tokenType > 0, "MainPool: sSYNR can not be unlocked");
+    require(tokenType > 0, "MainPool: sSYNR can not be unstaked");
+    if (tokenType == 3) {
+      require(lockedUntil < block.timestamp, "MainPool: SYNR Pass cannot be early unstaked");
+    }
     if (tokenType == 1) {
       users[user].synrAmount = uint96(uint256(users[user].synrAmount).sub(tokenAmountOrID));
     } else {
@@ -174,9 +187,9 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
         uint256(deposit.lockedFrom) == lockedFrom &&
         uint256(deposit.lockedUntil) == lockedUntil &&
         uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
-      "MainPool: deposit not found"
+      "MainPool: inconsistent deposit"
     );
-    require(deposit.unlockedAt == 0, "MainPool: deposit already unlocked");
+    require(deposit.unstakedAt == 0, "MainPool: deposit already unstaked");
     if (tokenType == 2) {
       pass.safeTransferFrom(address(this), _msgSender(), uint256(tokenAmountOrID));
     } else {
@@ -184,10 +197,10 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
       uint256 amount = uint256(tokenAmountOrID).sub(penalty);
       synr.safeTransferFrom(address(this), user, amount, "");
       if (penalty > 0) {
-        collectedPenalties += penalty;
+        penalties += penalty;
       }
     }
-    deposit.unlockedAt = uint32(block.timestamp);
+    deposit.unstakedAt = uint32(block.timestamp);
     emit DepositUnlocked(user, uint16(mainIndex));
   }
 
@@ -221,11 +234,11 @@ contract MainPool is IMainPool, Payload, TokenReceiver, Initializable, OwnableUp
   }
 
   function withdrawPenalties(uint256 amount, address beneficiary) external override onlyOwner {
-    require(amount <= collectedPenalties, "MainPool: amount not available");
+    require(amount <= penalties, "MainPool: amount not available");
     if (amount == 0) {
-      amount = collectedPenalties;
+      amount = penalties;
     }
-    collectedPenalties -= amount;
+    penalties -= amount;
     synr.transferFrom(address(this), beneficiary, amount);
   }
 

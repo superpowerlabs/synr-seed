@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-interface IPayload {
+// Author: Francesco Sullo <francesco@sullo.co>
+// (c) 2022+ SuperPower Labs Inc.
+
+interface IPayloadUtils {
   function version() external pure returns (uint256);
 
   // can be called by web2 app for consistency

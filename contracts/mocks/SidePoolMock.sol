@@ -11,8 +11,8 @@ contract SidePoolMock is SidePool, UUPSUpgradeable {
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(address seed_) public initializer {
-    __SidePool_init(seed_);
+  function initialize(address seed_, address blueprint_) public initializer {
+    __SidePool_init(seed_, blueprint_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
