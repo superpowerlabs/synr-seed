@@ -23,7 +23,7 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
     __WormholeTunnel_init();
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal override(SidePool, WormholeTunnelUpgradeable) onlyOwner {}
 
   // UNSTAKE starts on the side chain and completes on the main chain
   function wormholeTransfer(
@@ -45,7 +45,7 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    require(tokenType < 4, "SeedFarm: blueprints' unstake does not require bridge");
+    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: blueprints' unstake does not require bridge");
     _unstake(tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     emit DepositUnlocked(_msgSender(), uint16(mainIndex));
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
@@ -58,6 +58,7 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
   }
 
   function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
+//    console.log(payload);
     (
       uint256 tokenType,
       uint256 lockedFrom,

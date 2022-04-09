@@ -28,7 +28,7 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
     __WormholeTunnel_init();
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal override(MainPool, WormholeTunnelUpgradeable) onlyOwner {}
 
   // STAKE/BURN starts on the main chain and completes on the side chain
   function wormholeTransfer(
@@ -56,7 +56,7 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    require(tokenType > 0, "SynrBridge: sSYNR can't be unstaked");
+    require(tokenType > S_SYNR_SWAP, "SynrBridge: sSYNR can't be unstaked");
     _unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 }

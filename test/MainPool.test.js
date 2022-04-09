@@ -11,16 +11,11 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe("#SynrBridge", function () {
-  let WormholeMock, wormhole;
+describe("#MainPool", function () {
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
-  let SynrBridge, synrBridge;
-  let SynrBridgeV2;
-  let SeedFarm, seedFarm;
-  let SideToken, seed;
+  let MainPool, mainPool;
   let SynCityPasses, pass;
-  let SynCityCouponsSimplified, blueprint;
 
   const BN = ethers.BigNumber.from;
 
@@ -31,13 +26,8 @@ describe("#SynrBridge", function () {
     [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
-    SynrBridge = await ethers.getContractFactory("SynrBridgeMock");
-    SynrBridgeV2 = await ethers.getContractFactory("SynrBridgeV2Mock");
-    SeedFarm = await ethers.getContractFactory("SeedFarmMock");
-    SideToken = await ethers.getContractFactory("SideToken");
-    WormholeMock = await ethers.getContractFactory("WormholeMock");
+    MainPool = await ethers.getContractFactory("MainPoolMock");
     SynCityPasses = await ethers.getContractFactory("SynCityPasses");
-    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
   });
 
   async function initAndDeploy() {
@@ -58,33 +48,11 @@ describe("#SynrBridge", function () {
     pass = await SynCityPasses.deploy(validator.address);
     await pass.deployed();
 
-    synrBridge = await upgrades.deployProxy(SynrBridge, [synr.address, sSynr.address, pass.address]);
-    await synrBridge.deployed();
+    mainPool = await upgrades.deployProxy(MainPool, [synr.address, sSynr.address, pass.address]);
+    await mainPool.deployed();
 
-    await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
-
-    seed = await upgrades.deployProxy(SideToken, ["Mobland SEED Token", "SEED"]);
-    await seed.deployed();
-
-    blueprint = await SynCityCouponsSimplified.deploy(8000);
-    await blueprint.deployed()
-
-    seedFarm = await upgrades.deployProxy(SeedFarm, [seed.address, blueprint.address]);
-    await seedFarm.deployed();
-    await seedFarm.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800);
-    await seedFarm.updateNftConf(100000, 1500, 120000, 150, 1000);
-
-    await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
-
-    wormhole = await WormholeMock.deploy();
-    await synrBridge.wormholeInit(2, wormhole.address);
-    await wormhole.deployed();
-
-    await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
-    await synrBridge.initPool(7, 4000);
-
-    await seedFarm.wormholeInit(4, wormhole.address);
-    await seedFarm.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
+    await sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+    await mainPool.initPool(7, 4000);
   }
 
   async function configure() {}
@@ -98,32 +66,27 @@ describe("#SynrBridge", function () {
       // console.log(await synr.balanceOf(user1.address))
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = await synrBridge.serializeInput(
+      const payload = await mainPool.serializeInput(
         1, // SYNR
         365, // 1 year
         amount
       );
       expect(payload).equal("100000000000000000000003651");
-      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
-      expect(
-        await synrBridge.connect(user1).wormholeTransfer(
-          payload,
-          4, // BSC
-          bytes32Address(user1.address),
-          1
-        )
-      )
-        .emit(synrBridge, "DepositSaved")
+      await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
+      expect(await mainPool.connect(user1).stake(payload, 4))
+        .emit(mainPool, "DepositSaved")
         .withArgs(user1.address, 0);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      const deposit = await synrBridge.getDepositByIndex(user1.address, 0);
+      const deposit = await mainPool.getDepositByIndex(user1.address, 0);
       // console.log(deposit.lockedFrom, deposit.lockedUntil);
-      const vestedPercentage = await synrBridge.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil)
+      const vestedPercentage = await mainPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil);
       expect(vestedPercentage).equal(50);
-      const unvested = ethers.BigNumber.from(deposit.tokenAmountOrID.toString()).mul(100 - vestedPercentage).div(100);
-      const percentage = (await synrBridge.conf()).earlyUnstakePenalty / 100;
+      const unvested = ethers.BigNumber.from(deposit.tokenAmountOrID.toString())
+        .mul(100 - vestedPercentage)
+        .div(100);
+      const percentage = (await mainPool.conf()).earlyUnstakePenalty / 100;
       const unvestedPenalty = unvested.mul(percentage).div(100);
-      expect(await synrBridge.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)).equal(unvestedPenalty);
+      expect(await mainPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)).equal(unvestedPenalty);
     });
   });
 
@@ -135,38 +98,24 @@ describe("#SynrBridge", function () {
     it("should return length of deposits", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "100000000000000000000003651"
-      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
-      expect(
-          await synrBridge.connect(user1).wormholeTransfer(
-              payload,
-              4, // BSC
-              bytes32Address(user1.address),
-              1
-          )
-      )
-          .emit(synrBridge, "DepositSaved")
-          .withArgs(user1.address, 0);
-      const lenght = await synrBridge.getDepositsLength(user1.address);
+      const payload = "100000000000000000000003651";
+      await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
+      expect(await mainPool.connect(user1).stake(payload, 4))
+        .emit(mainPool, "DepositSaved")
+        .withArgs(user1.address, 0);
+      const lenght = await mainPool.getDepositsLength(user1.address);
       expect(parseInt(lenght)).equal(1);
     });
 
     it("should return deposit by index", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "100000000000000000000003651"
-      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
-      expect(
-          await synrBridge.connect(user1).wormholeTransfer(
-              payload,
-              4, // BSC
-              bytes32Address(user1.address),
-              1
-          )
-      )
-          .emit(synrBridge, "DepositSaved")
-          .withArgs(user1.address, 0);
-      const deposit = await synrBridge.getDepositByIndex(user1.address, 0);
+      const payload = "100000000000000000000003651";
+      await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
+      expect(await mainPool.connect(user1).stake(payload, 4))
+        .emit(mainPool, "DepositSaved")
+        .withArgs(user1.address, 0);
+      const deposit = await mainPool.getDepositByIndex(user1.address, 0);
       expect(parseInt(deposit)).equal(1, deposit.lockedFrom, deposit.lockedUntil, 0, amount);
     });
   });
@@ -187,12 +136,12 @@ describe("#SynrBridge", function () {
       };
 
       const expected = BN(1)
-          .add(await BNMulBy(lockedFrom, 10))
-          .add(await BNMulBy(lockedUntil, 1, 11))
-          .add(await BNMulBy(0, 1, 21))
-          .add(await BNMulBy(amount, 1, 26));
-      const payload = await synrBridge.fromDepositToTransferPayload(deposit);
-      expect(payload).equal(expected)
+        .add(await BNMulBy(lockedFrom, 10))
+        .add(await BNMulBy(lockedUntil, 1, 11))
+        .add(await BNMulBy(0, 1, 21))
+        .add(await BNMulBy(amount, 1, 26));
+      const payload = await mainPool.fromDepositToTransferPayload(deposit);
+      expect(payload).equal(expected);
     });
 
     it("should throw for invalid token type", async function () {
@@ -208,7 +157,7 @@ describe("#SynrBridge", function () {
         otherChain: 4,
         mainIndex: 0,
       };
-      expect(synrBridge.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: invalid token type")
+      expect(mainPool.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: invalid token type");
     });
 
     it("should throw invalid interval", async function () {
@@ -224,7 +173,7 @@ describe("#SynrBridge", function () {
         otherChain: 4,
         mainIndex: 0,
       };
-      expect(synrBridge.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: invalid interval")
+      expect(mainPool.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: invalid interval");
     });
 
     it("should throw tokenAmount out of range", async function () {
@@ -240,7 +189,7 @@ describe("#SynrBridge", function () {
         otherChain: 4,
         mainIndex: 0,
       };
-      expect(synrBridge.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: tokenAmountOrID out of range")
+      expect(mainPool.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: tokenAmountOrID out of range");
     });
   });
 
@@ -252,28 +201,26 @@ describe("#SynrBridge", function () {
     it("should return updated user", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "100000000000000000000003651"
-      await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
+      const payload = "100000000000000000000003651";
+      await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
       expect(
-          await synrBridge.connect(user1).wormholeTransfer(
-              payload,
-              4, // BSC
-              bytes32Address(user1.address),
-              1
-          )
+        await mainPool.connect(user1).stake(
+          payload,
+          4 // BSC
+        )
       )
-          .emit(synrBridge, "DepositSaved")
-          .withArgs(user1.address, 0);
+        .emit(mainPool, "DepositSaved")
+        .withArgs(user1.address, 0);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      await synrBridge.updateUserAndAddDeposit(user1.address, 1, 1000000000, 3000000000, amount, 44, 0);
+      await mainPool.updateUserAndAddDeposit(user1.address, 1, 1000000000, 3000000000, amount, 44, 0);
       //Update user pushes new deposit, it therefore changes the index of the intended new update deposite to the last one in the list.
       //unsure if that is the intended behavior of UPDATE USER
-      const depositAfter = await synrBridge.getDepositByIndex(user1.address, 1);
+      const depositAfter = await mainPool.getDepositByIndex(user1.address, 1);
       expect(depositAfter.tokenType, depositAfter.lockedFrom, depositAfter.lockedUntil, depositAfter.otherChain).equal(
-          1,
-          1000000000,
-          3000000000,
-          44
+        1,
+        1000000000,
+        3000000000,
+        44
       );
     });
   });
