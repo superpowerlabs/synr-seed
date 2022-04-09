@@ -189,7 +189,9 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 boostedAmount = baseAmount;
     uint256 limit;
     if (user.passAmount > 0) {
-      limit = uint256(user.passAmount).mul(1e18).mul(nftConf.sPBoostLimit);
+      // if a SYNR Pass can boost 15000 SYNR (i.e., nftConf.sPBoostLimit)
+      // there is a potential limit that depends on how many pass you staked
+      limit = uint256(user.passAmount).mul(nftConf.sPBoostLimit).mul(1e18);
       if (limit < baseAmount) {
         baseAmount = limit;
       }
@@ -197,7 +199,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     }
     baseAmount = uint256(user.tokenAmount);
     if (user.blueprintsAmount > 0) {
-      limit = uint256(user.blueprintsAmount).mul(1e18).mul(nftConf.bPBoostLimit);
+      limit = uint256(user.blueprintsAmount).mul(nftConf.bPBoostLimit).mul(1e18);
       if (limit < boostedAmount) {
         baseAmount = limit;
       }
@@ -218,12 +220,12 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       user.deposits[i].lastRewardsAt = uint32(block.timestamp);
     }
     if (rewards > 0) {
-      rewards = rewards.mul(boostWeight(user_)).div(uint256(10000));
+      rewards = rewards.mul(boostWeight(user_)).div(10000);
       uint256 tax = calculateTaxOnRewards(rewards);
       rewardsToken.mint(user_, rewards.sub(tax));
       rewardsToken.mint(address(this), tax);
       taxes += tax;
-      emit RewardsCollected(user_, rewards);
+      emit RewardsCollected(user_, rewards.sub(tax));
     }
   }
 
@@ -234,7 +236,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       rewards += calculateUntaxedRewards(user.deposits[i], timestamp);
     }
     if (rewards > 0) {
-      rewards = rewards.mul(boostWeight(user_)).div(uint256(10000));
+      rewards = rewards.mul(boostWeight(user_)).div(10000);
     }
     return rewards;
   }
@@ -291,6 +293,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
       users[user_].blueprintsAmount++;
+      // SidePool must be approve to spend blueprints
       blueprint.safeTransferFrom(user_, address(this), tokenAmountOrID);
     }
     users[user_].tokenAmount = uint96(uint256(users[user_].tokenAmount).add(tokenAmount));
@@ -314,10 +317,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   }
 
   function stakeBlueprint(uint256 tokenId) external override {
-    _stake(_msgSender(), 4, block.timestamp, 0, type(uint16).max, tokenId);
+    _stake(_msgSender(), BLUEPRINT_STAKE_FOR_BOOST, block.timestamp, 0, type(uint16).max, tokenId);
   }
 
-  function unstakeBlueprint(uint256 tokenId) external override {
+  function unstakeBlueprint(uint256 tokenId) public override {
     User storage user = users[_msgSender()];
     for (uint256 i; i < user.deposits.length; i++) {
       if (uint256(user.deposits[i].tokenAmountOrID) == tokenId && user.deposits[i].tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
@@ -390,14 +393,14 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass used as SYNR cannot be early unstaked");
     }
     _collectRewards(_msgSender());
-    mainIndex = getDepositIndexByMainIndex(_msgSender(), mainIndex);
-    Deposit storage deposit = users[_msgSender()].deposits[mainIndex];
+    uint index = getDepositIndexByMainIndex(_msgSender(), mainIndex);
+    Deposit storage deposit = users[_msgSender()].deposits[index];
     require(
       uint256(deposit.tokenType) == tokenType &&
       uint256(deposit.lockedFrom) == lockedFrom &&
       uint256(deposit.lockedUntil) == lockedUntil &&
       uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
-      "SidePool: deposit not found"
+      "SidePool: inconsistent deposit"
     );
     if (tokenType == SYNR_STAKE) {
       uint256 vestedPercentage = getVestedPercentage(
@@ -419,7 +422,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       users[_msgSender()].passAmount--;
     }
     deposit.unstakedAt = uint32(block.timestamp);
-    emit DepositUnlocked(_msgSender(), uint16(mainIndex));
+    emit DepositUnlocked(_msgSender(), uint16(index));
   }
 
   function withdrawPenaltiesOrTaxes(

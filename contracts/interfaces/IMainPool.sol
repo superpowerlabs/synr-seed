@@ -10,7 +10,7 @@ interface IMainPool {
   event DepositUnlocked(address user, uint16 mainIndex);
 
   struct Deposit {
-    // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
+    // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass...
     uint8 tokenType;
     // @dev locking period - from
     uint32 lockedFrom;

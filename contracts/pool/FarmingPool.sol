@@ -44,11 +44,11 @@ contract FarmingPool is IFarmingPool, SidePool {
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal override {
-    require(tokenType == SYNR_STAKE || tokenType == BLUEPRINT_STAKE_FOR_BOOST, "FarmingPool: invalid tokenType");
+    require(tokenType == SEED_STAKE || tokenType == BLUEPRINT_STAKE_FOR_BOOST, "FarmingPool: invalid tokenType");
     updateRatio();
     _collectRewards(user_);
     uint256 tokenAmount;
-    if (tokenType == SYNR_STAKE) {
+    if (tokenType == SEED_STAKE) {
       tokenAmount = tokenAmountOrID.mul(conf.stakeFactor);
       stakedToken.transferFrom(user_, address(this), tokenAmount);
     } else {
@@ -78,7 +78,7 @@ contract FarmingPool is IFarmingPool, SidePool {
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal override {
-    require(tokenType == SYNR_STAKE, "SidePool: wrong tokenType");
+    require(tokenType == SEED_STAKE, "SidePool: wrong tokenType");
     mainIndex = getDepositIndexByMainIndex(_msgSender(), mainIndex);
     Deposit storage deposit = users[_msgSender()].deposits[mainIndex];
     require(

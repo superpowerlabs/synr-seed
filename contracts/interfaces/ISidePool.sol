@@ -59,7 +59,7 @@ interface ISidePool {
 
   struct NftConf {
     uint32 synrEquivalent; // 100,000
-    uint16 sPBoostFactor; // 1250 > 12.5%
+    uint16 sPBoostFactor; // 12500 > 112.5% > +12.5% of boost
     uint32 sPBoostLimit;
     uint16 bPBoostFactor;
     uint32 bPBoostLimit;
