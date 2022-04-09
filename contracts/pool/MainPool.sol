@@ -5,6 +5,7 @@ pragma solidity ^0.8.2;
 // (c) 2022+ SuperPower Labs Inc.
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
@@ -14,10 +15,11 @@ import "../interfaces/IMainPool.sol";
 import "../token/SyndicateERC20.sol";
 import "../token/SyntheticSyndicateERC20.sol";
 import "../token/SynCityPasses.sol";
+import "./Constants.sol";
 
 import "hardhat/console.sol";
 
-contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, OwnableUpgradeable {
+contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -30,6 +32,9 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   SynCityPasses public pass;
 
   uint256 public penalties;
+
+  //    /// @custom:oz-upgrades-unsafe-allow constructor
+  //    constructor() initializer {}
 
   // solhint-disable-next-line
   function __MainPool_init(
@@ -45,6 +50,8 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     sSynr = SyntheticSyndicateERC20(sSynr_);
     pass = SynCityPasses(pass_);
   }
+
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
   function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external override onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "MainPool: contract cannot receive sSYNR");
@@ -62,9 +69,9 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
    * @return the payload, an encoded uint256
    */
   function fromDepositToTransferPayload(Deposit memory deposit) public pure override returns (uint256) {
-    require(deposit.tokenType < 4, "PayloadUtils: invalid token type");
-    require(deposit.lockedFrom < deposit.lockedUntil, "PayloadUtils: invalid interval");
+    require(deposit.tokenType <= SYNR_PASS_STAKE_FOR_SEEDS, "PayloadUtils: invalid token type");
     require(deposit.lockedUntil < 1e10, "PayloadUtils: lockedTime out of range");
+    require(deposit.lockedUntil == 0 || deposit.lockedFrom < deposit.lockedUntil, "PayloadUtils: invalid interval");
     require(deposit.tokenAmountOrID < 1e28, "PayloadUtils: tokenAmountOrID out of range");
     return
       uint256(deposit.tokenType)
@@ -83,9 +90,9 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     uint16 otherChain,
     uint256 mainIndex
   ) internal returns (Deposit memory) {
-    if (tokenType == 1) {
+    if (tokenType == SYNR_STAKE) {
       users[user].synrAmount += uint96(tokenAmountOrID);
-    } else if (tokenType == 2) {
+    } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       users[user].passAmount++;
     }
     Deposit memory deposit = Deposit({
@@ -117,7 +124,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     uint16 otherChain
   ) internal returns (uint256) {
     validateInput(tokenType, lockupTime, tokenAmountOrID);
-    if (tokenType == 1) {
+    if (tokenType == SYNR_STAKE || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(
         lockupTime > conf.minimumLockupTime - 1 && lockupTime < conf.maximumLockupTime + 1,
         "MainPool: invalid lockupTime type"
@@ -125,10 +132,10 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     }
     // Contract must be approved as spender.
     // It will throw if the balance is insufficient
-    if (tokenType == 0) {
+    if (tokenType == S_SYNR_SWAP) {
       // MainPool must be whitelisted to receive sSYNR
       sSynr.transferFrom(_msgSender(), address(this), tokenAmountOrID);
-    } else if (tokenType == 1) {
+    } else if (tokenType == SYNR_STAKE) {
       synr.safeTransferFrom(_msgSender(), address(this), tokenAmountOrID, "");
     } else {
       // tokenType 2 and 3
@@ -150,7 +157,9 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     uint256 tokenAmountOrID,
     uint16 otherChain
   ) internal returns (Deposit memory) {
-    uint256 lockedUntil = tokenType == 1 || tokenType == 3 ? uint32(block.timestamp.add(lockupTime * 1 days)) : 0;
+    uint256 lockedUntil = tokenType == SYNR_STAKE || tokenType == SYNR_PASS_STAKE_FOR_SEEDS
+      ? uint32(block.timestamp.add(lockupTime * 1 days))
+      : 0;
     Deposit memory deposit = _updateUserAndAddDeposit(
       user,
       tokenType,
@@ -171,11 +180,11 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal {
-    require(tokenType > 0, "MainPool: sSYNR can not be unstaked");
-    if (tokenType == 3) {
+    require(tokenType > S_SYNR_SWAP, "MainPool: sSYNR can not be unstaked");
+    if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "MainPool: SYNR Pass cannot be early unstaked");
     }
-    if (tokenType == 1) {
+    if (tokenType == SYNR_STAKE) {
       users[user].synrAmount = uint96(uint256(users[user].synrAmount).sub(tokenAmountOrID));
     } else {
       users[user].passAmount = uint16(uint256(users[user].passAmount).sub(1));
@@ -190,7 +199,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       "MainPool: inconsistent deposit"
     );
     require(deposit.unstakedAt == 0, "MainPool: deposit already unstaked");
-    if (tokenType == 2) {
+    if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       pass.safeTransferFrom(address(this), _msgSender(), uint256(tokenAmountOrID));
     } else {
       uint256 penalty = calculatePenaltyForEarlyUnstake(block.timestamp, deposit);
@@ -209,9 +218,15 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     uint256 lockedFrom,
     uint256 lockedUntil
   ) public view override returns (uint256) {
+    if (lockedUntil == 0) {
+      return 10000;
+    }
     uint256 lockupTime = lockedUntil.sub(lockedFrom);
+    if (lockupTime == 0) {
+      return 10000;
+    }
     uint256 vestedTime = when.sub(lockedFrom);
-    return vestedTime.mul(100).div(lockupTime);
+    return vestedTime.mul(10000).div(lockupTime);
   }
 
   function calculatePenaltyForEarlyUnstake(uint256 when, Deposit memory deposit) public view override returns (uint256) {
@@ -219,7 +234,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       return 0;
     }
     uint256 vestedPercentage = getVestedPercentage(when, uint256(deposit.lockedFrom), uint256(deposit.lockedUntil));
-    uint256 unvestedAmount = uint256(deposit.tokenAmountOrID).mul(vestedPercentage).div(100);
+    uint256 unvestedAmount = uint256(deposit.tokenAmountOrID).mul(vestedPercentage).div(10000);
     return unvestedAmount.mul(conf.earlyUnstakePenalty).div(10000);
   }
 

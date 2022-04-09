@@ -9,12 +9,18 @@ function normalize(val, n = 18) {
   return "" + val + "0".repeat(n);
 }
 
+const S_SYNR_SWAP = 0;
+const SYNR_STAKE = 1;
+const SYNR_PASS_STAKE_FOR_BOOST = 2;
+const SYNR_PASS_STAKE_FOR_SEEDS = 3;
+const BLUEPRINT_STAKE_FOR_BOOST = 4;
+
 // test unit coming soon
 
 describe("#SidePool", function () {
   let WormholeMock, wormhole;
   let SideToken, seed;
-  let coupon
+  let coupon;
   let SidePool, sidePool;
   let SynCityCouponsSimplified, blueprint;
   let week = 7 * 24 * 3600;
@@ -25,15 +31,16 @@ describe("#SidePool", function () {
     initEthers(ethers);
     [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
     SideToken = await ethers.getContractFactory("SideToken");
-    SidePool  = await ethers.getContractFactory("SidePoolMock");
-    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");  });
+    SidePool = await ethers.getContractFactory("SidePoolMock");
+    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
+  });
 
   async function initAndDeploy(initPool) {
     seed = await upgrades.deployProxy(SideToken, ["Mobland SEED Token", "SEED"]);
     await seed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);
-    await blueprint.deployed()
+    await blueprint.deployed();
 
     sidePool = await upgrades.deployProxy(SidePool, [seed.address, blueprint.address]);
     await sidePool.deployed();
@@ -44,7 +51,7 @@ describe("#SidePool", function () {
     }
   }
 
-  let deposit
+  let deposit;
 
   describe("#initPool", async function () {
     beforeEach(async function () {
@@ -53,16 +60,13 @@ describe("#SidePool", function () {
 
     it("should revert if already initiated", async function () {
       await sidePool.initPool(1000, week, 9800, 1000, 100, 800);
-      expect(sidePool.initPool(1000, week, 9800, 1000, 100, 1000)).revertedWith('SidePool: already initiated')
+      expect(sidePool.initPool(1000, week, 9800, 1000, 100, 1000)).revertedWith("SidePool: already initiated");
     });
 
     it("should revert if wrong parameters", async function () {
-      await assertThrowsMessage(sidePool.initPool(1000, week, 129800, 1000, 100, 800),
-          "value out-of-bounds")
-      await assertThrowsMessage(sidePool.initPool(1000, 1e12, 9800, 1000, 100, 800),
-          "value out-of-bounds")
-      await assertThrowsMessage(sidePool.initPool(1e10, week, 9800, 1000, 100, 800),
-          "value out-of-bounds")
+      await assertThrowsMessage(sidePool.initPool(1000, week, 129800, 1000, 100, 800), "value out-of-bounds");
+      await assertThrowsMessage(sidePool.initPool(1000, 1e12, 9800, 1000, 100, 800), "value out-of-bounds");
+      await assertThrowsMessage(sidePool.initPool(1e10, week, 9800, 1000, 100, 800), "value out-of-bounds");
     });
   });
 
@@ -74,7 +78,7 @@ describe("#SidePool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: 1,
+        tokenType: SYNR_STAKE,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -82,7 +86,7 @@ describe("#SidePool", function () {
         unstakedAt: 0,
         mainIndex: 0,
         lastRewardsAt: lockedFrom,
-        rewardsFactor: 1000
+        rewardsFactor: 1000,
       };
     });
 
@@ -97,8 +101,8 @@ describe("#SidePool", function () {
     });
 
     it("should calculate the yield weight", async function () {
-      // 1496 means a weight of 1.496
-      expect(await sidePool.yieldWeight(deposit)).equal(1493);
+      // 14962 means a weight of 1.4962
+      expect(await sidePool.yieldWeight(deposit)).equal(14931);
     });
   });
 
@@ -125,25 +129,22 @@ describe("#SidePool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: 1,
+        tokenType: SYNR_STAKE,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
-        tokenAmount: amount.mul(100),
         unstakedAt: 0,
         mainIndex: 0,
+        tokenAmount: amount.mul(100),
         lastRewardsAt: lockedFrom,
-        rewardsFactor: 1000
+        rewardsFactor: 1000,
       };
-
     });
 
     it("should calculate the rewards", async function () {
-      await increaseBlockTimestampBy(23 * 24 * 3600);
-      expect(await sidePool.calculateUntaxedRewards(deposit))
-          .equal("1840951944444444444444443");
+      await increaseBlockTimestampBy(21 * 24 * 3600);
+      expect(await sidePool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("1680981749999999999999999");
     });
-
   });
 
   describe("#updateRatio", async function () {

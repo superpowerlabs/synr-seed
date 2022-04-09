@@ -17,19 +17,20 @@ contract TokenReceiver is IERC20Receiver, IERC721ReceiverUpgradeable {
     // solhint-disable-next-line
     bytes calldata _data
   ) external pure override returns (bytes4) {
-    return 0x4fc35859;
+    return this.onERC20Received.selector;
   }
 
   function onERC721Received(
-    // solhint-disable-next-line
+  // solhint-disable-next-line
     address operator,
-    // solhint-disable-next-line
+  // solhint-disable-next-line
     address from,
-    // solhint-disable-next-line
+  // solhint-disable-next-line
     uint256 tokenId,
-    // solhint-disable-next-line
+  // solhint-disable-next-line
     bytes calldata data
-  ) external override returns (bytes4) {
-    return 0xf0b9e5ba;
+  ) public override returns (bytes4) {
+    return this.onERC721Received.selector;
   }
+
 }

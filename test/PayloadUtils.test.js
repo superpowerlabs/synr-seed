@@ -52,7 +52,7 @@ describe("#PayloadUtils", function () {
 
     it("should throw not a mobland pass", async function () {
       const amount = ethers.utils.parseEther("10000");
-      payloadUtils.serializeInput
+      payloadUtils.serializeInput;
       expect(payloadUtils.serializeInput(2, 365, amount)).revertedWith("PayloadUtils: Not a Mobland SYNR Pass token ID");
     });
 
@@ -78,13 +78,13 @@ describe("#PayloadUtils", function () {
       const amount = ethers.utils.parseEther("10000");
 
       const payload = await payloadUtils.serializeInput(
-        1, // SYNR
+        2, // SYNR
         365, // 1 year
-        amount
+        200
       );
       const deserialize = await payloadUtils.deserializeInput(payload);
 
-      expect(parseInt(deserialize)).equal(1, 365, amount);
+      expect(parseInt(deserialize)).equal(2, 365, amount);
     });
 
     // TODO add a fake payload and verify if it fails
@@ -96,29 +96,22 @@ describe("#PayloadUtils", function () {
     });
 
     it("should deserialize deposit", async function () {
-
       const deposit = {
         tokenType: 2,
         lockedFrom: await getTimestamp(),
-        lockedUntil: await getTimestamp() + 3600000,
-        tokenAmountOrID: ethers.utils.parseEther('1000'),
-        mainIndex: 0
+        lockedUntil: (await getTimestamp()) + 3600000,
+        tokenAmountOrID: ethers.utils.parseEther("1000"),
+        mainIndex: 0,
       };
 
       const payload = await payloadUtils.fromDepositToTransferPayload(deposit);
-      const [
-        tokenType,
-        lockedFrom,
-        lockedUntil,
-        mainIndex,
-        tokenAmountOrID
-      ] = await payloadUtils.deserializeDeposit(payload);
+      const [tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID] = await payloadUtils.deserializeDeposit(payload);
 
-      expect(tokenType).equal(deposit.tokenType)
-      expect(lockedFrom).equal(deposit.lockedFrom)
-      expect(lockedUntil).equal(deposit.lockedUntil)
-      expect(mainIndex).equal(deposit.mainIndex)
-      expect(tokenAmountOrID).equal(deposit.tokenAmountOrID)
+      expect(tokenType).equal(deposit.tokenType);
+      expect(lockedFrom).equal(deposit.lockedFrom);
+      expect(lockedUntil).equal(deposit.lockedUntil);
+      expect(mainIndex).equal(deposit.mainIndex);
+      expect(tokenAmountOrID).equal(deposit.tokenAmountOrID);
     });
   });
 });

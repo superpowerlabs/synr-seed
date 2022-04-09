@@ -31,9 +31,9 @@ const Helpers = {
   async BNMulBy(param, num = 1, repeat = 0) {
     const BN = ethers.BigNumber.from;
     if (repeat) {
-      return BN(param.toString()).mul(BN(num + "0".repeat(repeat)))
+      return BN(param.toString()).mul(BN(num + "0".repeat(repeat)));
     }
-    return BN(param.toString()).mul(num)
+    return BN(param.toString()).mul(num);
   },
 
   async increaseBlockTimestampBy(offset) {
