@@ -27,7 +27,8 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   Conf public conf;
   NftConf public nftConf;
 
-  SideToken public poolToken;
+  SideToken public rewardsToken;
+  SideToken public stakedToken;
   SynCityCouponsSimplified public blueprint;
 
   uint256 public penalties;
@@ -37,11 +38,14 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   //  constructor() initializer {}
 
   // solhint-disable-next-line
-  function __SidePool_init(address poolToken_, address blueprint_) public initializer {
+  function __SidePool_init(address stakedToken_, address rewardsToken_, address blueprint_) public initializer {
     __Ownable_init();
-    require(poolToken_.isContract(), "SEED not a contract");
-    require(blueprint_.isContract(), "Blueprint not a contract");
-    poolToken = SideToken(poolToken_);
+    require(stakedToken_.isContract(), "SidePool: stakedToken not a contract");
+    require(rewardsToken_.isContract(), "SidePool: rewardsToken not a contract");
+    require(blueprint_.isContract(), "SidePooL: Blueprint not a contract");
+    // in SeedFarm, stakedToken and rewardsToken are same token, SEED
+    stakedToken = SideToken(stakedToken_);
+    rewardsToken = SideToken(rewardsToken_);
     blueprint = SynCityCouponsSimplified(blueprint_);
   }
 
@@ -129,21 +133,17 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     conf.lastRatioUpdateAt = uint32(block.timestamp);
   }
 
-  function shouldUpdateRatio() public view returns (bool) {
+  function shouldUpdateRatio() public view override returns (bool) {
     return
       block.timestamp.sub(conf.poolInitAt).div(conf.decayInterval) >
       uint256(conf.lastRatioUpdateAt).sub(conf.poolInitAt).div(conf.decayInterval);
-  }
-
-  function multiplier() public pure override returns (uint256) {
-    return 1e9;
   }
 
   function lockupTime(Deposit memory deposit) public view override returns (uint256) {
     return uint256(deposit.lockedUntil).sub(deposit.lockedFrom).div(1 days);
   }
 
-  function updateRatio() public {
+  function updateRatio() public override {
     if (shouldUpdateRatio()) {
       uint256 count = block.timestamp.sub(conf.poolInitAt).div(conf.decayInterval) -
         uint256(conf.lastRatioUpdateAt).sub(conf.poolInitAt).div(conf.decayInterval);
@@ -160,19 +160,14 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return uint256(10000).add(lockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
   }
 
-  function calculateUntaxedRewards(Deposit memory deposit, uint256 timestamp) public view returns (uint256) {
+  function calculateUntaxedRewards(Deposit memory deposit, uint256 timestamp) public view override returns (uint256) {
     if (deposit.tokenAmount == 0) {
       return 0;
     }
     uint256 lockedUntil = uint256(deposit.lockedUntil);
     uint256 now_ = lockedUntil > timestamp ? timestamp : lockedUntil;
-//    console.log("------");
-//    console.log(uint(deposit.rewardsFactor));
-//    console.log(uint(deposit.lastRewardsAt));
-//    console.log(now_.sub(deposit.lastRewardsAt));
-//    console.log(lockedUntil.sub(deposit.lockedFrom));
-//    console.log(yieldWeight(deposit));
-    return uint256(deposit.tokenAmount)
+    return
+      uint256(deposit.tokenAmount)
         .mul(deposit.rewardsFactor)
         .mul(now_.sub(deposit.lastRewardsAt))
         .div(lockedUntil.sub(deposit.lockedFrom))
@@ -180,14 +175,14 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
         .div(1000000);
   }
 
-  function calculateTaxOnRewards(uint256 rewards) public view returns (uint256) {
+  function calculateTaxOnRewards(uint256 rewards) public view override returns (uint256) {
     return rewards.mul(conf.taxPoints).div(10000);
   }
 
-  function boostWeight(address user_) public view returns (uint256) {
+  function boostWeight(address user_) public view override returns (uint256) {
     User storage user = users[user_];
     uint256 baseAmount = uint256(user.tokenAmount);
-    uint boost = 10000;
+    uint256 boost = 10000;
     if (baseAmount == 0) {
       return boost;
     }
@@ -211,7 +206,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return boost.mul(boostedAmount).div(user.tokenAmount);
   }
 
-  function collectRewards() public {
+  function collectRewards() public override {
     _collectRewards(_msgSender());
   }
 
@@ -223,22 +218,23 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       user.deposits[i].lastRewardsAt = uint32(block.timestamp);
     }
     if (rewards > 0) {
-      rewards = rewards.mul(boostWeight(user_)).div(uint(10000));
+      rewards = rewards.mul(boostWeight(user_)).div(uint256(10000));
       uint256 tax = calculateTaxOnRewards(rewards);
-      poolToken.mint(user_, rewards.sub(tax));
-      poolToken.mint(address(this), tax);
+      rewardsToken.mint(user_, rewards.sub(tax));
+      rewardsToken.mint(address(this), tax);
       taxes += tax;
+      emit RewardsCollected(user_, rewards);
     }
   }
 
-  function untaxedPendingRewards(address user_, uint256 timestamp) external view returns (uint256) {
+  function untaxedPendingRewards(address user_, uint256 timestamp) external view override returns (uint256) {
     User storage user = users[user_];
     uint256 rewards;
     for (uint256 i = 0; i < user.deposits.length; i++) {
       rewards += calculateUntaxedRewards(user.deposits[i], timestamp);
     }
     if (rewards > 0) {
-      rewards = rewards.mul(boostWeight(user_)).div(uint(10000));
+      rewards = rewards.mul(boostWeight(user_)).div(uint256(10000));
     }
     return rewards;
   }
@@ -277,22 +273,22 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 lockedUntil,
     uint256 mainIndex,
     uint256 tokenAmountOrID
-  ) internal {
+  ) internal virtual {
     require(tokenType <= BLUEPRINT_STAKE_FOR_BOOST, "SidePool: invalid tokenType");
     updateRatio();
     _collectRewards(user_);
     uint256 tokenAmount;
     if (tokenType == S_SYNR_SWAP) {
       tokenAmount = tokenAmountOrID.mul(conf.swapFactor);
-      poolToken.mint(address(this), tokenAmount);
+      stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_STAKE) {
       tokenAmount = tokenAmountOrID.mul(conf.stakeFactor);
-      poolToken.mint(address(this), tokenAmount);
+      stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
       users[user_].passAmount++;
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       tokenAmount = uint256(nftConf.synrEquivalent).mul(conf.stakeFactor);
-      poolToken.mint(address(this), tokenAmount);
+      stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
       users[user_].blueprintsAmount++;
       blueprint.safeTransferFrom(user_, address(this), tokenAmountOrID);
@@ -314,13 +310,14 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       rewardsFactor: conf.rewardsFactor
     });
     users[user_].deposits.push(deposit);
+    emit DepositSaved(user_, uint16(mainIndex));
   }
 
-  function stakeBlueprint(uint256 tokenId) external {
+  function stakeBlueprint(uint256 tokenId) external override {
     _stake(_msgSender(), 4, block.timestamp, 0, type(uint16).max, tokenId);
   }
 
-  function unstakeBlueprint(uint256 tokenId) external {
+  function unstakeBlueprint(uint256 tokenId) external override {
     User storage user = users[_msgSender()];
     for (uint256 i; i < user.deposits.length; i++) {
       if (uint256(user.deposits[i].tokenAmountOrID) == tokenId && user.deposits[i].tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
@@ -336,7 +333,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 when,
     uint256 lockedFrom,
     uint256 lockedUntil
-  ) public view returns (uint256) {
+  ) public view override returns (uint256) {
     if (lockedUntil == 0) {
       return 10000;
     }
@@ -350,7 +347,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return vestedTime.mul(10000).div(lockupTime);
   }
 
-  function unstakeIfSSynr(uint256 depositIndex) external {
+  function unstakeIfSSynr(uint256 depositIndex) external override {
     Deposit storage deposit = users[_msgSender()].deposits[depositIndex];
     require(deposit.tokenType == S_SYNR_SWAP, "SidePool: not a sSYNR > SEED swap");
     _collectRewards(_msgSender());
@@ -358,9 +355,9 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       uint256 vestedPercentage = getVestedPercentage(block.timestamp, deposit.lockedFrom, deposit.lockedUntil);
       uint256 unstakedAmount = uint256(deposit.tokenAmount).mul(vestedPercentage).div(10000);
       penalties += uint256(deposit.tokenAmount).sub(unstakedAmount);
-      poolToken.transfer(_msgSender(), unstakedAmount);
+      stakedToken.transfer(_msgSender(), unstakedAmount);
     } else {
-      poolToken.transfer(_msgSender(), uint256(deposit.tokenAmount));
+      stakedToken.transfer(_msgSender(), uint256(deposit.tokenAmount));
     }
     deposit.unstakedAt = uint32(block.timestamp);
   }
@@ -387,7 +384,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 lockedUntil,
     uint256 mainIndex,
     uint256 tokenAmountOrID
-  ) internal {
+  ) internal virtual {
     require(tokenType > S_SYNR_SWAP, "SidePool: sSYNR cannot be unstaked");
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass used as SYNR cannot be early unstaked");
@@ -397,9 +394,9 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     Deposit storage deposit = users[_msgSender()].deposits[mainIndex];
     require(
       uint256(deposit.tokenType) == tokenType &&
-        uint256(deposit.lockedFrom) == lockedFrom &&
-        uint256(deposit.lockedUntil) == lockedUntil &&
-        uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
+      uint256(deposit.lockedFrom) == lockedFrom &&
+      uint256(deposit.lockedUntil) == lockedUntil &&
+      uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
       "SidePool: deposit not found"
     );
     if (tokenType == SYNR_STAKE) {
@@ -415,13 +412,14 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       } else {
         unstakedAmount = uint256(deposit.tokenAmount);
       }
-      poolToken.transfer(_msgSender(), unstakedAmount);
+      stakedToken.transfer(_msgSender(), unstakedAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      poolToken.transfer(_msgSender(), deposit.tokenAmount);
+      stakedToken.transfer(_msgSender(), deposit.tokenAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
       users[_msgSender()].passAmount--;
     }
     deposit.unstakedAt = uint32(block.timestamp);
+    emit DepositUnlocked(_msgSender(), uint16(mainIndex));
   }
 
   function withdrawPenaltiesOrTaxes(
@@ -434,7 +432,12 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     if (amount == 0) {
       amount = available;
     }
-    available -= amount;
-    poolToken.transfer(beneficiary, amount);
+    if (what == 1) {
+      penalties -= amount;
+      stakedToken.transfer(beneficiary, amount);
+    } else {
+      taxes -= amount;
+      rewardsToken.transfer(beneficiary, amount);
+    }
   }
 }

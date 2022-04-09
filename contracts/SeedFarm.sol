@@ -19,8 +19,9 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
   constructor() initializer {}
 
   function initialize(address seed_, address blueprint_) public initializer {
-    __SidePool_init(seed_, blueprint_);
-    __WormholeTunnel_init();
+    __SidePool_init(seed_, seed_, blueprint_);
+    require(keccak256(abi.encodePacked(stakedToken.symbol())) == keccak256(abi.encodePacked("SEED")), "SeedFarm: seed_ not SEED");
+  __WormholeTunnel_init();
   }
 
   function _authorizeUpgrade(address newImplementation) internal override(SidePool, WormholeTunnelUpgradeable) onlyOwner {}
@@ -47,7 +48,6 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
     ) = deserializeDeposit(payload);
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: blueprints' unstake does not require bridge");
     _unstake(tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
-    emit DepositUnlocked(_msgSender(), uint16(mainIndex));
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
@@ -58,7 +58,7 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
   }
 
   function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
-//    console.log(payload);
+    //    console.log(payload);
     (
       uint256 tokenType,
       uint256 lockedFrom,
@@ -67,6 +67,5 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
     _stake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
-    emit DepositSaved(to, uint16(mainIndex));
   }
 }
