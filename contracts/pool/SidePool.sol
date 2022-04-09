@@ -165,10 +165,16 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       return 0;
     }
     uint256 lockedUntil = uint256(deposit.lockedUntil);
-    uint256 now = lockedUntil > timestamp ? timestamp : lockedUntil;
+    uint256 now_ = lockedUntil > timestamp ? timestamp : lockedUntil;
+//    console.log("------");
+//    console.log(uint(deposit.rewardsFactor));
+//    console.log(uint(deposit.lastRewardsAt));
+//    console.log(now_.sub(deposit.lastRewardsAt));
+//    console.log(lockedUntil.sub(deposit.lockedFrom));
+//    console.log(yieldWeight(deposit));
     return uint256(deposit.tokenAmount)
         .mul(deposit.rewardsFactor)
-        .mul(now.sub(deposit.lastRewardsAt))
+        .mul(now_.sub(deposit.lastRewardsAt))
         .div(lockedUntil.sub(deposit.lockedFrom))
         .mul(yieldWeight(deposit))
         .div(1000000);

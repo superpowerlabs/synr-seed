@@ -124,7 +124,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     uint16 otherChain
   ) internal returns (uint256) {
     validateInput(tokenType, lockupTime, tokenAmountOrID);
-    if (tokenType == SYNR_STAKE) {
+    if (tokenType == SYNR_STAKE || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(
         lockupTime > conf.minimumLockupTime - 1 && lockupTime < conf.maximumLockupTime + 1,
         "MainPool: invalid lockupTime type"
