@@ -37,6 +37,12 @@ contract SynCityCouponsSimplified is ERC721, ERC721Enumerable, Ownable {
   }
 
   // implementation required by the compiler, extending ERC721 and ERC721Enumerable
+  /**
+   *
+   * @param from address from where the tokens are being transfer.
+   * @param to address to where the tokens are being transfer.
+   * @param tokenId Id of the token being transfer.
+   */
   function _beforeTokenTransfer(
     address from,
     address to,

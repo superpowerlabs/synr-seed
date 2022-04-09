@@ -29,14 +29,22 @@ contract SideToken is Initializable, ERC20Upgradeable, AccessControlUpgradeable,
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _grantRole(UPGRADER_ROLE, msg.sender);
   }
-
+/**
+   *
+   * @param to address to mint the token.
+   * @param amount amount to be minted.
+   */
   function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
     _mint(to, amount);
   }
-
+/**
+   *
+   * @param to address to burn the token.
+   * @param amount amount to be burn.
+   */
   function burn(address to, uint256 amount) public onlyRole(BURNER_ROLE) {
     _burn(to, amount);
   }
-
+  
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }
