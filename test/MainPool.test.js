@@ -80,10 +80,10 @@ describe("#MainPool", function () {
       const deposit = await mainPool.getDepositByIndex(user1.address, 0);
       // console.log(deposit.lockedFrom, deposit.lockedUntil);
       const vestedPercentage = await mainPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil);
-      expect(vestedPercentage).equal(50);
+      expect(vestedPercentage).equal(5000);
       const unvested = ethers.BigNumber.from(deposit.tokenAmountOrID.toString())
-        .mul(100 - vestedPercentage)
-        .div(100);
+        .mul(10000 - vestedPercentage)
+        .div(10000);
       const percentage = (await mainPool.conf()).earlyUnstakePenalty / 100;
       const unvestedPenalty = unvested.mul(percentage).div(100);
       expect(await mainPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)).equal(unvestedPenalty);
