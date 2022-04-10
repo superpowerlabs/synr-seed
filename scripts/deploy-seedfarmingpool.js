@@ -9,6 +9,7 @@ const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
+const {upgrades} = require('hardhat');
 let deployUtils;
 
 async function main() {
@@ -17,25 +18,25 @@ async function main() {
   const seedAddress = deployed[chainId].SeedToken;
   const blueprintAddress = deployed[chainId].SynCityCoupons
 
-  console.log("Deploying SeedFarm");
-  const SeedFarm = await ethers.getContractFactory("SeedFarm");
+  const SeedFarmingPool = await ethers.getContractFactory("SeedFarmingPool");
 
-  const seedFarm = await upgrades.deployProxy(SeedFarm, [seedAddress, blueprintAddress], {
-    gas: 6000000
-  });
-  await seedFarm.deployed();
+  console.log("Deploying SeedFarmingPool");
+  const seedPool = await upgrades.deployProxy(SeedFarmingPool, [seedAddress, seedAddress, blueprintAddress]);
+  await seedPool.deployed()
+  console.log("SeedFarmingPool deployed at", seedPool.address);
 
-  const SeedToken = await ethers.getContractFactory("SideToken");
+  const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress);
-  await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
 
-  console.log("SeedFarm deployed at", seedFarm.address);
+  console.log("Give the pool minting permissions on Seed")
+  await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address, {
+    gasLimit: 66340
+  });
 
-  console.log("SeedFarm deployed at", seedFarm.address);
-  await deployUtils.saveDeployed(chainId, ["SeedFarm"], [seedFarm.address]);
+  await deployUtils.saveDeployed(chainId, ["SeedFarmingPool"], [seedPool.address]);
 
   console.log(
-      await deployUtils.verifyCodeInstructions("SeedFarm", chainId, ["address", "address"], [seedAddress, blueprintAddress], "SeedFarm")
+      await deployUtils.verifyCodeInstructions("SeedFarmingPool", chainId, ["address","address", "address"], [seedAddress, seedAddress, blueprintAddress], "SeedFarmingPool")
   );
 
 }

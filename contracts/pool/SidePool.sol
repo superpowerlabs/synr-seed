@@ -375,6 +375,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   }
 
   function _unstake(
+    address user_,
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
@@ -384,9 +385,9 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass used as SYNR cannot be early unstaked");
     }
-    _collectRewards(_msgSender());
-    uint256 index = getDepositIndexByMainIndex(_msgSender(), mainIndex);
-    Deposit storage deposit = users[_msgSender()].deposits[index];
+    _collectRewards(user_);
+    uint256 index = getDepositIndexByMainIndex(user_, mainIndex);
+    Deposit storage deposit = users[user_].deposits[index];
     require(
       uint256(deposit.tokenType) == tokenType &&
         uint256(deposit.lockedFrom) == lockedFrom &&
@@ -407,19 +408,19 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       } else {
         unstakedAmount = uint256(deposit.tokenAmount);
       }
-      stakedToken.transfer(_msgSender(), unstakedAmount);
+      stakedToken.transfer(user_, unstakedAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      stakedToken.transfer(_msgSender(), deposit.tokenAmount);
+      stakedToken.transfer(user_, deposit.tokenAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
-      users[_msgSender()].passAmount--;
+      users[user_].passAmount--;
     } else if (deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
-      users[_msgSender()].blueprintsAmount--;
-      blueprint.safeTransferFrom(address(this), _msgSender(), uint256(deposit.tokenAmountOrID));
+      users[user_].blueprintsAmount--;
+      blueprint.safeTransferFrom(address(this), user_, uint256(deposit.tokenAmountOrID));
     } else {
       revert("SidePool: invalid tokenType");
     }
     deposit.unstakedAt = uint32(block.timestamp);
-    emit DepositUnlocked(_msgSender(), uint16(index));
+    emit DepositUnlocked(user_, uint16(index));
   }
 
   function withdrawPenaltiesOrTaxes(
@@ -456,6 +457,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
 
   function _unstakeDeposit(Deposit memory deposit) internal {
     _unstake(
+      _msgSender(),
       uint256(deposit.tokenType),
       uint256(deposit.lockedFrom),
       uint256(deposit.lockedUntil),

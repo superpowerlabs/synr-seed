@@ -20,15 +20,16 @@ function normalize(val, n = 18) {
   return "" + val + "0".repeat(n);
 }
 
-describe.skip("#Integration test", function () {
+describe("#Integration test", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
   let SynrBridge, synrBridge;
   let SynrBridgeV2;
-  let SeedFarm, seedFarm;
   let SeedToken, seed;
   let SynCityPasses, pass;
+  let SeedFactory, seedFactory;
+  let SeedFarmingPool, seedPool;
   let SynCityCouponsSimplified, blueprint;
 
   let deployer, fundOwner, superAdmin, operator, validator, user1, user2, user3, treasury;
@@ -40,7 +41,8 @@ describe.skip("#Integration test", function () {
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
     SynrBridge = await ethers.getContractFactory("SynrBridgeMock");
     SynrBridgeV2 = await ethers.getContractFactory("SynrBridgeV2Mock");
-    SeedFarm = await ethers.getContractFactory("SeedFactoryMock");
+    SeedFactory = await ethers.getContractFactory("SeedFactoryMock");
+    SeedFarmingPool = await ethers.getContractFactory("SeedFarmingPool");
     SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
     SynCityPasses = await ethers.getContractFactory("SynCityPassesMock");
@@ -87,22 +89,26 @@ describe.skip("#Integration test", function () {
     await blueprint.mint(user1.address, 2);
     await blueprint.mint(user3.address, 1);
 
-    seedFarm = await upgrades.deployProxy(SeedFarm, [seed.address, blueprint.address]);
-    await seedFarm.deployed();
-    await seedFarm.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800);
-    await seedFarm.updateNftConf(100000, 1500, 500000, 150, 1000);
+    seedPool = await upgrades.deployProxy(SeedFarmingPool, [seed.address, seed.address, blueprint.address]);
+    await seedPool.deployed()
+    await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800);
+    await seedPool.updateNftConf(100000, 1500, 500000, 150, 1000);
 
-    await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
+    seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
+    await seedFactory.deployed();
+
+    await seedPool.setFactory(seedFactory.address)
+    await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address);
 
     wormhole = await WormholeMock.deploy();
     await synrBridge.wormholeInit(2, wormhole.address);
     await wormhole.deployed();
 
-    await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
+    await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFactory.address));
     await synrBridge.initPool(7, 4000);
 
-    await seedFarm.wormholeInit(4, wormhole.address);
-    await seedFarm.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
+    await seedFactory.wormholeInit(4, wormhole.address);
+    await seedFactory.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
   }
 
   async function configure() {}
@@ -202,40 +208,40 @@ describe.skip("#Integration test", function () {
 
     expect(await synr.balanceOf(synrBridge.address)).equal(amount.add(amount2));
 
-    expect(await seedFarm.mockWormholeCompleteTransfer(fundOwner.address, finalPayload))
-      .emit(seedFarm, "DepositSaved")
+    expect(await seedFactory.mockWormholeCompleteTransfer(fundOwner.address, finalPayload))
+      .emit(seedFactory, "DepositSaved")
       .withArgs(fundOwner.address, 0);
 
     expect(await seed.balanceOf(fundOwner.address)).equal(0);
 
-    expect(await seedFarm.mockWormholeCompleteTransfer(fundOwner.address, finalPayload2))
-      .emit(seedFarm, "DepositSaved")
+    expect(await seedFactory.mockWormholeCompleteTransfer(fundOwner.address, finalPayload2))
+      .emit(seedFactory, "DepositSaved")
       .withArgs(fundOwner.address, 1);
 
     expect(await seed.balanceOf(fundOwner.address)).equal("3500761035007610350");
 
-    expect(await seedFarm.mockWormholeCompleteTransfer(user2.address, finalPayload3))
-      .emit(seedFarm, "DepositSaved")
+    expect(await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload3))
+      .emit(seedFactory, "DepositSaved")
       .withArgs(user2.address, 0);
 
     await increaseBlockTimestampBy(20 * 24 * 3600);
 
     let ts = await getTimestamp();
-    const untaxedPendingRewards = await seedFarm.untaxedPendingRewards(fundOwner.address, ts + 1);
+    const untaxedPendingRewards = await seedPool.untaxedPendingRewards(fundOwner.address, ts + 1);
 
-    let boostWeight = await seedFarm.boostWeight(fundOwner.address);
+    let boostWeight = await seedPool.boostWeight(fundOwner.address);
     expect(boostWeight).equal(10000);
 
-    await seedFarm.connect(fundOwner).collectRewards();
-    let seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
+    await seedPool.connect(fundOwner).collectRewards();
+    let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.lastRewardsAt).equal(await getTimestamp());
 
     ts = await getTimestamp();
-    const untaxedPendingRewards3 = await seedFarm.untaxedPendingRewards(user2.address, ts + 1);
-    const tax = await seedFarm.calculateTaxOnRewards(untaxedPendingRewards3);
+    const untaxedPendingRewards3 = await seedPool.untaxedPendingRewards(user2.address, ts + 1);
+    const tax = await seedPool.calculateTaxOnRewards(untaxedPendingRewards3);
     expect(await seed.balanceOf(user2.address)).equal(0);
 
-    await seedFarm.connect(user2).collectRewards();
+    await seedPool.connect(user2).collectRewards();
     expect(await seed.balanceOf(user2.address)).equal(untaxedPendingRewards3.sub(tax));
 
     let payload4 = await synrBridge.serializeInput(
@@ -262,18 +268,18 @@ describe.skip("#Integration test", function () {
     let deposit4 = await synrBridge.getDepositByIndex(fundOwner.address, 2);
     const finalPayload4 = await synrBridge.fromDepositToTransferPayload(deposit4);
 
-    expect(await seedFarm.mockWormholeCompleteTransfer(fundOwner.address, finalPayload4))
-      .emit(seedFarm, "DepositSaved")
+    expect(await seedFactory.mockWormholeCompleteTransfer(fundOwner.address, finalPayload4))
+      .emit(seedFactory, "DepositSaved")
       .withArgs(fundOwner.address, 2);
 
-    boostWeight = await seedFarm.boostWeight(fundOwner.address);
+    boostWeight = await seedPool.boostWeight(fundOwner.address);
     expect(boostWeight).equal(10250);
 
     await increaseBlockTimestampBy(20 * 24 * 3600);
 
     ts = await getTimestamp();
 
-    const untaxedPendingRewardsBoosted = await seedFarm.untaxedPendingRewards(fundOwner.address, ts + 1);
+    const untaxedPendingRewardsBoosted = await seedPool.untaxedPendingRewards(fundOwner.address, ts + 1);
 
     // console.log(untaxedPendingRewards.toString())
     // console.log(untaxedPendingRewardsBoosted.toString())
@@ -282,16 +288,16 @@ describe.skip("#Integration test", function () {
 
     expect(seedDeposit.unstakedAt).equal(0);
     expect(seedDeposit.tokenAmount).equal(ethers.utils.parseEther("1000000"));
-    const seedPayload = await seedFarm.fromDepositToTransferPayload(seedDeposit);
+    const seedPayload = await seedPool.fromDepositToTransferPayload(seedDeposit);
 
     ts = await getTimestamp();
     // unstake
 
-    expect(await seedFarm.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1))
-      .emit(seedFarm, "DepositUnlocked")
+    expect(await seedFactory.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1))
+      .emit(seedFactory, "DepositUnlocked")
       .withArgs(fundOwner.address, 0);
 
-    seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
+    seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);
     expect(seedDeposit.unstakedAt).equal(ts + 1);
     const synrBalanceBefore = await synr.balanceOf(fundOwner.address);
@@ -335,20 +341,20 @@ describe.skip("#Integration test", function () {
 
     expect(await synr.balanceOf(synrBridge.address)).equal(amount);
 
-    await seedFarm.connect(user1).mockWormholeCompleteTransfer(user1.address, finalPayload);
+    await seedFactory.connect(user1).mockWormholeCompleteTransfer(user1.address, finalPayload);
 
     await increaseBlockTimestampBy(150 * 24 * 3600);
 
-    expect(await seedFarm.canUnstakeWithoutTax(user1.address, 0)).equal(false);
+    expect(await seedPool.canUnstakeWithoutTax(user1.address, 0)).equal(false);
 
-    let seedDeposit = await seedFarm.getDepositByIndex(user1.address, 0);
+    let seedDeposit = await seedPool.getDepositByIndex(user1.address, 0);
     expect(seedDeposit.unstakedAt).equal(0);
-    const seedPayload = await seedFarm.fromDepositToTransferPayload(seedDeposit);
+    const seedPayload = await seedPool.fromDepositToTransferPayload(seedDeposit);
 
     const synrBalanceBefore = await synr.balanceOf(user1.address);
 
     // unstake
-    await seedFarm.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
+    await seedFactory.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
 
     const ts = await getTimestamp();
     const tax = await synrBridge.calculatePenaltyForEarlyUnstake(ts, await synrBridge.getDepositByIndex(user1.address, 0));
@@ -396,7 +402,7 @@ describe.skip("#Integration test", function () {
 
     expect(await synr.balanceOf(synrBridge.address)).equal(amount);
 
-    await seedFarm.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
+    await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
@@ -408,14 +414,14 @@ describe.skip("#Integration test", function () {
 
     expect(await synrBridge.version()).equal(2);
 
-    let seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
+    let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.unstakedAt).equal(0);
-    const seedPayload = await seedFarm.fromDepositToTransferPayload(seedDeposit);
+    const seedPayload = await seedPool.fromDepositToTransferPayload(seedDeposit);
 
     const ts = await getTimestamp();
     // unstake
-    await seedFarm.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
-    seedDeposit = await seedFarm.getDepositByIndex(fundOwner.address, 0);
+    await seedFactory.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
+    seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
 
     expect(seedDeposit.unstakedAt).greaterThan(ts);
 

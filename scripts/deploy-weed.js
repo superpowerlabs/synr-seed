@@ -8,20 +8,27 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  const network = chainId === 56 ? "BSC" : chainId === 97 ? "BSCTestnet" : "localhost";
 
   console.log("Deploying SEED...");
   const WeedToken = await ethers.getContractFactory("WeedToken");
-  const seed = await upgrades.deployProxy(WeedToken, []);
-  await seed.deployed();
+  const weed = await WeedToken.deploy();
+  await weed.deployed();
 
-  console.log(
-      await deployUtils.verifyCodeInstructions("WeedToken", chainId, [], [], "WeedToken")
-  );
+  console.log("WeedToken deployed at", weed.address);
+  await deployUtils.saveDeployed(chainId, ["WeedToken"], [weed.address]);
 
+  const network = chainId === 56 ? 'bsc'
+      : chainId === 97 ? 'bsc_testnet'
+          : 'localhost'
 
-  console.log("WeedToken deployed at", seed.address);
-  await deployUtils.saveDeployed(chainId, ["WeedToken"], [seed.address]);
+  console.log(`
+To verify weedToken source code:
+    
+  npx hardhat verify --show-stack-traces \\
+      --network ${network} \\
+      ${weed.address}
+      
+`);
 }
 
 main()
