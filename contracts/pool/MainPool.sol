@@ -136,6 +136,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
       // MainPool must be whitelisted to receive sSYNR
       sSynr.transferFrom(_msgSender(), address(this), tokenAmountOrID);
     } else if (tokenType == SYNR_STAKE) {
+      // MainPool must be approved to spend the SYNR
       synr.safeTransferFrom(_msgSender(), address(this), tokenAmountOrID, "");
     } else {
       // tokenType 2 and 3
@@ -200,7 +201,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     );
     require(deposit.unstakedAt == 0, "MainPool: deposit already unstaked");
     if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      pass.safeTransferFrom(address(this), _msgSender(), uint256(tokenAmountOrID));
+      pass.safeTransferFrom(address(this), user, uint256(tokenAmountOrID));
     } else {
       uint256 penalty = calculatePenaltyForEarlyUnstake(block.timestamp, deposit);
       uint256 amount = uint256(tokenAmountOrID).sub(penalty);

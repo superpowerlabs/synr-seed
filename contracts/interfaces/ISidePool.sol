@@ -9,6 +9,8 @@ interface ISidePool {
 
   event DepositUnlocked(address user, uint16 mainIndex);
 
+  event RewardsCollected(address user, uint rewards);
+
   struct Deposit {
     // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
     uint8 tokenType;
@@ -57,7 +59,7 @@ interface ISidePool {
 
   struct NftConf {
     uint32 synrEquivalent; // 100,000
-    uint16 sPBoostFactor; // 1250 > 12.5%
+    uint16 sPBoostFactor; // 12500 > 112.5% > +12.5% of boost
     uint32 sPBoostLimit;
     uint16 bPBoostFactor;
     uint32 bPBoostLimit;
@@ -91,17 +93,24 @@ interface ISidePool {
     uint32 bPBoostLimit_
   ) external;
 
-  function multiplier() external pure returns (uint256);
-
   function lockupTime(Deposit memory deposit) external view returns (uint256);
 
   function yieldWeight(Deposit memory deposit) external view returns (uint256);
 
-  /**
-   * @notice Converts the input payload to the transfer payload
-   * @param deposit The deposit
-   * @return the payload, an encoded uint256
-   */
+  function shouldUpdateRatio() external view returns (bool);
+
+  function updateRatio() external;
+
+  function calculateUntaxedRewards(Deposit memory deposit, uint256 timestamp) external view returns (uint256);
+
+  function calculateTaxOnRewards(uint256 rewards) external view returns (uint256);
+
+  function boostWeight(address user_) external view returns (uint256);
+
+  function collectRewards() external;
+
+  function untaxedPendingRewards(address user_, uint256 timestamp) external view returns (uint256);
+
   function fromDepositToTransferPayload(Deposit memory deposit) external pure returns (uint256);
 
   function getDepositByIndex(address user, uint256 mainIndex) external view returns (Deposit memory);
@@ -112,9 +121,22 @@ interface ISidePool {
 
   function getDepositIndexByMainIndex(address user, uint256 mainIndex) external view returns (uint256);
 
+  function getVestedPercentage(
+    uint256 when,
+    uint256 lockedFrom,
+    uint256 lockedUntil
+  ) external view returns (uint256);
+
+  function unstakeIfSSynr(uint256 depositIndex) external;
+
   function withdrawPenaltiesOrTaxes(
     uint256 amount,
     address beneficiary,
     uint256 what
   ) external;
+
+  function stake(uint tokenType, uint256 lockupTime, uint256 tokenAmountOrID) external;
+
+  function unstake(uint256 depositIndex) external;
+
 }
