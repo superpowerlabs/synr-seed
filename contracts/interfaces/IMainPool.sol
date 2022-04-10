@@ -66,4 +66,15 @@ interface IMainPool {
   function withdrawSSynr(uint256 amount, address to) external;
 
   function withdrawPenalties(uint256 amount, address to) external;
+
+  function stake(address user, uint256 payload, uint16 recipientChain) external;
+
+  function unstake(
+    address user,
+    uint256 tokenType,
+    uint256 lockedFrom,
+    uint256 lockedUntil,
+    uint256 mainIndex,
+    uint256 tokenAmountOrID
+  ) external;
 }

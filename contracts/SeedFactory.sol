@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./pool/Constants.sol";
-import "./pool/SeedFarmingPool.sol";
+import "./pool/SeedPool.sol";
 import "./utils/PayloadUtils.sol";
 import "hardhat/console.sol";
 
@@ -17,7 +17,7 @@ contract SeedFactory is PayloadUtils, Constants, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
-  SeedFarmingPool public pool;
+  SeedPool public pool;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -25,7 +25,7 @@ contract SeedFactory is PayloadUtils, Constants, WormholeTunnelUpgradeable {
   function initialize(address pool_) public initializer {
     __WormholeTunnel_init();
     require(pool_.isContract(), "SeedFactory: pool_ not a contract");
-    pool = SeedFarmingPool(pool_);
+    pool = SeedPool(pool_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal override(WormholeTunnelUpgradeable) onlyOwner {}

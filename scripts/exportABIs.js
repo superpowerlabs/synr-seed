@@ -25,10 +25,11 @@ async function main() {
 
   abi("SeedToken", "token");
   abi("SynCityCouponsSimplified", "token", "SynCityCoupons");
-  abi("SeedFarm", "");
+  abi("SeedFactory", "");
 
   abi("WeedToken", "token");
   abi("FarmingPool", "pool");
+  abi("MainPool", "pool");
 
   await fs.writeFile(path.resolve(__dirname, "../export/ABIs.json"), JSON.stringify(ABIs, null, 2));
 }

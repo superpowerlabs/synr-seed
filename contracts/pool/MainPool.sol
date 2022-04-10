@@ -33,15 +33,22 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
 
   uint256 public penalties;
 
-  //    /// @custom:oz-upgrades-unsafe-allow constructor
-  //    constructor() initializer {}
+  address public factory;
+
+  modifier onlyFactory() {
+    require(factory != address(0) && _msgSender() == factory, "SeedPool: forbidden");
+    _;
+  }
+
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() initializer {}
 
   // solhint-disable-next-line
-  function __MainPool_init(
+  function initialize(
     address synr_,
     address sSynr_,
     address pass_
-  ) internal virtual initializer {
+  ) public initializer {
     __Ownable_init();
     require(synr_.isContract(), "synr_ not a contract");
     require(sSynr_.isContract(), "sSynr_ not a contract");
@@ -52,6 +59,11 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+
+  function setFactory(address farmer_) external onlyOwner {
+    require(farmer_.isContract(), "SeedPool: farmer_ not a contract");
+    factory = farmer_;
+  }
 
   function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external override onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "MainPool: contract cannot receive sSYNR");
@@ -118,6 +130,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
   }
 
   function _makeDeposit(
+    address user,
     uint256 tokenType,
     uint256 lockupTime,
     uint256 tokenAmountOrID,
@@ -134,17 +147,17 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     // It will throw if the balance is insufficient
     if (tokenType == S_SYNR_SWAP) {
       // MainPool must be whitelisted to receive sSYNR
-      sSynr.transferFrom(_msgSender(), address(this), tokenAmountOrID);
+      sSynr.transferFrom(user, address(this), tokenAmountOrID);
     } else if (tokenType == SYNR_STAKE) {
       // MainPool must be approved to spend the SYNR
-      synr.safeTransferFrom(_msgSender(), address(this), tokenAmountOrID, "");
+      synr.safeTransferFrom(user, address(this), tokenAmountOrID, "");
     } else {
       // tokenType 2 and 3
       // SYNR Pass
       // MainPool must be approved to make the transfer
-      pass.safeTransferFrom(_msgSender(), address(this), tokenAmountOrID);
+      pass.safeTransferFrom(user, address(this), tokenAmountOrID);
     }
-    return fromDepositToTransferPayload(_updateUser(_msgSender(), tokenType, lockupTime, tokenAmountOrID, otherChain));
+    return fromDepositToTransferPayload(_updateUser(user, tokenType, lockupTime, tokenAmountOrID, otherChain));
   }
 
   function depositsLength(address user) public view returns (uint256) {
@@ -258,11 +271,26 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     synr.transferFrom(address(this), beneficiary, amount);
   }
 
-  function _stake(uint256 payload, uint16 recipientChain) internal {
+  function _stake(address user, uint256 payload, uint16 recipientChain) internal {
     (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
     require(conf.minimumLockupTime > 0, "MainPool: pool not alive");
-    payload = _makeDeposit(tokenType, lockupTime, tokenAmountOrID, recipientChain);
-    emit DepositSaved(_msgSender(), uint16(getIndexFromPayload(payload)));
+    payload = _makeDeposit(user, tokenType, lockupTime, tokenAmountOrID, recipientChain);
+    emit DepositSaved(user, uint16(getIndexFromPayload(payload)));
+  }
+
+  function stake(address user, uint256 payload, uint16 recipientChain) external virtual onlyFactory {
+    _stake(user, payload, recipientChain);
+  }
+
+  function unstake(
+    address user,
+    uint256 tokenType,
+    uint256 lockedFrom,
+    uint256 lockedUntil,
+    uint256 mainIndex,
+    uint256 tokenAmountOrID
+  ) external virtual onlyFactory {
+    _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
   uint256[50] private __gap;

@@ -7,14 +7,14 @@ pragma solidity ^0.8.2;
 import "./SidePool.sol";
 import "hardhat/console.sol";
 
-contract SeedFarmingPool is SidePool {
+contract SeedPool is SidePool {
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
 
   address public factory;
 
   modifier onlyFactory() {
-    require(factory != address(0) && _msgSender() == factory, "SeedFarmingPool: forbidden");
+    require(factory != address(0) && _msgSender() == factory, "SeedPool: forbidden");
     _;
   }
 
@@ -32,7 +32,7 @@ contract SeedFarmingPool is SidePool {
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
   function setFactory(address farmer_) external onlyOwner {
-    require(farmer_.isContract(), "SeedFarmingPool: farmer_ not a contract");
+    require(farmer_.isContract(), "SeedPool: farmer_ not a contract");
     factory = farmer_;
   }
 
@@ -42,7 +42,7 @@ contract SeedFarmingPool is SidePool {
     uint256 tokenAmountOrID
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
-    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SeedFarmingPool: unsupported token");
+    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
     _stake(
       _msgSender(),
       tokenType,
@@ -61,13 +61,13 @@ contract SeedFarmingPool is SidePool {
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) external onlyFactory {
-    require(tokenType <= BLUEPRINT_STAKE_FOR_BOOST, "SeedFarmingPool: unsupported token");
+    require(tokenType <= BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
     _stake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
   function unstake(uint256 depositIndex) external override {
     Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
-    require(deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SeedFarmingPool: invalid tokenType");
+    require(deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: invalid tokenType");
     _unstakeDeposit(deposit);
   }
 

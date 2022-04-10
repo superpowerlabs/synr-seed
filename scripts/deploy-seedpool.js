@@ -18,12 +18,16 @@ async function main() {
   const seedAddress = deployed[chainId].SeedToken;
   const blueprintAddress = deployed[chainId].SynCityCoupons
 
-  const SeedFarmingPool = await ethers.getContractFactory("SeedFarmingPool");
+  const SeedPool = await ethers.getContractFactory("SeedPool");
 
-  console.log("Deploying SeedFarmingPool");
-  const seedPool = await upgrades.deployProxy(SeedFarmingPool, [seedAddress, seedAddress, blueprintAddress]);
+  console.log("Deploying SeedPool");
+  const seedPool = await upgrades.deployProxy(SeedPool, [seedAddress, seedAddress, blueprintAddress]);
   await seedPool.deployed()
-  console.log("SeedFarmingPool deployed at", seedPool.address);
+
+  console.log("SeedPool deployed at", seedPool.address);
+
+  await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, {gasLimit: 60000});
+  await seedPool.updateNftConf(100000, 1500, 500000, 150, 1000, {gasLimit: 60000});
 
   const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress);
@@ -33,10 +37,10 @@ async function main() {
     gasLimit: 66340
   });
 
-  await deployUtils.saveDeployed(chainId, ["SeedFarmingPool"], [seedPool.address]);
+  await deployUtils.saveDeployed(chainId, ["SeedPool"], [seedPool.address]);
 
   console.log(
-      await deployUtils.verifyCodeInstructions("SeedFarmingPool", chainId, ["address","address", "address"], [seedAddress, seedAddress, blueprintAddress], "SeedFarmingPool")
+      await deployUtils.verifyCodeInstructions("SeedPool", chainId, ["address","address", "address"], [seedAddress, seedAddress, blueprintAddress], "SeedPool")
   );
 
 }
