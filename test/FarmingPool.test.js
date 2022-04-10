@@ -2,11 +2,11 @@ const {expect, assert} = require("chai");
 
 const {
   initEthers,
-  SYNR_STAKE,
   assertThrowsMessage,
   getTimestamp,
   increaseBlockTimestampBy,
   bytes32Address,
+  SYNR_STAKE,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -18,21 +18,23 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe("#SidePool", function () {
-  let WormholeMock, wormhole;
+describe("#FarmingPool", function () {
   let SideToken, seed;
+  let weed;
   let coupon;
-  let SidePool, sidePool;
+  let FarmingPool, pool;
   let SynCityCouponsSimplified, blueprint;
   let week = 7 * 24 * 3600;
 
-  let deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury;
+  let user0sSeeds = "250000000"
+
+  let deployer, user0, user1, user2, marketplace, treasury;
 
   before(async function () {
     initEthers(ethers);
-    [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
+    [deployer, user0, user1, user2, marketplace, treasury] = await ethers.getSigners();
     SideToken = await ethers.getContractFactory("SideToken");
-    SidePool = await ethers.getContractFactory("SidePoolMock");
+    FarmingPool = await ethers.getContractFactory("FarmingPool");
     SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
   });
 
@@ -40,16 +42,26 @@ describe("#SidePool", function () {
     seed = await upgrades.deployProxy(SideToken, ["Mobland SEED Token", "SEED"]);
     await seed.deployed();
 
+    weed = await upgrades.deployProxy(SideToken, ["Mobland WEED Token", "WEED"]);
+    await weed.deployed();
+
     blueprint = await SynCityCouponsSimplified.deploy(8000);
     await blueprint.deployed();
 
-    sidePool = await upgrades.deployProxy(SidePool, [seed.address, seed.address, blueprint.address]);
-    await sidePool.deployed();
+    pool = await upgrades.deployProxy(FarmingPool, [seed.address, weed.address, blueprint.address]);
+    await pool.deployed();
 
     if (initPool) {
-      await sidePool.initPool(1000, week, 9800, 1000, 100, 800);
-      await sidePool.updateNftConf(100000, 1500, 120000, 150, 1000);
+      await pool.initPool(1000, week, 9800, 1000, 100, 800);
+      await pool.updateNftConf(0,0,0, // << those are ignored
+          150, 1000);
     }
+
+    await seed.grantRole(await seed.MINTER_ROLE(), deployer.address);
+    await seed.mint(user0.address, ethers.utils.parseEther(user0sSeeds));
+
+    await weed.grantRole(await weed.MINTER_ROLE(), pool.address);
+
   }
 
   let deposit;
@@ -60,14 +72,14 @@ describe("#SidePool", function () {
     });
 
     it("should revert if already initiated", async function () {
-      await sidePool.initPool(1000, week, 9800, 1000, 100, 800);
-      expect(sidePool.initPool(1000, week, 9800, 1000, 100, 1000)).revertedWith("SidePool: already initiated");
+      await pool.initPool(1000, week, 9800, 1000, 100, 800);
+      expect(pool.initPool(1000, week, 9800, 1000, 100, 1000)).revertedWith("SidePool: already initiated");
     });
 
     it("should revert if wrong parameters", async function () {
-      await assertThrowsMessage(sidePool.initPool(1000, week, 129800, 1000, 100, 800), "value out-of-bounds");
-      await assertThrowsMessage(sidePool.initPool(1000, 1e12, 9800, 1000, 100, 800), "value out-of-bounds");
-      await assertThrowsMessage(sidePool.initPool(1e10, week, 9800, 1000, 100, 800), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1000, week, 129800, 1000, 100, 800), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1000, 1e12, 9800, 1000, 100, 800), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1e10, week, 9800, 1000, 100, 800), "value out-of-bounds");
     });
   });
 
@@ -92,7 +104,7 @@ describe("#SidePool", function () {
     });
 
     it("should calculate the yield weight", async function () {
-      expect(await sidePool.lockupTime(deposit)).equal(180);
+      expect(await pool.lockupTime(deposit)).equal(180);
     });
   });
 
@@ -103,7 +115,7 @@ describe("#SidePool", function () {
 
     it("should calculate the yield weight", async function () {
       // 14962 means a weight of 1.4962
-      expect(await sidePool.yieldWeight(deposit)).equal(14931);
+      expect(await pool.yieldWeight(deposit)).equal(14931);
     });
   });
 
@@ -114,12 +126,12 @@ describe("#SidePool", function () {
 
     it("should be updated", async function () {
       await increaseBlockTimestampBy(23 * 24 * 3600);
-      expect(await sidePool.shouldUpdateRatio()).equal(true);
+      expect(await pool.shouldUpdateRatio()).equal(true);
     });
 
     it("should not be updated", async function () {
       await increaseBlockTimestampBy(3 * 24 * 3600);
-      expect(await sidePool.shouldUpdateRatio()).equal(false);
+      expect(await pool.shouldUpdateRatio()).equal(false);
     });
   });
 
@@ -144,7 +156,7 @@ describe("#SidePool", function () {
 
     it("should calculate the rewards", async function () {
       await increaseBlockTimestampBy(21 * 24 * 3600);
-      expect(await sidePool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("1680981749999999999999999");
+      expect(await pool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("1680981749999999999999999");
     });
   });
 
@@ -155,21 +167,45 @@ describe("#SidePool", function () {
 
     it("should update rewardsFactor", async function () {
       await increaseBlockTimestampBy(23 * 24 * 3600);
-      await sidePool.updateRatio();
-      const conf = await sidePool.conf();
+      await pool.updateRatio();
+      const conf = await pool.conf();
       expect(conf.rewardsFactor).equal(940);
       expect(conf.lastRatioUpdateAt).equal(await getTimestamp());
-      expect(await sidePool.shouldUpdateRatio()).equal(false);
+      expect(await pool.shouldUpdateRatio()).equal(false);
     });
 
     it("should not update rewardsFactor", async function () {
       await increaseBlockTimestampBy(13 * 24 * 3600);
-      await sidePool.updateRatio();
-      let conf = await sidePool.conf();
+      await pool.updateRatio();
+      let conf = await pool.conf();
       expect(conf.rewardsFactor).equal(980);
-      await sidePool.updateRatio();
-      conf = await sidePool.conf();
+      await pool.updateRatio();
+      conf = await pool.conf();
       expect(conf.rewardsFactor).equal(980);
     });
+  });
+
+  describe("#stake", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should stake some seed", async function () {
+      const amount = ethers.utils.parseEther("1500000")
+      await seed.connect(user0).approve(pool.address, ethers.utils.parseEther(user0sSeeds))
+
+      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 365
+      expect(await pool.connect(user0).stake(365, amount))
+          .emit(pool, "DepositSaved")
+          .withArgs(user0.address, 0);
+
+      let deposit = await pool.getDepositByIndex(user0.address, 0);
+      expect(deposit.tokenAmountOrID).equal(amount);
+      expect(deposit.tokenType).equal(SYNR_STAKE);
+      expect(deposit.lockedUntil).equal(lockedUntil);
+
+    });
+
+
   });
 });

@@ -46,4 +46,10 @@ const Helpers = {
   },
 };
 
+Helpers.S_SYNR_SWAP = 0;
+Helpers.SYNR_STAKE = 1;
+Helpers.SYNR_PASS_STAKE_FOR_BOOST = 2;
+Helpers.SYNR_PASS_STAKE_FOR_SEEDS = 3;
+Helpers.BLUEPRINT_STAKE_FOR_BOOST = 4;
+
 module.exports = Helpers;
