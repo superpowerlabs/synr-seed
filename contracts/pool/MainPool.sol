@@ -293,7 +293,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
    * @notice calculates penalty when unstaking SYNR before period is up
    * @param when timestamp where percentage will be calculated
    * @param deposit deposit from where penalty is to be calculated
-   * @return the penalty if any
+   * @return the penalty, if any
    */
   function calculatePenaltyForEarlyUnstake(uint256 when, Deposit memory deposit) public view override returns (uint256) {
     if (when > uint256(deposit.lockedUntil)) {
