@@ -6,7 +6,7 @@ const {
   getTimestamp,
   increaseBlockTimestampBy,
   bytes32Address,
-  SYNR_STAKE,
+  SEED_STAKE,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -91,7 +91,7 @@ describe("#FarmingPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: SYNR_STAKE,
+        tokenType: SEED_STAKE,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -142,7 +142,7 @@ describe("#FarmingPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: SYNR_STAKE,
+        tokenType: SEED_STAKE,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -192,16 +192,18 @@ describe("#FarmingPool", function () {
 
     it("should stake some seed", async function () {
       const amount = ethers.utils.parseEther("1500000")
-      await seed.connect(user0).approve(pool.address, ethers.utils.parseEther(user0sSeeds))
+      await seed.connect(user0).approve(pool.address, amount)
+      const balanceBefore = await seed.balanceOf(user0.address)
+      expect(balanceBefore).equal(normalize(user0sSeeds))
 
       const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 365
-      expect(await pool.connect(user0).stake(365, amount))
+      expect(await pool.connect(user0).stake(SEED_STAKE, 365, amount))
           .emit(pool, "DepositSaved")
           .withArgs(user0.address, 0);
 
       let deposit = await pool.getDepositByIndex(user0.address, 0);
       expect(deposit.tokenAmountOrID).equal(amount);
-      expect(deposit.tokenType).equal(SYNR_STAKE);
+      expect(deposit.tokenType).equal(SEED_STAKE);
       expect(deposit.lockedUntil).equal(lockedUntil);
 
     });

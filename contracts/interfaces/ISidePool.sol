@@ -121,10 +121,6 @@ interface ISidePool {
 
   function getDepositIndexByMainIndex(address user, uint256 mainIndex) external view returns (uint256);
 
-  function stakeBlueprint(uint256 tokenId) external;
-
-  function unstakeBlueprint(uint256 tokenId) external;
-
   function getVestedPercentage(
     uint256 when,
     uint256 lockedFrom,
@@ -138,4 +134,9 @@ interface ISidePool {
     address beneficiary,
     uint256 what
   ) external;
+
+  function stake(uint tokenType, uint256 lockupTime, uint256 tokenAmountOrID) external;
+
+  function unstake(uint256 depositIndex) external;
+
 }
