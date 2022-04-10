@@ -311,7 +311,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
 /**
 * @notice stakes if the pool is active
   * @param user_ address of user being updated
-   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param tokenType identifies the type of transaction being made 
    * @param lockedFrom timestamp when locked 
    * @param lockedUntil timestamp when can unstake without penalty  
    * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
@@ -461,7 +461,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
 
  /**
    * @notice unstakes a deposit, calculates penalty for early unstake
-   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param tokenType identifies the type of transaction being made 
    * @param lockedFrom timestamp when locked 
    * @param lockedUntil timestamp when can unstake without penalty  
    * @param mainIndex index of deposit

@@ -26,16 +26,34 @@ contract FarmingPool is IFarmingPool, SidePool {
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
 
+/**
+   * @notice calls _stake function
+   * @param lockupTime time which the stake will be lock
+   * @param tokenAmount amount to be staked
+   */
   function stake(uint256 lockupTime, uint256 tokenAmount) external override {
     uint mainIndex = users[_msgSender()].deposits.length;
     _stake(_msgSender(), 1, block.timestamp, block.timestamp.add(lockupTime * 1 days), mainIndex, tokenAmount);
   }
 
+/**
+   * @notice calls _unstake function
+   * @param depositIndex index of the deposit
+   */
   function unstake(uint256 depositIndex) external override {
     Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
     _unstake(uint(deposit.tokenType), uint(deposit.lockedFrom), uint(deposit.lockedUntil), uint(deposit.mainIndex), uint(deposit.tokenAmountOrID));
   }
 
+/**
+* @notice stakes if the pool is active
+  * @param user_ address of user being updated
+   * @param tokenType identifies the type of transaction being made  
+   * @param lockedFrom timestamp when locked 
+   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
+   * @param mainIndex index of deposit being updated
+   */
   function _stake(
     address user_,
     uint256 tokenType,
@@ -71,6 +89,14 @@ contract FarmingPool is IFarmingPool, SidePool {
     emit DepositSaved(user_, uint16(mainIndex));
   }
 
+/**
+   * @notice unstakes a deposit, calculates penalty for early unstake
+   * @param tokenType identifies the type of transaction being made 
+   * @param lockedFrom timestamp when locked 
+   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param mainIndex index of deposit
+   * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
+   */
   function _unstake(
     uint256 tokenType,
     uint256 lockedFrom,
