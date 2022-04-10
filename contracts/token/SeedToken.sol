@@ -10,7 +10,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./SideToken.sol";
 
 contract SeedToken is Initializable, SideToken, UUPSUpgradeable {
-
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 

@@ -59,5 +59,6 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
     require(tokenType > S_SYNR_SWAP, "SynrBridge: sSYNR can't be unstaked");
     _unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
+
   uint256[50] private __gap;
 }

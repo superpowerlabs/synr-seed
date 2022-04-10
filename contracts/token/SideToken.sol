@@ -16,6 +16,7 @@ contract SideToken is Initializable, ERC20Upgradeable, AccessControlUpgradeable 
 
   using AddressUpgradeable for address;
 
+  // solhint-disable-next-line
   function __SideToken_init(string memory name, string memory symbol) public initializer {
     __ERC20_init(name, symbol);
     __AccessControl_init();
@@ -31,5 +32,4 @@ contract SideToken is Initializable, ERC20Upgradeable, AccessControlUpgradeable 
   function burn(address to, uint256 amount) public onlyRole(BURNER_ROLE) {
     _burn(to, amount);
   }
-
 }
