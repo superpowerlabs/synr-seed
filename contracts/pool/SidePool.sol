@@ -196,6 +196,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return rewards.mul(conf.taxPoints).div(10000);
   }
 
+/**
+   * @param user_ address of the owner of the token being boosted
+   * @return the amount being boost
+   */
   function boostWeight(address user_) public view override returns (uint256) {
     User storage user = users[user_];
     uint256 baseAmount = uint256(user.tokenAmount);
@@ -507,6 +511,12 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     emit DepositUnlocked(_msgSender(), uint16(index));
   }
 
+/**
+   * @notice Withdraws SYNR that has been collected as tax for unstaking early
+   * @param amount amount of ssynr to be withdrawn
+   * @param beneficiary address to which the withdrawl will go to
+   * @param what what is available
+   */
   function withdrawPenaltiesOrTaxes(
     uint256 amount,
     address beneficiary,
