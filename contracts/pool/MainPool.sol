@@ -218,7 +218,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     uint256 when,
     uint256 lockedFrom,
     uint256 lockedUntil
-  ) public view override returns (uint256) {
+  ) public pure override returns (uint256) {
     if (lockedUntil == 0) {
       return 10000;
     }
@@ -264,4 +264,6 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     payload = _makeDeposit(tokenType, lockupTime, tokenAmountOrID, recipientChain);
     emit DepositSaved(_msgSender(), uint16(getIndexFromPayload(payload)));
   }
+
+  uint256[50] private __gap;
 }

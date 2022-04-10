@@ -29,7 +29,7 @@ contract TokenReceiver is IERC20Receiver, IERC721ReceiverUpgradeable {
     uint256 tokenId,
     // solhint-disable-next-line
     bytes calldata data
-  ) public override returns (bytes4) {
+  ) public pure override returns (bytes4) {
     return this.onERC721Received.selector;
   }
 }

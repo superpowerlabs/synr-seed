@@ -19,30 +19,31 @@ function normalize(val, n = 18) {
 // test unit coming soon
 
 describe("#FarmingPool", function () {
-  let SideToken, seed;
-  let weed;
+  let SeedToken, seed;
+  let WeedToken, weed;
   let coupon;
   let FarmingPool, pool;
   let SynCityCouponsSimplified, blueprint;
   let week = 7 * 24 * 3600;
 
-  let user0sSeeds = "250000000"
+  let user0sSeeds = "250000000";
 
   let deployer, user0, user1, user2, marketplace, treasury;
 
   before(async function () {
     initEthers(ethers);
     [deployer, user0, user1, user2, marketplace, treasury] = await ethers.getSigners();
-    SideToken = await ethers.getContractFactory("SideToken");
+    SeedToken = await ethers.getContractFactory("SeedToken");
+    WeedToken = await ethers.getContractFactory("WeedToken");
     FarmingPool = await ethers.getContractFactory("FarmingPool");
     SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
   });
 
   async function initAndDeploy(initPool) {
-    seed = await upgrades.deployProxy(SideToken, ["Mobland SEED Token", "SEED"]);
+    seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
-    weed = await upgrades.deployProxy(SideToken, ["Mobland WEED Token", "WEED"]);
+    weed = await upgrades.deployProxy(WeedToken, []);
     await weed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);
@@ -53,15 +54,19 @@ describe("#FarmingPool", function () {
 
     if (initPool) {
       await pool.initPool(1000, week, 9800, 1000, 100, 800);
-      await pool.updateNftConf(0,0,0, // << those are ignored
-          150, 1000);
+      await pool.updateNftConf(
+        0,
+        0,
+        0, // << those are ignored
+        150,
+        1000
+      );
     }
 
     await seed.grantRole(await seed.MINTER_ROLE(), deployer.address);
     await seed.mint(user0.address, ethers.utils.parseEther(user0sSeeds));
 
     await weed.grantRole(await weed.MINTER_ROLE(), pool.address);
-
   }
 
   let deposit;
@@ -83,7 +88,7 @@ describe("#FarmingPool", function () {
     });
   });
 
-  describe("#lockupTime", async function () {
+  describe("#getLockupTime", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
       //
@@ -104,7 +109,7 @@ describe("#FarmingPool", function () {
     });
 
     it("should calculate the yield weight", async function () {
-      expect(await pool.lockupTime(deposit)).equal(180);
+      expect(await pool.getLockupTime(deposit)).equal(180);
     });
   });
 
@@ -191,23 +196,20 @@ describe("#FarmingPool", function () {
     });
 
     it("should stake some seed", async function () {
-      const amount = ethers.utils.parseEther("1500000")
-      await seed.connect(user0).approve(pool.address, amount)
-      const balanceBefore = await seed.balanceOf(user0.address)
-      expect(balanceBefore).equal(normalize(user0sSeeds))
+      const amount = ethers.utils.parseEther("1500000");
+      await seed.connect(user0).approve(pool.address, amount);
+      const balanceBefore = await seed.balanceOf(user0.address);
+      expect(balanceBefore).equal(normalize(user0sSeeds));
 
-      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 365
+      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 365;
       expect(await pool.connect(user0).stake(SEED_STAKE, 365, amount))
-          .emit(pool, "DepositSaved")
-          .withArgs(user0.address, 0);
+        .emit(pool, "DepositSaved")
+        .withArgs(user0.address, 0);
 
       let deposit = await pool.getDepositByIndex(user0.address, 0);
       expect(deposit.tokenAmountOrID).equal(amount);
       expect(deposit.tokenType).equal(SEED_STAKE);
       expect(deposit.lockedUntil).equal(lockedUntil);
-
     });
-
-
   });
 });

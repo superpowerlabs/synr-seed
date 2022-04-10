@@ -27,7 +27,7 @@ describe("#Integration test", function () {
   let SynrBridge, synrBridge;
   let SynrBridgeV2;
   let SeedFarm, seedFarm;
-  let SideToken, seed;
+  let SeedToken, seed;
   let SynCityPasses, pass;
   let SynCityCouponsSimplified, blueprint;
 
@@ -41,7 +41,7 @@ describe("#Integration test", function () {
     SynrBridge = await ethers.getContractFactory("SynrBridgeMock");
     SynrBridgeV2 = await ethers.getContractFactory("SynrBridgeV2Mock");
     SeedFarm = await ethers.getContractFactory("SeedFarmMock");
-    SideToken = await ethers.getContractFactory("SideToken");
+    SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
     SynCityPasses = await ethers.getContractFactory("SynCityPassesMock");
     SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
@@ -78,7 +78,7 @@ describe("#Integration test", function () {
 
     await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
 
-    seed = await upgrades.deployProxy(SideToken, ["Mobland SEED Token", "SEED"]);
+    seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);

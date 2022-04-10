@@ -20,11 +20,12 @@ async function main() {
 
   const synrAddress = deployed[chainId].SyndicateERC20;
   const sSynrAddress = deployed[chainId].SyntheticSyndicateERC20;
+  const synrPassAddress = deployed[chainId].SynCityPasses;
 
   console.log("Deploying SynrBridge");
   const SynrBridge = await ethers.getContractFactory("SynrBridge");
 
-  const synrBridge = await upgrades.deployProxy(SynrBridge, [synrAddress, sSynrAddress]);
+  const synrBridge = await upgrades.deployProxy(SynrBridge, [synrAddress, sSynrAddress, synrPassAddress]);
   await synrBridge.deployed();
 
   const SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
@@ -35,16 +36,10 @@ async function main() {
 
   const network = chainId === 1 ? "ethereum" : chainId === 3 ? "ropsten" : "localhost";
 
-  console.log(`
-To verify SynrBridge source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
+  console.log(
+      await deployUtils.verifyCodeInstructions("WeedToken", chainId, ["address", "address", "address"], [synrAddress, sSynrAddress, synrPassAddress], "SynrBridge")
+  );
 
-The encoded arguments are:
-
-${deployUtils.encodeArguments(["address", "address"], [synrAddress, sSynrAddress])}
-
-`);
-
-  console.log("SynrBridge deployed at", synrBridge.address);
   await deployUtils.saveDeployed(chainId, ["SynrBridge"], [synrBridge.address]);
 }
 

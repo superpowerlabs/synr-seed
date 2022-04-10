@@ -11,16 +11,17 @@ async function main() {
   const network = chainId === 56 ? "BSC" : chainId === 97 ? "BSCTestnet" : "localhost";
 
   console.log("Deploying SEED...");
-  const SeedToken = await ethers.getContractFactory("SideToken");
-  const seed = await upgrades.deployProxy(SeedToken, []);
+  const WeedToken = await ethers.getContractFactory("WeedToken");
+  const seed = await upgrades.deployProxy(WeedToken, []);
   await seed.deployed();
 
   console.log(
-    await deployUtils.verifyCodeInstructions("SeedToken", chainId, [], [], "SeedToken")
+      await deployUtils.verifyCodeInstructions("WeedToken", chainId, [], [], "WeedToken")
   );
 
-  console.log("SeedToken deployed at", seed.address);
-  await deployUtils.saveDeployed(chainId, ["SeedToken"], [seed.address]);
+
+  console.log("WeedToken deployed at", seed.address);
+  await deployUtils.saveDeployed(chainId, ["WeedToken"], [seed.address]);
 }
 
 main()

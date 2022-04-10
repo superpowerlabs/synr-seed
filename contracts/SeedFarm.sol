@@ -20,8 +20,11 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
 
   function initialize(address seed_, address blueprint_) public initializer {
     __SidePool_init(seed_, seed_, blueprint_);
-    require(keccak256(abi.encodePacked(stakedToken.symbol())) == keccak256(abi.encodePacked("SEED")), "SeedFarm: seed_ not SEED");
-  __WormholeTunnel_init();
+    require(
+      keccak256(abi.encodePacked(stakedToken.symbol())) == keccak256(abi.encodePacked("SEED")),
+      "SeedFarm: seed_ not SEED"
+    );
+    __WormholeTunnel_init();
   }
 
   function _authorizeUpgrade(address newImplementation) internal override(SidePool, WormholeTunnelUpgradeable) onlyOwner {}
@@ -69,4 +72,6 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: no blueprint allowed here");
     _stake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
+
+  uint256[50] private __gap;
 }
