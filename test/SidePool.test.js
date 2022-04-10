@@ -20,7 +20,7 @@ function normalize(val, n = 18) {
 
 describe("#SidePool", function () {
   let WormholeMock, wormhole;
-  let SideToken, seed;
+  let SeedToken, seed;
   let coupon;
   let SidePool, sidePool;
   let SynCityCouponsSimplified, blueprint;
@@ -31,13 +31,13 @@ describe("#SidePool", function () {
   before(async function () {
     initEthers(ethers);
     [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
-    SideToken = await ethers.getContractFactory("SideToken");
+    SeedToken = await ethers.getContractFactory("SeedToken");
     SidePool = await ethers.getContractFactory("SidePoolMock");
     SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
   });
 
   async function initAndDeploy(initPool) {
-    seed = await upgrades.deployProxy(SideToken, ["Mobland SEED Token", "SEED"]);
+    seed = await upgrades.deployProxy(SeedToken, ["Mobland SEED Token", "SEED"]);
     await seed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);

@@ -15,14 +15,15 @@ async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
+  const blueprintAddress = deployed[chainId][chainId === 56 ? "SynCityCoupons" : "SynCityCouponsSimplified"];
 
   console.log("Deploying SeedFarm");
   const SeedFarm = await ethers.getContractFactory("SeedFarm");
 
-  const seedFarm = await upgrades.deployProxy(SeedFarm, [seedAddress]);
+  const seedFarm = await upgrades.deployProxy(SeedFarm, [seedAddress, blueprintAddress]);
   await seedFarm.deployed();
 
-  const SeedToken = await ethers.getContractFactory("SeedToken");
+  const SeedToken = await ethers.getContractFactory("SideToken");
   const seed = await SeedToken.attach(seedAddress);
   await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
 
@@ -30,13 +31,9 @@ async function main() {
 
   const network = chainId === 56 ? "BSC" : chainId === 97 ? "BSCTestnet" : "localhost";
 
-  console.log(`
-To verify SeedFarm source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
-
-The encoded arguments are:
-
-${deployUtils.encodeArguments(["address"], [seedAddress])}
-`);
+  console.log(
+      await deployUtils.verifyCodeInstructions("WeedToken", chainId, ["address", "address"], [seedAddress, blueprintAddress], "SeedFarm")
+  );
 
   console.log("SeedFarm deployed at", seedFarm.address);
   await deployUtils.saveDeployed(chainId, ["SeedFarm"], [seedFarm.address]);

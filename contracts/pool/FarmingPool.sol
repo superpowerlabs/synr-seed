@@ -36,5 +36,5 @@ contract FarmingPool is SidePool {
     require(deposit.tokenType == SEED_STAKE || deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "FarmingPool: invalid tokenType");
     _unstakeDeposit(deposit);
   }
-
+  uint256[50] private __gap;
 }

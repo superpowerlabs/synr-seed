@@ -458,4 +458,5 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     require(deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SidePool: not a blueprint");
     _unstakeDeposit(deposit);
   }
+  uint256[50] private __gap;
 }

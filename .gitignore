@@ -2,8 +2,12 @@
 *.swo
 
 # Logs
+/log
 logs
 *.log
+
+/tmp
+tmp.*
 
 # Runtime data
 pids

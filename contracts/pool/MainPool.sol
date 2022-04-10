@@ -264,4 +264,5 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     payload = _makeDeposit(tokenType, lockupTime, tokenAmountOrID, recipientChain);
     emit DepositSaved(_msgSender(), uint16(getIndexFromPayload(payload)));
   }
+  uint256[50] private __gap;
 }
