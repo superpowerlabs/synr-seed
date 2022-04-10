@@ -139,6 +139,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       uint256(conf.lastRatioUpdateAt).sub(conf.poolInitAt).div(conf.decayInterval);
   }
 
+/**
+   * @param deposit The deposit
+   * @return the time it will be locked
+   */
   function lockupTime(Deposit memory deposit) public view override returns (uint256) {
     return uint256(deposit.lockedUntil).sub(deposit.lockedFrom).div(1 days);
   }
@@ -156,10 +160,19 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     }
   }
 
+/**
+   * @param deposit The deposit
+   * @return the weighted yield
+   */
   function yieldWeight(Deposit memory deposit) public view override returns (uint256) {
     return uint256(10000).add(lockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
   }
 
+/**
+   * @param deposit The deposit
+   * @param timestamp Current time of the stake
+   * @return the Amount of untaxed reward
+   */
   function calculateUntaxedRewards(Deposit memory deposit, uint256 timestamp) public view override returns (uint256) {
     if (deposit.tokenAmount == 0) {
       return 0;
@@ -175,6 +188,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
         .div(1000000);
   }
 
+/**
+   * @notice Calculates the tax for claiming reward
+   * @param rewards The rewards of the stake
+   */
   function calculateTaxOnRewards(uint256 rewards) public view override returns (uint256) {
     return rewards.mul(conf.taxPoints).div(10000);
   }
@@ -212,6 +229,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     _collectRewards(_msgSender());
   }
 
+/**
+  * @notice The reward is collected and the tax is substracted 
+   * @param user_ The user collecting the reward
+   */
   function _collectRewards(address user_) internal {
     User storage user = users[user_];
     uint256 rewards;
@@ -229,6 +250,11 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     }
   }
 
+/**
+   * @param user_ The user collecting the reward
+   * @param timestamp Current time of the stake
+   * @return the pending rewards that have yet to be taxed
+   */
   function untaxedPendingRewards(address user_, uint256 timestamp) external view override returns (uint256) {
     User storage user = users[user_];
     uint256 rewards;
@@ -259,15 +285,34 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
         .add(uint256(deposit.tokenAmountOrID).mul(1e26));
   }
 
+/**
+   * @notice Searches for deposit from the user and its index
+   * @param user address of user who made deposit being searched
+   * @param index index of the deposit being searched
+   * @return the deposit
+   */
   function getDepositByIndex(address user, uint256 index) public view override returns (Deposit memory) {
     require(users[user].deposits[index].tokenAmountOrID > 0, "SidePool: deposit not found");
     return users[user].deposits[index];
   }
 
+/**
+   * @param user address of user
+   * @return the ammount of deposits a user has made
+   */
   function getDepositsLength(address user) public view override returns (uint256) {
     return users[user].deposits.length;
   }
 
+/**
+* @notice stakes if the pool is active
+  * @param user_ address of user being updated
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param lockedFrom timestamp when locked 
+   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
+   * @param mainIndex index of deposit being updated
+   */
   function _stake(
     address user_,
     uint256 tokenType,
@@ -316,10 +361,18 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     emit DepositSaved(user_, uint16(mainIndex));
   }
 
+/**
+   * @notice calls _stake and passes Blueprint 
+   * @param tokenId id of token to be stake
+   */
   function stakeBlueprint(uint256 tokenId) external override {
     _stake(_msgSender(), BLUEPRINT_STAKE_FOR_BOOST, block.timestamp, 0, type(uint16).max, tokenId);
   }
 
+/**
+   * @notice calls _colledRewards to get rewards
+   * @param tokenId id of token to be unstake
+   */
   function unstakeBlueprint(uint256 tokenId) public override {
     User storage user = users[_msgSender()];
     for (uint256 i; i < user.deposits.length; i++) {
@@ -332,6 +385,13 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     }
   }
 
+  /**
+   * @notice gets Percentage Vested at a certain timestamp
+   * @param when timestamp where percentage will be calculated
+   * @param lockedFrom timestamp when locked 
+   * @param lockedUntil timestamp when can unstake without penalty  
+   * @return the percentage vested
+   */
   function getVestedPercentage(
     uint256 when,
     uint256 lockedFrom,
@@ -350,6 +410,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return vestedTime.mul(10000).div(lockupTime);
   }
 
+/**
+   * @notice Only unstakes if the token is SSYNR
+   * @param depositIndex index of deposit that wishes to be unstake
+   */
   function unstakeIfSSynr(uint256 depositIndex) external override {
     Deposit storage deposit = users[_msgSender()].deposits[depositIndex];
     require(deposit.tokenType == S_SYNR_SWAP, "SidePool: not a sSYNR > SEED swap");
@@ -367,11 +431,21 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
 
   //  function
 
+/**
+   * @param user address of which trying to unstake
+   * @param mainIndex the main index of the deposit
+   */
   function canUnstakeWithoutTax(address user, uint256 mainIndex) external view override returns (bool) {
     Deposit memory deposit = users[user].deposits[mainIndex];
     return deposit.lockedUntil > 0 && block.timestamp > uint256(deposit.lockedUntil);
   }
 
+/**
+   * @notice Searches for deposit from the user and its index
+   * @param user address of user who made deposit being searched
+   * @param mainIndex index of the deposit being searched
+   * @return the deposit
+   */
   function getDepositIndexByMainIndex(address user, uint256 mainIndex) public view override returns (uint256) {
     for (uint256 i; i < users[user].deposits.length; i++) {
       if (uint256(users[user].deposits[i].mainIndex) == mainIndex && users[user].deposits[i].lockedFrom > 0) {
@@ -381,6 +455,14 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     revert("SidePool: deposit not found");
   }
 
+ /**
+   * @notice unstakes a deposit, calculates penalty for early unstake
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param lockedFrom timestamp when locked 
+   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param mainIndex index of deposit
+   * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
+   */
   function _unstake(
     uint256 tokenType,
     uint256 lockedFrom,
