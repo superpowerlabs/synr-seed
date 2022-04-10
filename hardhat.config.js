@@ -48,13 +48,22 @@ module.exports = {
     },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      gasLimit: 6000000,
       accounts: [envJson.testnet.privateKey],
     },
     bsc_testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
-      gasPrice: 20000000000,
+      // gasPrice: 20000000000,
+      gasLimit: 6000000,
       accounts: [envJson.testnet.privateKey],
+    },
+    mumbai: {
+      url: 'https://rpc-mumbai.matic.today',
+      chainId: 80001,
+      // gasPrice: 20000000000,
+      gasLimit: 6000000,
+      accounts: [envJson.testnet.privateKey]
     },
   },
   gasReporter: {

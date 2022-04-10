@@ -14,7 +14,7 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  console.log("chainId", chainId);
+  // console.log("chainId", chainId);
 
   const [owner] = await ethers.getSigners();
 
@@ -33,14 +33,12 @@ async function main() {
   await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
 
   console.log("SynrBridge deployed at", synrBridge.address);
-
-  const network = chainId === 1 ? "ethereum" : chainId === 3 ? "ropsten" : "localhost";
+  await deployUtils.saveDeployed(chainId, ["SynrBridge"], [synrBridge.address]);
 
   console.log(
-      await deployUtils.verifyCodeInstructions("WeedToken", chainId, ["address", "address", "address"], [synrAddress, sSynrAddress, synrPassAddress], "SynrBridge")
+      await deployUtils.verifyCodeInstructions("SynrBridge", chainId, ["address", "address", "address"], [synrAddress, sSynrAddress, synrPassAddress], "SynrBridge")
   );
 
-  await deployUtils.saveDeployed(chainId, ["SynrBridge"], [synrBridge.address]);
 }
 
 main()

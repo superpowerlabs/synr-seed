@@ -40,10 +40,10 @@ describe("#FarmingPool", function () {
   });
 
   async function initAndDeploy(initPool) {
-    seed = await upgrades.deployProxy(SeedToken, []);
+    seed = await SeedToken.deploy();
     await seed.deployed();
 
-    weed = await upgrades.deployProxy(WeedToken, []);
+    weed = await WeedToken.deploy()
     await weed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);

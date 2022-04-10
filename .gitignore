@@ -66,6 +66,7 @@ db
 env.json
 /etherscan
 export
-.env
 .env.*
 .openzeppelin
+
+/flattened

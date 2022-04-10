@@ -15,27 +15,26 @@ async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
+  const weedAddress = deployed[chainId].WeedToken;
   const blueprintAddress = deployed[chainId].SynCityCoupons
 
-  console.log("Deploying SeedFarm");
-  const SeedFarm = await ethers.getContractFactory("SeedFarm");
+  console.log("Deploying FarmingPool");
+  const FarmingPool = await ethers.getContractFactory("FarmingPool");
 
-  const seedFarm = await upgrades.deployProxy(SeedFarm, [seedAddress, blueprintAddress], {
-    gas: 6000000
-  });
-  await seedFarm.deployed();
+  const pool = await upgrades.deployProxy(FarmingPool, [seedAddress, weedAddress, blueprintAddress]);
+  await pool.deployed();
 
-  const SeedToken = await ethers.getContractFactory("SideToken");
-  const seed = await SeedToken.attach(seedAddress);
-  await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
+  const WeedToken = await ethers.getContractFactory("WeedToken");
+  const weed = await WeedToken.attach(weedAddress);
+  await weed.grantRole(await weed.MINTER_ROLE(), pool.address);
 
-  console.log("SeedFarm deployed at", seedFarm.address);
+  console.log("FarmingPool deployed at", pool.address);
 
-  console.log("SeedFarm deployed at", seedFarm.address);
-  await deployUtils.saveDeployed(chainId, ["SeedFarm"], [seedFarm.address]);
+  console.log("FarmingPool deployed at", pool.address);
+  await deployUtils.saveDeployed(chainId, ["FarmingPool"], [pool.address]);
 
   console.log(
-      await deployUtils.verifyCodeInstructions("SeedFarm", chainId, ["address", "address"], [seedAddress, blueprintAddress], "SeedFarm")
+      await deployUtils.verifyCodeInstructions("FarmingPool", chainId, ["address", "address", "address"], [seedAddress, weedAddress, blueprintAddress], "FarmingPool")
   );
 
 }

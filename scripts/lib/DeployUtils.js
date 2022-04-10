@@ -4,11 +4,9 @@ const {Contract} = require("@ethersproject/contracts");
 const abi = require("ethereumjs-abi");
 
 const oZChainName = {
-  1337: "unknown-1337",
   1: "mainnet",
   3: "ropsten",
-  56: "bsc",
-  97: "bsc_testnet",
+  56: "bsc"
 };
 
 const scanner = {
@@ -105,7 +103,8 @@ class DeployUtils {
   }
 
   async verifyCodeInstructions(name, chainId, types, values, contract) {
-    const oz = JSON.parse(await fs.readFile(path.resolve(__dirname, "../../.openzeppelin", oZChainName[chainId] + ".json")));
+    let chainName = oZChainName[chainId] || 'unknown-' + chainId
+    const oz = JSON.parse(await fs.readFile(path.resolve(__dirname, "../../.openzeppelin", chainName + ".json")));
     let address
     LOOP: for (let key in oz.impls) {
       let storage = oz.impls[key].layout.storage
@@ -129,14 +128,17 @@ ${this.encodeArguments(types, values)}` : ""}
     await fs.ensureDir(logDir);
     const shortDate = (new Date).toISOString().substring(5, 16)
     const fn = [name, chainId, shortDate].join('_') + ".log";
-    await fs.writeFile(path.resolve(logDir, fn), response);
-
+    if (chainId !== 1337) {
+      await fs.writeFile(path.resolve(logDir, fn), response);
     return `${response}
     
 Info saved in:
     
     log/${fn}
 `;
+    } else {
+      return response;
+    }
   }
 }
 
