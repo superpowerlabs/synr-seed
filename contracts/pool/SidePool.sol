@@ -139,7 +139,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       uint256(conf.lastRatioUpdateAt).sub(conf.poolInitAt).div(conf.decayInterval);
   }
 
-  function lockupTime(Deposit memory deposit) public view override returns (uint256) {
+  function getLockupTime(Deposit memory deposit) public pure override returns (uint256) {
     return uint256(deposit.lockedUntil).sub(deposit.lockedFrom).div(1 days);
   }
 
@@ -157,7 +157,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   }
 
   function yieldWeight(Deposit memory deposit) public view override returns (uint256) {
-    return uint256(10000).add(lockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
+    return uint256(10000).add(getLockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
   }
 
   function calculateUntaxedRewards(Deposit memory deposit, uint256 timestamp) public view override returns (uint256) {
@@ -327,12 +327,11 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 when,
     uint256 lockedFrom,
     uint256 lockedUntil
-  ) public view override returns (uint256) {
+  ) public pure override returns (uint256) {
     if (lockedUntil == 0) {
       return 10000;
     }
     uint256 lockupTime = lockedUntil.sub(lockedFrom);
-    return 100;
     if (lockupTime == 0) {
       return 10000;
     }

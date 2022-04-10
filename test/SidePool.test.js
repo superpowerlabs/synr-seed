@@ -37,7 +37,7 @@ describe("#SidePool", function () {
   });
 
   async function initAndDeploy(initPool) {
-    seed = await upgrades.deployProxy(SeedToken, ["Mobland SEED Token", "SEED"]);
+    seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);
@@ -71,7 +71,7 @@ describe("#SidePool", function () {
     });
   });
 
-  describe("#lockupTime", async function () {
+  describe("#getLockupTime", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
       //
@@ -92,7 +92,7 @@ describe("#SidePool", function () {
     });
 
     it("should calculate the yield weight", async function () {
-      expect(await sidePool.lockupTime(deposit)).equal(180);
+      expect(await sidePool.getLockupTime(deposit)).equal(180);
     });
   });
 

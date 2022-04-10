@@ -121,9 +121,9 @@ class DeployUtils {
     
 https://${scanner[chainId]}/address/${address}    
 
-The encoded arguments are:
+${values.length ? `The encoded arguments are:
 
-${this.encodeArguments(types, values)}
+${this.encodeArguments(types, values)}` : ""}
 `;
     const logDir = path.resolve(__dirname, "../../log");
     await fs.ensureDir(logDir);

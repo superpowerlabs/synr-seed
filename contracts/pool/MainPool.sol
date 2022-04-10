@@ -218,7 +218,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     uint256 when,
     uint256 lockedFrom,
     uint256 lockedUntil
-  ) public view override returns (uint256) {
+  ) public pure override returns (uint256) {
     if (lockedUntil == 0) {
       return 10000;
     }

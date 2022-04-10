@@ -12,11 +12,11 @@ async function main() {
 
   console.log("Deploying SEED...");
   const SeedToken = await ethers.getContractFactory("SideToken");
-  const seed = await upgrades.deployProxy(SeedToken, ["Mobland SEED Token", "SEED"]);
+  const seed = await upgrades.deployProxy(SeedToken, []);
   await seed.deployed();
 
   console.log(
-    await deployUtils.verifyCodeInstructions("SeedToken", chainId, ["string", "string"], ["Mobland SEED Token", "SEED"], "SideToken")
+    await deployUtils.verifyCodeInstructions("SeedToken", chainId, [], [], "SeedToken")
   );
 
   console.log("SeedToken deployed at", seed.address);

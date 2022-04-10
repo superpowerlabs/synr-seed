@@ -14,7 +14,7 @@ contract WeedToken is Initializable, SideToken, UUPSUpgradeable {
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(string memory name, string memory symbol) public initializer {
+  function initialize() public initializer {
     __SideToken_init("Mobland Weed Token", "WEED");
     __UUPSUpgradeable_init();
   }

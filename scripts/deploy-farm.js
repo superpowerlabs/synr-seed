@@ -15,7 +15,7 @@ async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
-  const blueprintAddress = deployed[chainId][chainId === 56 ? "SynCityCoupons" : "SynCityCouponsSimplified"];
+  const blueprintAddress = deployed[chainId].SynCityCoupons
 
   console.log("Deploying SeedFarm");
   const SeedFarm = await ethers.getContractFactory("SeedFarm");

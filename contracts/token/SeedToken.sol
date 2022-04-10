@@ -14,7 +14,7 @@ contract SeedToken is Initializable, SideToken, UUPSUpgradeable {
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(string memory name, string memory symbol) public initializer {
+  function initialize() public initializer {
     __SideToken_init("Mobland Seed Token", "SEED");
     __UUPSUpgradeable_init();
   }

@@ -40,10 +40,10 @@ describe("#FarmingPool", function () {
   });
 
   async function initAndDeploy(initPool) {
-    seed = await upgrades.deployProxy(SeedToken, ["Mobland SEED Token", "SEED"]);
+    seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
-    weed = await upgrades.deployProxy(WeedToken, ["Mobland WEED Token", "WEED"]);
+    weed = await upgrades.deployProxy(WeedToken, []);
     await weed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);
@@ -88,7 +88,7 @@ describe("#FarmingPool", function () {
     });
   });
 
-  describe("#lockupTime", async function () {
+  describe("#getLockupTime", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
       //
@@ -109,7 +109,7 @@ describe("#FarmingPool", function () {
     });
 
     it("should calculate the yield weight", async function () {
-      expect(await pool.lockupTime(deposit)).equal(180);
+      expect(await pool.getLockupTime(deposit)).equal(180);
     });
   });
 

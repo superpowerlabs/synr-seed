@@ -93,7 +93,7 @@ interface ISidePool {
     uint32 bPBoostLimit_
   ) external;
 
-  function lockupTime(Deposit memory deposit) external view returns (uint256);
+  function getLockupTime(Deposit memory deposit) external view returns (uint256);
 
   function yieldWeight(Deposit memory deposit) external view returns (uint256);
 

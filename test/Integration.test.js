@@ -78,7 +78,7 @@ describe("#Integration test", function () {
 
     await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
 
-    seed = await upgrades.deployProxy(SeedToken, ["Mobland SEED Token", "SEED"]);
+    seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);
