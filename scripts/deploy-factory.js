@@ -17,13 +17,12 @@ async function main() {
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
   const blueprintAddress = deployed[chainId].SynCityCoupons
-  const seedFarmingAddress = deployed[chainId].SeedFarmingPool
+  const seedFarmingAddress = deployed[chainId].SeedPool
 
-  const SeedFarmingPool = await ethers.getContractFactory("SeedFarmingPool");
+  const SeedPool = await ethers.getContractFactory("SeedPool");
   const SeedFactory = await ethers.getContractFactory("SeedFactory");
 
-  console.log("Deploying SeedFarmingPool");
-  const seedPool = SeedFarmingPool.attach(seedFarmingAddress);
+  const seedPool = SeedPool.attach(seedFarmingAddress);
 
   const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress);
@@ -35,7 +34,6 @@ async function main() {
 
   const seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
   await seedFactory.deployed();
-
   await seedPool.setFactory(seedFactory.address)
 
 

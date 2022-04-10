@@ -25,11 +25,12 @@ describe("#Integration test", function () {
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
   let SynrBridge, synrBridge;
+  let MainPool, mainPool;
   let SynrBridgeV2;
   let SeedToken, seed;
   let SynCityPasses, pass;
   let SeedFactory, seedFactory;
-  let SeedFarmingPool, seedPool;
+  let SeedPool, seedPool;
   let SynCityCouponsSimplified, blueprint;
 
   let deployer, fundOwner, superAdmin, operator, validator, user1, user2, user3, treasury;
@@ -42,7 +43,8 @@ describe("#Integration test", function () {
     SynrBridge = await ethers.getContractFactory("SynrBridgeMock");
     SynrBridgeV2 = await ethers.getContractFactory("SynrBridgeV2Mock");
     SeedFactory = await ethers.getContractFactory("SeedFactoryMock");
-    SeedFarmingPool = await ethers.getContractFactory("SeedFarmingPool");
+    SeedPool = await ethers.getContractFactory("SeedPool");
+    MainPool = await ethers.getContractFactory("MainPool");
     SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
     SynCityPasses = await ethers.getContractFactory("SynCityPassesMock");
@@ -75,10 +77,14 @@ describe("#Integration test", function () {
     await pass.mintToken(user2.address);
     await pass.mintToken(user2.address);
 
-    synrBridge = await upgrades.deployProxy(SynrBridge, [synr.address, sSynr.address, pass.address]);
+    mainPool = await upgrades.deployProxy(MainPool, [synr.address, sSynr.address, pass.address]);
+    await mainPool.deployed();
+
+    synrBridge = await upgrades.deployProxy(SynrBridge, [mainPool.address]);
     await synrBridge.deployed();
 
-    await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+    await sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+    await mainPool.setFactory(synrBridge.address)
 
     seed = await SeedToken.deploy();
     await seed.deployed();
@@ -89,7 +95,7 @@ describe("#Integration test", function () {
     await blueprint.mint(user1.address, 2);
     await blueprint.mint(user3.address, 1);
 
-    seedPool = await upgrades.deployProxy(SeedFarmingPool, [seed.address, seed.address, blueprint.address]);
+    seedPool = await upgrades.deployProxy(SeedPool, [seed.address, seed.address, blueprint.address]);
     await seedPool.deployed()
     await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800);
     await seedPool.updateNftConf(100000, 1500, 500000, 150, 1000);
@@ -105,7 +111,7 @@ describe("#Integration test", function () {
     await wormhole.deployed();
 
     await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFactory.address));
-    await synrBridge.initPool(7, 4000);
+    await mainPool.initPool(7, 4000);
 
     await seedFactory.wormholeInit(4, wormhole.address);
     await seedFactory.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
@@ -144,7 +150,7 @@ describe("#Integration test", function () {
     );
     expect(payload3).equal("50000000000000000000000000");
 
-    await synr.connect(fundOwner).approve(synrBridge.address, ethers.utils.parseEther("30000"));
+    await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("35000"));
 
     expect(
       await synrBridge.connect(fundOwner).wormholeTransfer(
@@ -156,14 +162,15 @@ describe("#Integration test", function () {
     )
       .emit(synrBridge, "DepositSaved")
       .withArgs(fundOwner.address, 0);
-    let deposit = await synrBridge.getDepositByIndex(fundOwner.address, 0);
+
+    let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
     expect(deposit.tokenAmountOrID).equal(amount);
     expect(deposit.tokenType).equal(SYNR_STAKE);
     expect(deposit.otherChain).equal(4);
 
-    const finalPayload = await synrBridge.fromDepositToTransferPayload(deposit);
+    const finalPayload = await mainPool.fromDepositToTransferPayload(deposit);
 
-    await sSynr.connect(user2).approve(synrBridge.address, ethers.utils.parseEther("30000"));
+    await sSynr.connect(user2).approve(mainPool.address, ethers.utils.parseEther("30000"));
 
     expect(
       synrBridge.connect(user2).wormholeTransfer(
@@ -184,11 +191,11 @@ describe("#Integration test", function () {
     )
       .emit(synrBridge, "DepositSaved")
       .withArgs(user2.address, 0);
-    let deposit3 = await synrBridge.getDepositByIndex(user2.address, 0);
+    let deposit3 = await mainPool.getDepositByIndex(user2.address, 0);
     expect(deposit3.tokenAmountOrID).equal(amount3);
     expect(deposit3.tokenType).equal(S_SYNR_SWAP);
     expect(deposit3.otherChain).equal(4);
-    const finalPayload3 = await synrBridge.fromDepositToTransferPayload(deposit3);
+    const finalPayload3 = await mainPool.fromDepositToTransferPayload(deposit3);
 
     expect(
       await synrBridge.connect(fundOwner).wormholeTransfer(
@@ -200,13 +207,13 @@ describe("#Integration test", function () {
     )
       .emit(synrBridge, "DepositSaved")
       .withArgs(fundOwner.address, 1);
-    let deposit2 = await synrBridge.getDepositByIndex(fundOwner.address, 1);
+    let deposit2 = await mainPool.getDepositByIndex(fundOwner.address, 1);
     expect(deposit2.tokenAmountOrID).equal(amount2);
     expect(deposit2.tokenType).equal(1);
     expect(deposit2.otherChain).equal(4);
-    const finalPayload2 = await synrBridge.fromDepositToTransferPayload(deposit2);
+    const finalPayload2 = await mainPool.fromDepositToTransferPayload(deposit2);
 
-    expect(await synr.balanceOf(synrBridge.address)).equal(amount.add(amount2));
+    expect(await synr.balanceOf(mainPool.address)).equal(amount.add(amount2));
 
     expect(await seedFactory.mockWormholeCompleteTransfer(fundOwner.address, finalPayload))
       .emit(seedFactory, "DepositSaved")
@@ -244,7 +251,7 @@ describe("#Integration test", function () {
     await seedPool.connect(user2).collectRewards();
     expect(await seed.balanceOf(user2.address)).equal(untaxedPendingRewards3.sub(tax));
 
-    let payload4 = await synrBridge.serializeInput(
+    let payload4 = await mainPool.serializeInput(
       SYNR_PASS_STAKE_FOR_BOOST, // sSYNR
       0, // 1 year
       9
@@ -252,7 +259,7 @@ describe("#Integration test", function () {
     expect(payload4).equal("90002");
 
     // approve the spending of the pass
-    await pass.connect(fundOwner).approve(synrBridge.address, 9);
+    await pass.connect(fundOwner).approve(mainPool.address, 9);
 
     expect(
       await synrBridge.connect(fundOwner).wormholeTransfer(
@@ -265,8 +272,8 @@ describe("#Integration test", function () {
       .emit(synrBridge, "DepositSaved")
       .withArgs(fundOwner.address, 2);
 
-    let deposit4 = await synrBridge.getDepositByIndex(fundOwner.address, 2);
-    const finalPayload4 = await synrBridge.fromDepositToTransferPayload(deposit4);
+    let deposit4 = await mainPool.getDepositByIndex(fundOwner.address, 2);
+    const finalPayload4 = await mainPool.fromDepositToTransferPayload(deposit4);
 
     expect(await seedFactory.mockWormholeCompleteTransfer(fundOwner.address, finalPayload4))
       .emit(seedFactory, "DepositSaved")
@@ -315,7 +322,7 @@ describe("#Integration test", function () {
     await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
 
     // stake SYNR in the SynrBridge
-    const payload = await synrBridge.serializeInput(
+    const payload = await mainPool.serializeInput(
       SYNR_STAKE, // SYNR
       300,
       amount
@@ -323,7 +330,7 @@ describe("#Integration test", function () {
 
     expect(payload).equal("100000000000000000000003001");
 
-    await synr.connect(user1).approve(synrBridge.address, ethers.utils.parseEther("10000"));
+    await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
 
     await synrBridge.connect(user1).wormholeTransfer(
       payload,
@@ -332,14 +339,14 @@ describe("#Integration test", function () {
       1
     );
 
-    let deposit = await synrBridge.getDepositByIndex(user1.address, 0);
+    let deposit = await mainPool.getDepositByIndex(user1.address, 0);
     expect(deposit.tokenAmountOrID).equal(amount);
     expect(deposit.tokenType).equal(SYNR_STAKE);
     expect(deposit.otherChain).equal(4);
 
-    const finalPayload = await synrBridge.fromDepositToTransferPayload(deposit);
+    const finalPayload = await mainPool.fromDepositToTransferPayload(deposit);
 
-    expect(await synr.balanceOf(synrBridge.address)).equal(amount);
+    expect(await synr.balanceOf(mainPool.address)).equal(amount);
 
     await seedFactory.connect(user1).mockWormholeCompleteTransfer(user1.address, finalPayload);
 
@@ -357,7 +364,7 @@ describe("#Integration test", function () {
     await seedFactory.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
 
     const ts = await getTimestamp();
-    const tax = await synrBridge.calculatePenaltyForEarlyUnstake(ts, await synrBridge.getDepositByIndex(user1.address, 0));
+    const tax = await mainPool.calculatePenaltyForEarlyUnstake(ts, await mainPool.getDepositByIndex(user1.address, 0));
     expect(amount.sub(tax)).equal("8000000000000000000000");
 
     await synrBridge.mockWormholeCompleteTransfer(user1.address, seedPayload);
@@ -365,9 +372,9 @@ describe("#Integration test", function () {
     const synrBalanceAfter = await synr.balanceOf(user1.address);
     expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount.sub(tax));
 
-    expect(await synrBridge.penalties()).equal(tax);
+    expect(await mainPool.penalties()).equal(tax);
     const synrBalanceBeforePenalty = await synr.balanceOf(user2.address);
-    await synrBridge.withdrawPenalties(tax, user2.address);
+    await mainPool.withdrawPenalties(tax, user2.address);
     const synrBalanceAfterPenalty = await synr.balanceOf(user2.address);
     expect(await synrBalanceAfterPenalty).equal(synrBalanceBeforePenalty + tax);
   });
@@ -376,7 +383,7 @@ describe("#Integration test", function () {
     const amount = ethers.utils.parseEther("10000");
 
     // stake SYNR in the SynrBridge
-    const payload = await synrBridge.serializeInput(
+    const payload = await mainPool.serializeInput(
       SYNR_STAKE, // SYNR
       365, // 1 year
       amount
@@ -384,7 +391,7 @@ describe("#Integration test", function () {
 
     expect(payload).equal("100000000000000000000003651");
 
-    await synr.connect(fundOwner).approve(synrBridge.address, ethers.utils.parseEther("10000"));
+    await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("10000"));
 
     await synrBridge.connect(fundOwner).wormholeTransfer(
       payload,
@@ -393,14 +400,14 @@ describe("#Integration test", function () {
       1
     );
 
-    let deposit = await synrBridge.getDepositByIndex(fundOwner.address, 0);
+    let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
     expect(deposit.tokenAmountOrID).equal(amount);
     expect(deposit.tokenType).equal(SYNR_STAKE);
     expect(deposit.otherChain).equal(4);
 
-    const finalPayload = await synrBridge.fromDepositToTransferPayload(deposit);
+    const finalPayload = await mainPool.fromDepositToTransferPayload(deposit);
 
-    expect(await synr.balanceOf(synrBridge.address)).equal(amount);
+    expect(await synr.balanceOf(mainPool.address)).equal(amount);
 
     await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
 

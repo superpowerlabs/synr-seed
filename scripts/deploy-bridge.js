@@ -18,25 +18,30 @@ async function main() {
 
   const [owner] = await ethers.getSigners();
 
-  const synrAddress = deployed[chainId].SyndicateERC20;
-  const sSynrAddress = deployed[chainId].SyntheticSyndicateERC20;
-  const synrPassAddress = deployed[chainId].SynCityPasses;
+  const mainPoolAddress = deployed[chainId].MainPool;
 
   console.log("Deploying SynrBridge");
   const SynrBridge = await ethers.getContractFactory("SynrBridge");
 
-  const synrBridge = await upgrades.deployProxy(SynrBridge, [synrAddress, sSynrAddress, synrPassAddress]);
+  const synrBridge = await upgrades.deployProxy(SynrBridge, [mainPoolAddress]);
   await synrBridge.deployed();
 
-  const SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
-  const sSynr = await SyntheticSyndicateERC20.attach(sSynrAddress);
-  await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+  // const SynrBridge = await ethers.getContractFactory("SynrBridge");
+  // const synrBridge = await SynrBridge.attach("0xF5C2D1cda9Bb2EA793B7F2069b385F7eB3ebf052");
+
 
   console.log("SynrBridge deployed at", synrBridge.address);
+
+  const MainPool = await ethers.getContractFactory("MainPool");
+  const pool = await MainPool.attach(mainPoolAddress);
+
+  console.log("Set SynrBridge as a MainPool factory");
+  await pool.setFactory(synrBridge.address, {gasLimit: 60000})
+
   await deployUtils.saveDeployed(chainId, ["SynrBridge"], [synrBridge.address]);
 
   console.log(
-      await deployUtils.verifyCodeInstructions("SynrBridge", chainId, ["address", "address", "address"], [synrAddress, sSynrAddress, synrPassAddress], "SynrBridge")
+      await deployUtils.verifyCodeInstructions("SynrBridge", chainId, ["address"], [mainPoolAddress], "SynrBridge")
   );
 
 }

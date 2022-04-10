@@ -9,26 +9,27 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./pool/MainPool.sol";
+import "./pool/Constants.sol";
+import "./utils/PayloadUtils.sol";
 
 import "hardhat/console.sol";
 
-contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
+contract SynrBridge is PayloadUtils, Constants, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
+
+  MainPool public pool;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(
-    address synr_,
-    address sSynr_,
-    address pass_
-  ) public initializer {
-    __MainPool_init(synr_, sSynr_, pass_);
+  function initialize(address pool_) public initializer {
     __WormholeTunnel_init();
+    require(pool_.isContract(), "SynrBridge: pool_ not a contract");
+    pool = MainPool(pool_);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override(MainPool, WormholeTunnelUpgradeable) onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal override(WormholeTunnelUpgradeable) onlyOwner {}
 
   // STAKE/BURN starts on the main chain and completes on the side chain
   function wormholeTransfer(
@@ -38,7 +39,7 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
     require(_msgSender() == address(uint160(uint256(recipient))), "SynrBridge: only the sender can receive on other chain");
-    _stake(payload, recipientChain);
+    pool.stake(_msgSender(), payload, recipientChain);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
@@ -57,7 +58,7 @@ contract SynrBridge is MainPool, WormholeTunnelUpgradeable {
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
     require(tokenType > S_SYNR_SWAP, "SynrBridge: sSYNR can't be unstaked");
-    _unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    pool.unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
   uint256[50] private __gap;
