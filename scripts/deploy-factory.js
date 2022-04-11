@@ -9,37 +9,41 @@ const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
+const {upgrades} = require('hardhat');
 let deployUtils;
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
+  const blueprintAddress = deployed[chainId].SynCityCoupons
+  const seedFarmingAddress = deployed[chainId].SeedPool
 
-  console.log("Deploying SeedFarm");
-  const SeedFarm = await ethers.getContractFactory("SeedFarm");
+  const SeedPool = await ethers.getContractFactory("SeedPool");
+  const SeedFactory = await ethers.getContractFactory("SeedFactory");
 
-  const seedFarm = await upgrades.deployProxy(SeedFarm, [seedAddress]);
-  await seedFarm.deployed();
+  const seedPool = SeedPool.attach(seedFarmingAddress);
 
   const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress);
-  await seed.grantRole(await seed.MINTER_ROLE(), seedFarm.address);
+  console.log("Give the pool minting permissions on Seed")
 
-  console.log("SeedFarm deployed at", seedFarm.address);
+  await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address, {gasLimit: 60000});
 
-  const network = chainId === 56 ? "BSC" : chainId === 97 ? "BSCTestnet" : "localhost";
+  console.log("Deploying SeedFactory");
 
-  console.log(`
-To verify SeedFarm source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
+  const seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
+  await seedFactory.deployed();
+  await seedPool.setFactory(seedFactory.address)
 
-The encoded arguments are:
 
-${deployUtils.encodeArguments(["address"], [seedAddress])}
-`);
+  console.log("SeedFactory deployed at", seedFactory.address);
+  await deployUtils.saveDeployed(chainId, ["SeedFactory"], [seedFactory.address]);
 
-  console.log("SeedFarm deployed at", seedFarm.address);
-  await deployUtils.saveDeployed(chainId, ["SeedFarm"], [seedFarm.address]);
+  console.log(
+      await deployUtils.verifyCodeInstructions("SeedFactory", chainId, ["address"], [seedPool.address], "SeedFactory")
+  );
+
 }
 
 main()

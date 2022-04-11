@@ -1,33 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-// Author: Francesco Sullo <francesco@sullo.co>
-// (c) 2022+ SuperPower Labs Inc.
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-
-contract SideToken is Initializable, ERC20Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+contract SideToken is ERC20, AccessControl {
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-  bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
-  using AddressUpgradeable for address;
-  address public manager;
-
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() initializer {}
-
-  function initialize(string memory name, string memory symbol) public initializer {
-    __ERC20_init(name, symbol);
-    __AccessControl_init();
-    __UUPSUpgradeable_init();
-
+  constructor(string memory name, string memory symbol) ERC20(name, symbol) {
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    _grantRole(UPGRADER_ROLE, msg.sender);
+    _grantRole(MINTER_ROLE, msg.sender);
   }
 /**
    *
@@ -37,14 +19,4 @@ contract SideToken is Initializable, ERC20Upgradeable, AccessControlUpgradeable,
   function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
     _mint(to, amount);
   }
-/**
-   *
-   * @param to address to burn the token.
-   * @param amount amount to be burn.
-   */
-  function burn(address to, uint256 amount) public onlyRole(BURNER_ROLE) {
-    _burn(to, amount);
-  }
-  
-  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }

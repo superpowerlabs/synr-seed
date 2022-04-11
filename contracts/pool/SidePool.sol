@@ -38,7 +38,11 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   //  constructor() initializer {}
 
   // solhint-disable-next-line
-  function __SidePool_init(address stakedToken_, address rewardsToken_, address blueprint_) public initializer {
+  function __SidePool_init(
+    address stakedToken_,
+    address rewardsToken_,
+    address blueprint_
+  ) public initializer {
     __Ownable_init();
     require(stakedToken_.isContract(), "SidePool: stakedToken not a contract");
     require(rewardsToken_.isContract(), "SidePool: rewardsToken not a contract");
@@ -143,7 +147,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
    * @param deposit The deposit
    * @return the time it will be locked
    */
-  function lockupTime(Deposit memory deposit) public view override returns (uint256) {
+  function getLockupTime(Deposit memory deposit) public pure override returns (uint256) {
     return uint256(deposit.lockedUntil).sub(deposit.lockedFrom).div(1 days);
   }
 
@@ -165,7 +169,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
    * @return the weighted yield
    */
   function yieldWeight(Deposit memory deposit) public view override returns (uint256) {
-    return uint256(10000).add(lockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
+    return uint256(10000).add(getLockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
   }
 
 /**
@@ -325,7 +329,6 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal virtual {
-    require(tokenType <= BLUEPRINT_STAKE_FOR_BOOST, "SidePool: invalid tokenType");
     updateRatio();
     _collectRewards(user_);
     uint256 tokenAmount;
@@ -344,12 +347,19 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       users[user_].blueprintsAmount++;
       // SidePool must be approve to spend blueprints
       blueprint.safeTransferFrom(user_, address(this), tokenAmountOrID);
+    } else if (tokenType == SEED_STAKE) {
+      tokenAmount = tokenAmountOrID;
+      // SidePool must be approve to spend SEED
+      stakedToken.transferFrom(user_, address(this), tokenAmount);
+    } else {
+      revert("SidePool: invalid tokenType");
     }
     users[user_].tokenAmount = uint96(uint256(users[user_].tokenAmount).add(tokenAmount));
     // add deposit
     if (tokenType == 0) {
       lockedUntil = lockedFrom + conf.decayInterval;
     }
+    uint256 index = users[user_].deposits.length;
     Deposit memory deposit = Deposit({
       tokenType: uint8(tokenType),
       lockedFrom: uint32(lockedFrom),
@@ -362,31 +372,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       rewardsFactor: conf.rewardsFactor
     });
     users[user_].deposits.push(deposit);
-    emit DepositSaved(user_, uint16(mainIndex));
-  }
-
-/**
-   * @notice calls _stake and passes Blueprint 
-   * @param tokenId id of token to be stake
-   */
-  function stakeBlueprint(uint256 tokenId) external override {
-    _stake(_msgSender(), BLUEPRINT_STAKE_FOR_BOOST, block.timestamp, 0, type(uint16).max, tokenId);
-  }
-
-/**
-   * @notice calls _colledRewards to get rewards
-   * @param tokenId id of token to be unstake
-   */
-  function unstakeBlueprint(uint256 tokenId) public override {
-    User storage user = users[_msgSender()];
-    for (uint256 i; i < user.deposits.length; i++) {
-      if (uint256(user.deposits[i].tokenAmountOrID) == tokenId && user.deposits[i].tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
-        _collectRewards(_msgSender());
-        user.blueprintsAmount--;
-        user.deposits[i].unstakedAt = uint32(block.timestamp);
-        blueprint.safeTransferFrom(address(this), _msgSender(), uint256(user.deposits[i].tokenAmountOrID));
-      }
-    }
+    emit DepositSaved(user_, uint16(index));
   }
 
   /**
@@ -400,12 +386,11 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 when,
     uint256 lockedFrom,
     uint256 lockedUntil
-  ) public view override returns (uint256) {
+  ) public pure override returns (uint256) {
     if (lockedUntil == 0) {
       return 10000;
     }
     uint256 lockupTime = lockedUntil.sub(lockedFrom);
-    return 100;
     if (lockupTime == 0) {
       return 10000;
     }
@@ -468,27 +453,27 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
    * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
    */
   function _unstake(
+    address user_,
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal virtual {
-    require(tokenType > S_SYNR_SWAP, "SidePool: sSYNR cannot be unstaked");
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass used as SYNR cannot be early unstaked");
     }
-    _collectRewards(_msgSender());
-    uint index = getDepositIndexByMainIndex(_msgSender(), mainIndex);
-    Deposit storage deposit = users[_msgSender()].deposits[index];
+    _collectRewards(user_);
+    uint256 index = getDepositIndexByMainIndex(user_, mainIndex);
+    Deposit storage deposit = users[user_].deposits[index];
     require(
       uint256(deposit.tokenType) == tokenType &&
-      uint256(deposit.lockedFrom) == lockedFrom &&
-      uint256(deposit.lockedUntil) == lockedUntil &&
-      uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
+        uint256(deposit.lockedFrom) == lockedFrom &&
+        uint256(deposit.lockedUntil) == lockedUntil &&
+        uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
       "SidePool: inconsistent deposit"
     );
-    if (tokenType == SYNR_STAKE) {
+    if (tokenType == SYNR_STAKE || tokenType == SEED_STAKE) {
       uint256 vestedPercentage = getVestedPercentage(
         block.timestamp,
         uint256(deposit.lockedFrom),
@@ -501,14 +486,19 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       } else {
         unstakedAmount = uint256(deposit.tokenAmount);
       }
-      stakedToken.transfer(_msgSender(), unstakedAmount);
+      stakedToken.transfer(user_, unstakedAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      stakedToken.transfer(_msgSender(), deposit.tokenAmount);
+      stakedToken.transfer(user_, deposit.tokenAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
-      users[_msgSender()].passAmount--;
+      users[user_].passAmount--;
+    } else if (deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
+      users[user_].blueprintsAmount--;
+      blueprint.safeTransferFrom(address(this), user_, uint256(deposit.tokenAmountOrID));
+    } else {
+      revert("SidePool: invalid tokenType");
     }
     deposit.unstakedAt = uint32(block.timestamp);
-    emit DepositUnlocked(_msgSender(), uint16(index));
+    emit DepositUnlocked(user_, uint16(index));
   }
 
 /**
@@ -535,4 +525,38 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       rewardsToken.transfer(beneficiary, amount);
     }
   }
+
+  // In SeedFarm you can stake directly only blueprints
+  // Must be overridden in FarmingPool
+  function stake(
+    uint256 tokenType,
+    // solhint-disable-next-line
+    uint256 lockupTime,
+    uint256 tokenAmountOrID
+  ) external virtual override {
+    // mainIndex = type(uint16).max means no meanIndex
+    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SidePool: not a blueprint");
+    _stake(_msgSender(), tokenType, block.timestamp, 0, type(uint16).max, tokenAmountOrID);
+  }
+
+  function _unstakeDeposit(Deposit memory deposit) internal {
+    _unstake(
+      _msgSender(),
+      uint256(deposit.tokenType),
+      uint256(deposit.lockedFrom),
+      uint256(deposit.lockedUntil),
+      uint256(deposit.mainIndex),
+      uint256(deposit.tokenAmountOrID)
+    );
+  }
+
+  // In SeedFarm you can unstake directly only blueprints
+  // Must be overridden in FarmingPool
+  function unstake(uint256 depositIndex) external virtual override {
+    Deposit storage deposit = users[_msgSender()].deposits[depositIndex];
+    require(deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SidePool: not a blueprint");
+    _unstakeDeposit(deposit);
+  }
+
+  uint256[50] private __gap;
 }

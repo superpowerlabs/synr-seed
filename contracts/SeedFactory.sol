@@ -8,23 +8,27 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
-import "./pool/SidePool.sol";
+import "./pool/Constants.sol";
+import "./pool/SeedPool.sol";
+import "./utils/PayloadUtils.sol";
 import "hardhat/console.sol";
 
-contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
+contract SeedFactory is PayloadUtils, Constants, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
+
+  SeedPool public pool;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(address seed_, address blueprint_) public initializer {
-    __SidePool_init(seed_, seed_, blueprint_);
-    require(keccak256(abi.encodePacked(stakedToken.symbol())) == keccak256(abi.encodePacked("SEED")), "SeedFarm: seed_ not SEED");
-  __WormholeTunnel_init();
+  function initialize(address pool_) public initializer {
+    __WormholeTunnel_init();
+    require(pool_.isContract(), "SeedFactory: pool_ not a contract");
+    pool = SeedPool(pool_);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override(SidePool, WormholeTunnelUpgradeable) onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal override(WormholeTunnelUpgradeable) onlyOwner {}
 
   // UNSTAKE starts on the side chain and completes on the main chain
   function wormholeTransfer(
@@ -47,7 +51,7 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: blueprints' unstake does not require bridge");
-    _unstake(tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    pool.unstakeViaFactory(_msgSender(), tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
@@ -67,6 +71,8 @@ contract SeedFarm is SidePool, WormholeTunnelUpgradeable {
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: no blueprint allowed here");
-    _stake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    pool.stakeViaFactory(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
+
+  uint256[50] private __gap;
 }

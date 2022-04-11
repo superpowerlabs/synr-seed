@@ -73,7 +73,7 @@ describe("#MainPool", function () {
       );
       expect(payload).equal("100000000000000000000003651");
       await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
-      expect(await mainPool.connect(user1).stake(payload, 4))
+      expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
         .withArgs(user1.address, 0);
       await increaseBlockTimestampBy(182.5 * 24 * 3600);
@@ -100,7 +100,7 @@ describe("#MainPool", function () {
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = "100000000000000000000003651";
       await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
-      expect(await mainPool.connect(user1).stake(payload, 4))
+      expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
         .withArgs(user1.address, 0);
       const lenght = await mainPool.getDepositsLength(user1.address);
@@ -112,7 +112,7 @@ describe("#MainPool", function () {
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
       const payload = "100000000000000000000003651";
       await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
-      expect(await mainPool.connect(user1).stake(payload, 4))
+      expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
         .withArgs(user1.address, 0);
       const deposit = await mainPool.getDepositByIndex(user1.address, 0);
@@ -190,38 +190,6 @@ describe("#MainPool", function () {
         mainIndex: 0,
       };
       expect(mainPool.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: tokenAmountOrID out of range");
-    });
-  });
-
-  describe("#_updateUserAndAddDeposit", async function () {
-    beforeEach(async function () {
-      await initAndDeploy();
-    });
-
-    it("should return updated user", async function () {
-      const amount = ethers.utils.parseEther("10000");
-      await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "100000000000000000000003651";
-      await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
-      expect(
-        await mainPool.connect(user1).stake(
-          payload,
-          4 // BSC
-        )
-      )
-        .emit(mainPool, "DepositSaved")
-        .withArgs(user1.address, 0);
-      await increaseBlockTimestampBy(182.5 * 24 * 3600);
-      await mainPool.updateUserAndAddDeposit(user1.address, 1, 1000000000, 3000000000, amount, 44, 0);
-      //Update user pushes new deposit, it therefore changes the index of the intended new update deposite to the last one in the list.
-      //unsure if that is the intended behavior of UPDATE USER
-      const depositAfter = await mainPool.getDepositByIndex(user1.address, 1);
-      expect(depositAfter.tokenType, depositAfter.lockedFrom, depositAfter.lockedUntil, depositAfter.otherChain).equal(
-        1,
-        1000000000,
-        3000000000,
-        44
-      );
     });
   });
 });

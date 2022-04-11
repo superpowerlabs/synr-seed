@@ -3,6 +3,20 @@ const fs = require("fs-extra");
 const {Contract} = require("@ethersproject/contracts");
 const abi = require("ethereumjs-abi");
 
+const oZChainName = {
+  1: "mainnet",
+  3: "ropsten",
+  56: "bsc"
+};
+
+const scanner = {
+  1337: "localhost",
+  1: "etherscan.io",
+  3: "ropsten.etherscan.io",
+  56: "bscscan.com",
+  97: "testnet.bscscan.com",
+};
+
 class DeployUtils {
   constructor(ethers) {
     this.ethers = ethers;
@@ -86,6 +100,45 @@ class DeployUtils {
 
   encodeArguments(parameterTypes, parameterValues) {
     return abi.rawEncode(parameterTypes, parameterValues).toString("hex");
+  }
+
+  async verifyCodeInstructions(name, chainId, types, values, contract) {
+    let chainName = oZChainName[chainId] || 'unknown-' + chainId
+    const oz = JSON.parse(await fs.readFile(path.resolve(__dirname, "../../.openzeppelin", chainName + ".json")));
+    let address
+    LOOP: for (let key in oz.impls) {
+      let storage = oz.impls[key].layout.storage
+      for  (let s of storage) {
+        if (s.contract === contract) {
+          address = oz.impls[key].address
+          break LOOP
+        }
+      }
+    }
+
+    let response = `To verify ${name} source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually at 
+    
+https://${scanner[chainId]}/address/${address}    
+
+${values.length ? `The encoded arguments are:
+
+${this.encodeArguments(types, values)}` : ""}
+`;
+    const logDir = path.resolve(__dirname, "../../log");
+    await fs.ensureDir(logDir);
+    const shortDate = (new Date).toISOString().substring(5, 16)
+    const fn = [name, chainId, shortDate].join('_') + ".log";
+    if (chainId !== 1337) {
+      await fs.writeFile(path.resolve(logDir, fn), response);
+    return `${response}
+    
+Info saved in:
+    
+    log/${fn}
+`;
+    } else {
+      return response;
+    }
   }
 }
 

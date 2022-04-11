@@ -7,9 +7,16 @@ pragma solidity ^0.8.2;
 import "./SidePool.sol";
 import "hardhat/console.sol";
 
-contract FarmingPool is SidePool {
+contract SeedPool is SidePool {
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
+
+  address public factory;
+
+  modifier onlyFactory() {
+    require(factory != address(0) && _msgSender() == factory, "SeedPool: forbidden");
+    _;
+  }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -24,19 +31,18 @@ contract FarmingPool is SidePool {
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
+  function setFactory(address farmer_) external onlyOwner {
+    require(farmer_.isContract(), "SeedPool: farmer_ not a contract");
+    factory = farmer_;
+  }
 
-  /**
-   * @notice calls _stake function
-   * @param lockupTime time which the stake will be lock
-   * @param tokenAmount amount to be staked
-   */
   function stake(
     uint256 tokenType,
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
-    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == SEED_STAKE, "FarmingPool: unsupported token");
+    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
     _stake(
       _msgSender(),
       tokenType,
@@ -47,17 +53,33 @@ contract FarmingPool is SidePool {
     );
   }
 
-/**
-   * @notice calls _unstake function
-   * @param depositIndex index of the deposit
-   */
+  function stakeViaFactory(
+    address user_,
+    uint256 tokenType,
+    uint256 lockedFrom,
+    uint256 lockedUntil,
+    uint256 mainIndex,
+    uint256 tokenAmountOrID
+  ) external onlyFactory {
+    require(tokenType <= BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
+    _stake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+  }
+
   function unstake(uint256 depositIndex) external override {
     Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
-    require(
-      deposit.tokenType == SEED_STAKE || deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST,
-      "FarmingPool: invalid tokenType"
-    );
+    require(deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: invalid tokenType");
     _unstakeDeposit(deposit);
+  }
+
+  function unstakeViaFactory(
+    address user_,
+    uint256 tokenType,
+    uint256 lockedFrom,
+    uint256 lockedUntil,
+    uint256 mainIndex,
+    uint256 tokenAmountOrID
+  ) external onlyFactory {
+    _unstake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
   uint256[50] private __gap;

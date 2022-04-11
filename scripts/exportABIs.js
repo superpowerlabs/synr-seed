@@ -12,17 +12,24 @@ async function main() {
     contracts: {},
   };
 
-  function abi(name, folder) {
+  function abi(name, folder, rename) {
     let source = path.resolve(__dirname, `../artifacts/contracts/${folder ? folder + "/" : ""}${name}.sol/${name}.json`);
     let json = require(source);
-    ABIs.contracts[name] = json.abi;
+    ABIs.contracts[rename || name] = json.abi;
   }
 
   abi("SyntheticSyndicateERC20", "token");
   abi("SyndicateERC20", "token");
-  abi("SeedToken", "token");
+  abi("SynCityPasses", "token");
   abi("SynrBridge", "");
-  abi("SeedFarm", "");
+
+  abi("SeedToken", "token");
+  abi("SynCityCouponsSimplified", "token", "SynCityCoupons");
+  abi("SeedFactory", "");
+
+  abi("WeedToken", "token");
+  abi("FarmingPool", "pool");
+  abi("MainPool", "pool");
 
   await fs.writeFile(path.resolve(__dirname, "../export/ABIs.json"), JSON.stringify(ABIs, null, 2));
 }

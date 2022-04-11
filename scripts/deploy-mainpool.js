@@ -9,43 +9,43 @@ const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
+const {upgrades} = require('hardhat');
 let deployUtils;
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  console.log("chainId", chainId);
-
-  const [owner] = await ethers.getSigners();
 
   const synrAddress = deployed[chainId].SyndicateERC20;
   const sSynrAddress = deployed[chainId].SyntheticSyndicateERC20;
+  const synrPassAddress = deployed[chainId].SynCityPasses;
 
-  console.log("Deploying SynrBridge");
-  const SynrBridge = await ethers.getContractFactory("SynrBridge");
+  const MainPool = await ethers.getContractFactory("MainPool");
 
-  const synrBridge = await upgrades.deployProxy(SynrBridge, [synrAddress, sSynrAddress]);
-  await synrBridge.deployed();
+  console.log("Deploying MainPool");
+  const mainPool = await upgrades.deployProxy(MainPool, [synrAddress, sSynrAddress, synrPassAddress]);
+  await mainPool.deployed()
+  //
+  // const MainPool = await ethers.getContractFactory("MainPool");
+  // const mainPool = await MainPool.attach("0x906B067e392e2c5f9E4f101f36C0b8CdA4885EBf");
 
+  console.log("MainPool deployed at", mainPool.address);
+
+  console.log("Setting MainPool as a sSYNR receiver");
   const SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
   const sSynr = await SyntheticSyndicateERC20.attach(sSynrAddress);
-  await sSynr.updateRole(synrBridge.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+  await sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
 
-  console.log("SynrBridge deployed at", synrBridge.address);
+  console.log("Init MainPool");
+  // define right parameters
+  await mainPool.initPool(7, 4000, {gasLimit: 50000});
 
-  const network = chainId === 1 ? "ethereum" : chainId === 3 ? "ropsten" : "localhost";
+  await deployUtils.saveDeployed(chainId, ["MainPool"], [mainPool.address]);
 
-  console.log(`
-To verify SynrBridge source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually
+  console.log(
+      await deployUtils.verifyCodeInstructions("MainPool", chainId, ["address","address", "address"], [synrAddress, sSynrAddress, synrPassAddress], "MainPool")
+  );
 
-The encoded arguments are:
-
-${deployUtils.encodeArguments(["address", "address"], [synrAddress, sSynrAddress])}
-
-`);
-
-  console.log("SynrBridge deployed at", synrBridge.address);
-  await deployUtils.saveDeployed(chainId, ["SynrBridge"], [synrBridge.address]);
 }
 
 main()

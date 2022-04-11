@@ -9,7 +9,7 @@ interface ISidePool {
 
   event DepositUnlocked(address user, uint16 mainIndex);
 
-  event RewardsCollected(address user, uint rewards);
+  event RewardsCollected(address user, uint256 rewards);
 
   struct Deposit {
     // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
@@ -93,7 +93,7 @@ interface ISidePool {
     uint32 bPBoostLimit_
   ) external;
 
-  function lockupTime(Deposit memory deposit) external view returns (uint256);
+  function getLockupTime(Deposit memory deposit) external view returns (uint256);
 
   function yieldWeight(Deposit memory deposit) external view returns (uint256);
 
@@ -121,10 +121,6 @@ interface ISidePool {
 
   function getDepositIndexByMainIndex(address user, uint256 mainIndex) external view returns (uint256);
 
-  function stakeBlueprint(uint256 tokenId) external;
-
-  function unstakeBlueprint(uint256 tokenId) external;
-
   function getVestedPercentage(
     uint256 when,
     uint256 lockedFrom,
@@ -138,4 +134,12 @@ interface ISidePool {
     address beneficiary,
     uint256 what
   ) external;
+
+  function stake(
+    uint256 tokenType,
+    uint256 lockupTime,
+    uint256 tokenAmountOrID
+  ) external;
+
+  function unstake(uint256 depositIndex) external;
 }

@@ -10,26 +10,25 @@ async function main() {
   const chainId = await deployUtils.currentChainId();
 
   console.log("Deploying SEED...");
-  const SeedToken = await ethers.getContractFactory("SeedToken");
-  const seed = await SeedToken.deploy();
-  await seed.deployed();
+  const WeedToken = await ethers.getContractFactory("WeedToken");
+  const weed = await WeedToken.deploy();
+  await weed.deployed();
 
-  console.log("SeedToken deployed at", seed.address);
-  await deployUtils.saveDeployed(chainId, ["SeedToken"], [seed.address]);
+  console.log("WeedToken deployed at", weed.address);
+  await deployUtils.saveDeployed(chainId, ["WeedToken"], [weed.address]);
 
   const network = chainId === 56 ? 'bsc'
       : chainId === 97 ? 'bsc_testnet'
           : 'localhost'
 
   console.log(`
-To verify SeedToken source code:
+To verify weedToken source code:
     
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
-      ${seed.address}
+      ${weed.address}
       
 `);
-
 }
 
 main()
