@@ -16,7 +16,7 @@ async function main() {
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
   const weedAddress = deployed[chainId].WeedToken;
-  const blueprintAddress = deployed[chainId].SynCityCoupons
+  const blueprintAddress = deployed[chainId].SynCityCoupons;
 
   console.log("Deploying FarmingPool");
   const FarmingPool = await ethers.getContractFactory("FarmingPool");
@@ -34,9 +34,14 @@ async function main() {
   await deployUtils.saveDeployed(chainId, ["FarmingPool"], [pool.address]);
 
   console.log(
-      await deployUtils.verifyCodeInstructions("FarmingPool", chainId, ["address", "address", "address"], [seedAddress, weedAddress, blueprintAddress], "FarmingPool")
+    await deployUtils.verifyCodeInstructions(
+      "FarmingPool",
+      chainId,
+      ["address", "address", "address"],
+      [seedAddress, weedAddress, blueprintAddress],
+      "FarmingPool"
+    )
   );
-
 }
 
 main()

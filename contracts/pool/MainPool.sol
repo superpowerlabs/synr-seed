@@ -352,14 +352,22 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
    * @param payload an uint256 encoded with the information of the deposit
    * @param recipientChain chain to where the transfer will go
    */
-  function _stake(address user, uint256 payload, uint16 recipientChain) internal {
+  function _stake(
+    address user,
+    uint256 payload,
+    uint16 recipientChain
+  ) internal {
     (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
     require(conf.minimumLockupTime > 0, "MainPool: pool not alive");
     payload = _makeDeposit(user, tokenType, lockupTime, tokenAmountOrID, recipientChain);
     emit DepositSaved(user, uint16(getIndexFromPayload(payload)));
   }
 
-  function stake(address user, uint256 payload, uint16 recipientChain) external virtual onlyFactory {
+  function stake(
+    address user,
+    uint256 payload,
+    uint16 recipientChain
+  ) external virtual onlyFactory {
     _stake(user, payload, recipientChain);
   }
 

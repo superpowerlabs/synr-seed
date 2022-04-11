@@ -9,15 +9,15 @@ const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
-const {upgrades} = require('hardhat');
+const {upgrades} = require("hardhat");
 let deployUtils;
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
-  const blueprintAddress = deployed[chainId].SynCityCoupons
-  const seedFarmingAddress = deployed[chainId].SeedPool
+  const blueprintAddress = deployed[chainId].SynCityCoupons;
+  const seedFarmingAddress = deployed[chainId].SeedPool;
 
   const SeedPool = await ethers.getContractFactory("SeedPool");
   const SeedFactory = await ethers.getContractFactory("SeedFactory");
@@ -26,7 +26,7 @@ async function main() {
 
   const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress);
-  console.log("Give the pool minting permissions on Seed")
+  console.log("Give the pool minting permissions on Seed");
 
   await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address, {gasLimit: 60000});
 
@@ -34,16 +34,12 @@ async function main() {
 
   const seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
   await seedFactory.deployed();
-  await seedPool.setFactory(seedFactory.address)
-
+  await seedPool.setFactory(seedFactory.address);
 
   console.log("SeedFactory deployed at", seedFactory.address);
   await deployUtils.saveDeployed(chainId, ["SeedFactory"], [seedFactory.address]);
 
-  console.log(
-      await deployUtils.verifyCodeInstructions("SeedFactory", chainId, ["address"], [seedPool.address], "SeedFactory")
-  );
-
+  console.log(await deployUtils.verifyCodeInstructions("SeedFactory", chainId, ["address"], [seedPool.address], "SeedFactory"));
 }
 
 main()

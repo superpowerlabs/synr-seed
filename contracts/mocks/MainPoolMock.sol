@@ -6,7 +6,11 @@ import "../pool/MainPool.sol";
 import "hardhat/console.sol";
 
 contract MainPoolMock is MainPool {
-  function stake(address user, uint256 payload, uint16 recipientChain) external override {
+  function stake(
+    address user,
+    uint256 payload,
+    uint16 recipientChain
+  ) external override {
     _stake(user, payload, recipientChain);
   }
 
@@ -20,5 +24,4 @@ contract MainPoolMock is MainPool {
   ) external override {
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
-
 }

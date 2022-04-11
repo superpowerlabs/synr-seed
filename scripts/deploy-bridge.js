@@ -29,21 +29,17 @@ async function main() {
   // const SynrBridge = await ethers.getContractFactory("SynrBridge");
   // const synrBridge = await SynrBridge.attach("0xF5C2D1cda9Bb2EA793B7F2069b385F7eB3ebf052");
 
-
   console.log("SynrBridge deployed at", synrBridge.address);
 
   const MainPool = await ethers.getContractFactory("MainPool");
   const pool = await MainPool.attach(mainPoolAddress);
 
   console.log("Set SynrBridge as a MainPool factory");
-  await pool.setFactory(synrBridge.address, {gasLimit: 60000})
+  await pool.setFactory(synrBridge.address, {gasLimit: 60000});
 
   await deployUtils.saveDeployed(chainId, ["SynrBridge"], [synrBridge.address]);
 
-  console.log(
-      await deployUtils.verifyCodeInstructions("SynrBridge", chainId, ["address"], [mainPoolAddress], "SynrBridge")
-  );
-
+  console.log(await deployUtils.verifyCodeInstructions("SynrBridge", chainId, ["address"], [mainPoolAddress], "SynrBridge"));
 }
 
 main()

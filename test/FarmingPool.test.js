@@ -43,7 +43,7 @@ describe("#FarmingPool", function () {
     seed = await SeedToken.deploy();
     await seed.deployed();
 
-    weed = await WeedToken.deploy()
+    weed = await WeedToken.deploy();
     await weed.deployed();
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);

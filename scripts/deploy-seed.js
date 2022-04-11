@@ -17,9 +17,7 @@ async function main() {
   console.log("SeedToken deployed at", seed.address);
   await deployUtils.saveDeployed(chainId, ["SeedToken"], [seed.address]);
 
-  const network = chainId === 56 ? 'bsc'
-      : chainId === 97 ? 'bsc_testnet'
-          : 'localhost'
+  const network = chainId === 56 ? "bsc" : chainId === 97 ? "bsc_testnet" : "localhost";
 
   console.log(`
 To verify SeedToken source code:
@@ -29,7 +27,6 @@ To verify SeedToken source code:
       ${seed.address}
       
 `);
-
 }
 
 main()
