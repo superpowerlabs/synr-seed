@@ -9,7 +9,7 @@ const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
-const {upgrades} = require('hardhat');
+const {upgrades} = require("hardhat");
 let deployUtils;
 
 async function main() {
@@ -24,7 +24,7 @@ async function main() {
 
   console.log("Deploying MainPool");
   const mainPool = await upgrades.deployProxy(MainPool, [synrAddress, sSynrAddress, synrPassAddress]);
-  await mainPool.deployed()
+  await mainPool.deployed();
   //
   // const MainPool = await ethers.getContractFactory("MainPool");
   // const mainPool = await MainPool.attach("0x906B067e392e2c5f9E4f101f36C0b8CdA4885EBf");
@@ -43,9 +43,14 @@ async function main() {
   await deployUtils.saveDeployed(chainId, ["MainPool"], [mainPool.address]);
 
   console.log(
-      await deployUtils.verifyCodeInstructions("MainPool", chainId, ["address","address", "address"], [synrAddress, sSynrAddress, synrPassAddress], "MainPool")
+    await deployUtils.verifyCodeInstructions(
+      "MainPool",
+      chainId,
+      ["address", "address", "address"],
+      [synrAddress, sSynrAddress, synrPassAddress],
+      "MainPool"
+    )
   );
-
 }
 
 main()

@@ -67,7 +67,11 @@ interface IMainPool {
 
   function withdrawPenalties(uint256 amount, address to) external;
 
-  function stake(address user, uint256 payload, uint16 recipientChain) external;
+  function stake(
+    address user,
+    uint256 payload,
+    uint16 recipientChain
+  ) external;
 
   function unstake(
     address user,

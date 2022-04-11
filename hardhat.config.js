@@ -59,11 +59,11 @@ module.exports = {
       accounts: [envJson.testnet.privateKey],
     },
     mumbai: {
-      url: 'https://rpc-mumbai.matic.today',
+      url: "https://rpc-mumbai.matic.today",
       chainId: 80001,
       // gasPrice: 20000000000,
       gasLimit: 6000000,
-      accounts: [envJson.testnet.privateKey]
+      accounts: [envJson.testnet.privateKey],
     },
   },
   gasReporter: {

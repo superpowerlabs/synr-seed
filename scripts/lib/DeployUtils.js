@@ -6,7 +6,7 @@ const abi = require("ethereumjs-abi");
 const oZChainName = {
   1: "mainnet",
   3: "ropsten",
-  56: "bsc"
+  56: "bsc",
 };
 
 const scanner = {
@@ -103,15 +103,15 @@ class DeployUtils {
   }
 
   async verifyCodeInstructions(name, chainId, types, values, contract) {
-    let chainName = oZChainName[chainId] || 'unknown-' + chainId
+    let chainName = oZChainName[chainId] || "unknown-" + chainId;
     const oz = JSON.parse(await fs.readFile(path.resolve(__dirname, "../../.openzeppelin", chainName + ".json")));
-    let address
+    let address;
     LOOP: for (let key in oz.impls) {
-      let storage = oz.impls[key].layout.storage
-      for  (let s of storage) {
+      let storage = oz.impls[key].layout.storage;
+      for (let s of storage) {
         if (s.contract === contract) {
-          address = oz.impls[key].address
-          break LOOP
+          address = oz.impls[key].address;
+          break LOOP;
         }
       }
     }
@@ -120,17 +120,21 @@ class DeployUtils {
     
 https://${scanner[chainId]}/address/${address}    
 
-${values.length ? `The encoded arguments are:
+${
+  values.length
+    ? `The encoded arguments are:
 
-${this.encodeArguments(types, values)}` : ""}
+${this.encodeArguments(types, values)}`
+    : ""
+}
 `;
     const logDir = path.resolve(__dirname, "../../log");
     await fs.ensureDir(logDir);
-    const shortDate = (new Date).toISOString().substring(5, 16)
-    const fn = [name, chainId, shortDate].join('_') + ".log";
+    const shortDate = new Date().toISOString().substring(5, 16);
+    const fn = [name, chainId, shortDate].join("_") + ".log";
     if (chainId !== 1337) {
       await fs.writeFile(path.resolve(logDir, fn), response);
-    return `${response}
+      return `${response}
     
 Info saved in:
     

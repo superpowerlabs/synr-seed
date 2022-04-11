@@ -9,9 +9,14 @@ async function main() {
   deployUtils = new DeployUtils(ethers);
 
   console.log(
-    await deployUtils.verifyCodeInstructions("SeedToken", 1337, ["string", "string"], ["Mobland SEED Token", "SEED"], "SideToken")
+    await deployUtils.verifyCodeInstructions(
+      "SeedToken",
+      1337,
+      ["string", "string"],
+      ["Mobland SEED Token", "SEED"],
+      "SideToken"
+    )
   );
-
 }
 
 main()

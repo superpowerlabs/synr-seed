@@ -3,19 +3,19 @@
 //
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
-require('dotenv').config()
-const {assert} = require("chai")
+require("dotenv").config();
+const {assert} = require("chai");
 const hre = require("hardhat");
-const fs = require('fs-extra')
-const path = require('path')
-const requireOrMock = require('require-or-mock');
-const ethers = hre.ethers
+const fs = require("fs-extra");
+const path = require("path");
+const requireOrMock = require("require-or-mock");
+const ethers = hre.ethers;
 
 const DeployUtils = require("./lib/DeployUtils");
 let deployUtils;
 
 async function currentChainId() {
-  return (await ethers.provider.getNetwork()).chainId
+  return (await ethers.provider.getNetwork()).chainId;
 }
 
 async function main() {
@@ -27,26 +27,21 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  const chainId = await currentChainId()
-  const isLocalNode = /1337$/.test(chainId)
-  const [deployer] = await ethers.getSigners()
+  const chainId = await currentChainId();
+  const isLocalNode = /1337$/.test(chainId);
+  const [deployer] = await ethers.getSigners();
 
-  console.log(
-      "Deploying contracts with the account:",
-      deployer.address
-  );
+  console.log("Deploying contracts with the account:", deployer.address);
 
-  const network = chainId === 97 ? 'bsc_testnet'
-          : 'localhost'
+  const network = chainId === 97 ? "bsc_testnet" : "localhost";
 
-
-  console.log('Current chain ID', await currentChainId())
+  console.log("Current chain ID", await currentChainId());
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const SynCityCoupons = await ethers.getContractFactory("SynCityCouponsSimplified")
-  const nft = await SynCityCoupons.deploy(8000)
-  await nft.deployed()
+  const SynCityCoupons = await ethers.getContractFactory("SynCityCouponsSimplified");
+  const nft = await SynCityCoupons.deploy(8000);
+  await nft.deployed();
 
   // await nft.setMarketplace(process.env.BINANCE_ADDRESS)
 
@@ -57,18 +52,16 @@ To verify SynCityCouponsSimplified source code:
       --network ${network} \\
       ${nft.address}  \\
       8000
-`)
+`);
 
   await deployUtils.saveDeployed(chainId, ["SynCityCoupons"], [nft.address]);
-
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
-    .then(() => process.exit(0))
-    .catch(error => {
-      console.error(error);
-      process.exit(1);
-    });
-
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

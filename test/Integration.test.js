@@ -84,7 +84,7 @@ describe("#Integration test", function () {
     await synrBridge.deployed();
 
     await sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
-    await mainPool.setFactory(synrBridge.address)
+    await mainPool.setFactory(synrBridge.address);
 
     seed = await SeedToken.deploy();
     await seed.deployed();
@@ -96,14 +96,14 @@ describe("#Integration test", function () {
     await blueprint.mint(user3.address, 1);
 
     seedPool = await upgrades.deployProxy(SeedPool, [seed.address, seed.address, blueprint.address]);
-    await seedPool.deployed()
+    await seedPool.deployed();
     await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800);
     await seedPool.updateNftConf(100000, 1500, 500000, 150, 1000);
 
     seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
     await seedFactory.deployed();
 
-    await seedPool.setFactory(seedFactory.address)
+    await seedPool.setFactory(seedFactory.address);
     await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address);
 
     wormhole = await WormholeMock.deploy();
