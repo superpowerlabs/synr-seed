@@ -93,13 +93,12 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
         .add(uint256(deposit.tokenAmountOrID).mul(1e26));
   }
 
-
   /**
    * @notice updates the user with the staked amount or the pass amount and creates new deposit for the user
    * @param user address of user being updated
-   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
-   * @param lockedFrom timestamp when locked 
-   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.
+   * @param lockedFrom timestamp when locked
+   * @param lockedUntil timestamp when can unstake without penalty
    * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
    * @param otherChain chainID of recieving chain
    * @param mainIndex index of deposit being updated
@@ -152,8 +151,8 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
   }
 
   /**
-   * @notice makes the deposit 
-   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @notice makes the deposit
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.
    * @param lockupTime time the staking will take
    * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
    * @param otherChain chainID of recieving chain
@@ -201,7 +200,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
   /**
    * @notice updates the user, calls _updateUserAndAddDeposit
    * @param user address of user being updated
-   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.
    * @param lockupTime time the staking will take
    * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
    * @param otherChain chainID of recieving chain
@@ -229,12 +228,12 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     return deposit;
   }
 
-    /**
+  /**
    * @notice unstakes a deposit, calculates penalty for early unstake
    * @param user address of user
-   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
-   * @param lockedFrom timestamp when locked 
-   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.
+   * @param lockedFrom timestamp when locked
+   * @param lockedUntil timestamp when can unstake without penalty
    * @param mainIndex index of deposit
    * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
    */
@@ -282,8 +281,8 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
   /**
    * @notice gets Percentage Vested at a certain timestamp
    * @param when timestamp where percentage will be calculated
-   * @param lockedFrom timestamp when locked 
-   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param lockedFrom timestamp when locked
+   * @param lockedUntil timestamp when can unstake without penalty
    * @return the percentage vested
    */
   function getVestedPercentage(

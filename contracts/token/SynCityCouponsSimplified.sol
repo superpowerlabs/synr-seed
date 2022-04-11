@@ -57,7 +57,7 @@ contract SynCityCouponsSimplified is ERC721, ERC721Enumerable, Ownable {
   }
 
   // The swapper will manage the swap between the coupon and the final token
-   /**
+  /**
    * @param swapper_ is the addres of the owner doing the swap
    */
   function setSwapper(address swapper_) external onlyOwner {
@@ -66,7 +66,7 @@ contract SynCityCouponsSimplified is ERC721, ERC721Enumerable, Ownable {
     emit SwapperSet(swapper);
   }
 
-   /**
+  /**
    *
    * @param to address to where the tokens is being minted.
    * @param amount amount of token being minted.
@@ -91,7 +91,7 @@ contract SynCityCouponsSimplified is ERC721, ERC721Enumerable, Ownable {
   function _baseURI() internal view virtual override returns (string memory) {
     return _baseTokenURI;
   }
-  
+
   function updateBaseURI(string memory baseTokenURI) external onlyOwner {
     _baseTokenURI = baseTokenURI;
     emit BaseTokenURIUpdated(baseTokenURI);

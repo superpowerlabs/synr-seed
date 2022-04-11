@@ -143,7 +143,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       uint256(conf.lastRatioUpdateAt).sub(conf.poolInitAt).div(conf.decayInterval);
   }
 
-/**
+  /**
    * @param deposit The deposit
    * @return the time it will be locked
    */
@@ -164,7 +164,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     }
   }
 
-/**
+  /**
    * @param deposit The deposit
    * @return the weighted yield
    */
@@ -172,7 +172,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return uint256(10000).add(getLockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
   }
 
-/**
+  /**
    * @param deposit The deposit
    * @param timestamp Current time of the stake
    * @return the Amount of untaxed reward
@@ -192,7 +192,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
         .div(1000000);
   }
 
-/**
+  /**
    * @notice Calculates the tax for claiming reward
    * @param rewards The rewards of the stake
    */
@@ -200,7 +200,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return rewards.mul(conf.taxPoints).div(10000);
   }
 
-/**
+  /**
    * @param user_ address of the owner of the token being boosted
    * @return the amount being boost
    */
@@ -237,8 +237,8 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     _collectRewards(_msgSender());
   }
 
-/**
-  * @notice The reward is collected and the tax is substracted 
+  /**
+   * @notice The reward is collected and the tax is substracted
    * @param user_ The user collecting the reward
    */
   function _collectRewards(address user_) internal {
@@ -258,7 +258,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     }
   }
 
-/**
+  /**
    * @param user_ The user collecting the reward
    * @param timestamp Current time of the stake
    * @return the pending rewards that have yet to be taxed
@@ -293,7 +293,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
         .add(uint256(deposit.tokenAmountOrID).mul(1e26));
   }
 
-/**
+  /**
    * @notice Searches for deposit from the user and its index
    * @param user address of user who made deposit being searched
    * @param index index of the deposit being searched
@@ -304,7 +304,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return users[user].deposits[index];
   }
 
-/**
+  /**
    * @param user address of user
    * @return the ammount of deposits a user has made
    */
@@ -312,12 +312,12 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return users[user].deposits.length;
   }
 
-/**
-* @notice stakes if the pool is active
-  * @param user_ address of user being updated
-   * @param tokenType identifies the type of transaction being made 
-   * @param lockedFrom timestamp when locked 
-   * @param lockedUntil timestamp when can unstake without penalty  
+  /**
+   * @notice stakes if the pool is active
+   * @param user_ address of user being updated
+   * @param tokenType identifies the type of transaction being made
+   * @param lockedFrom timestamp when locked
+   * @param lockedUntil timestamp when can unstake without penalty
    * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
    * @param mainIndex index of deposit being updated
    */
@@ -378,8 +378,8 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   /**
    * @notice gets Percentage Vested at a certain timestamp
    * @param when timestamp where percentage will be calculated
-   * @param lockedFrom timestamp when locked 
-   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param lockedFrom timestamp when locked
+   * @param lockedUntil timestamp when can unstake without penalty
    * @return the percentage vested
    */
   function getVestedPercentage(
@@ -399,7 +399,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return vestedTime.mul(10000).div(lockupTime);
   }
 
-/**
+  /**
    * @notice Only unstakes if the token is SSYNR
    * @param depositIndex index of deposit that wishes to be unstake
    */
@@ -420,7 +420,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
 
   //  function
 
-/**
+  /**
    * @param user address of which trying to unstake
    * @param mainIndex the main index of the deposit
    */
@@ -429,7 +429,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     return deposit.lockedUntil > 0 && block.timestamp > uint256(deposit.lockedUntil);
   }
 
-/**
+  /**
    * @notice Searches for deposit from the user and its index
    * @param user address of user who made deposit being searched
    * @param mainIndex index of the deposit being searched
@@ -444,11 +444,11 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     revert("SidePool: deposit not found");
   }
 
- /**
+  /**
    * @notice unstakes a deposit, calculates penalty for early unstake
-   * @param tokenType identifies the type of transaction being made 
-   * @param lockedFrom timestamp when locked 
-   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param tokenType identifies the type of transaction being made
+   * @param lockedFrom timestamp when locked
+   * @param lockedUntil timestamp when can unstake without penalty
    * @param mainIndex index of deposit
    * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
    */
@@ -501,7 +501,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     emit DepositUnlocked(user_, uint16(index));
   }
 
-/**
+  /**
    * @notice Withdraws SYNR that has been collected as tax for unstaking early
    * @param amount amount of ssynr to be withdrawn
    * @param beneficiary address to which the withdrawl will go to

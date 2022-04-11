@@ -11,7 +11,8 @@ contract SideToken is ERC20, AccessControl {
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _grantRole(MINTER_ROLE, msg.sender);
   }
-/**
+
+  /**
    *
    * @param to address to mint the token.
    * @param amount amount to be minted.
