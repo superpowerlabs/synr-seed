@@ -93,6 +93,18 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
         .add(uint256(deposit.tokenAmountOrID).mul(1e26));
   }
 
+
+  /**
+   * @notice updates the user with the staked amount or the pass amount and creates new deposit for the user
+   * @param user address of user being updated
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param lockedFrom timestamp when locked 
+   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
+   * @param otherChain chainID of recieving chain
+   * @param mainIndex index of deposit being updated
+   * @return the new deposit
+   */
   function _updateUserAndAddDeposit(
     address user,
     uint256 tokenType,
@@ -120,15 +132,33 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     return deposit;
   }
 
+  /**
+   * @notice Searches for deposit from the user and its index
+   * @param user address of user who made deposit being searched
+   * @param mainIndex index of the deposit being searched
+   * @return the deposit
+   */
   function getDepositByIndex(address user, uint256 mainIndex) public view override returns (Deposit memory) {
     require(users[user].deposits[mainIndex].lockedFrom > 0, "PayloadUtils: deposit not found");
     return users[user].deposits[mainIndex];
   }
 
+  /**
+   * @param user address of user
+   * @return the ammount of deposits a user has made
+   */
   function getDepositsLength(address user) public view override returns (uint256) {
     return users[user].deposits.length;
   }
 
+  /**
+   * @notice makes the deposit 
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param lockupTime time the staking will take
+   * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
+   * @param otherChain chainID of recieving chain
+   * @return the TransferPayload calculated from the deposit
+   */
   function _makeDeposit(
     address user,
     uint256 tokenType,
@@ -160,10 +190,23 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     return fromDepositToTransferPayload(_updateUser(user, tokenType, lockupTime, tokenAmountOrID, otherChain));
   }
 
+  /**
+   * @param user address of user
+   * @return the ammount of deposits a user has made
+   */
   function depositsLength(address user) public view returns (uint256) {
     return users[user].deposits.length;
   }
 
+  /**
+   * @notice updates the user, calls _updateUserAndAddDeposit
+   * @param user address of user being updated
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param lockupTime time the staking will take
+   * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
+   * @param otherChain chainID of recieving chain
+   * @return the deposit
+   */
   function _updateUser(
     address user,
     uint256 tokenType,
@@ -186,6 +229,15 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     return deposit;
   }
 
+    /**
+   * @notice unstakes a deposit, calculates penalty for early unstake
+   * @param user address of user
+   * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.  
+   * @param lockedFrom timestamp when locked 
+   * @param lockedUntil timestamp when can unstake without penalty  
+   * @param mainIndex index of deposit
+   * @param tokenAmountOrID ammount of tokens being staked, in the case where a SYNR Pass is being staked, it identified its ID
+   */
   function _unstake(
     address user,
     uint256 tokenType,
@@ -227,6 +279,13 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     emit DepositUnlocked(user, uint16(mainIndex));
   }
 
+  /**
+   * @notice gets Percentage Vested at a certain timestamp
+   * @param when timestamp where percentage will be calculated
+   * @param lockedFrom timestamp when locked 
+   * @param lockedUntil timestamp when can unstake without penalty  
+   * @return the percentage vested
+   */
   function getVestedPercentage(
     uint256 when,
     uint256 lockedFrom,
@@ -243,6 +302,12 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     return vestedTime.mul(10000).div(lockupTime);
   }
 
+  /**
+   * @notice calculates penalty when unstaking SYNR before period is up
+   * @param when timestamp where percentage will be calculated
+   * @param deposit deposit from where penalty is to be calculated
+   * @return the penalty, if any
+   */
   function calculatePenaltyForEarlyUnstake(uint256 when, Deposit memory deposit) public view override returns (uint256) {
     if (when > uint256(deposit.lockedUntil)) {
       return 0;
@@ -252,6 +317,11 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     return unvestedAmount.mul(conf.earlyUnstakePenalty).div(10000);
   }
 
+  /**
+   * @notice Withdraws SSYNR that has been Swapped to the contract
+   * @param amount amount of ssynr to be withdrawn
+   * @param beneficiary address to which the withdrawl will go to
+   */
   function withdrawSSynr(uint256 amount, address beneficiary) external override onlyOwner {
     uint256 availableAmount = sSynr.balanceOf(address(this));
     require(amount <= availableAmount, "MainPool: sSYNR amount not available");
@@ -262,6 +332,11 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     sSynr.transferFrom(address(this), beneficiary, amount);
   }
 
+  /**
+   * @notice Withdraws SYNR that has been collected as tax for unstaking early
+   * @param amount amount of ssynr to be withdrawn
+   * @param beneficiary address to which the withdrawl will go to
+   */
   function withdrawPenalties(uint256 amount, address beneficiary) external override onlyOwner {
     require(amount <= penalties, "MainPool: amount not available");
     if (amount == 0) {
@@ -271,6 +346,12 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     synr.transferFrom(address(this), beneficiary, amount);
   }
 
+  /**
+   * @notice stakes the payload if the pool is active
+   * @param user address of user
+   * @param payload an uint256 encoded with the information of the deposit
+   * @param recipientChain chain to where the transfer will go
+   */
   function _stake(
     address user,
     uint256 payload,

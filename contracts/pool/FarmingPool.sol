@@ -24,6 +24,12 @@ contract FarmingPool is SidePool {
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
+
+  /**
+   * @notice calls _stake function
+   * @param lockupTime time which the stake will be lock
+   * @param tokenAmount amount to be staked
+   */
   function stake(
     uint256 tokenType,
     uint256 lockupTime,
@@ -41,6 +47,10 @@ contract FarmingPool is SidePool {
     );
   }
 
+/**
+   * @notice calls _unstake function
+   * @param depositIndex index of the deposit
+   */
   function unstake(uint256 depositIndex) external override {
     Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
     require(
