@@ -8,6 +8,7 @@ require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
 require("@nomiclabs/hardhat-etherscan");
 require("@openzeppelin/hardhat-upgrades");
+require("solidity-coverage");
 // Go to https://hardhat.org/config/ to learn more
 
 if (process.env.GAS_REPORT === "yes") {

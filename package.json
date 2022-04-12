@@ -1,5 +1,5 @@
 {
-  "name": "syndicate-staking",
+  "name": "synr-seed",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
@@ -28,6 +28,7 @@
     "pretty-quick": "^3.1.3",
     "require-or-mock": "^0.2.1",
     "solhint": "^3.3.7",
+    "solidity-coverage": "^0.7.20",
     "solium": "^1.2.5",
     "typescript": "^4.6.3"
   },
@@ -37,6 +38,7 @@
     "test-frontend": "react-scripts test",
     "eject": "react-scripts eject",
     "test": "npx hardhat test",
+    "coverage": "npx hardhat coverage",
     "test:gas": "GAS_REPORT=yes npx hardhat test",
     "clean": "rm -rf cache && rm -rf src/artifacts",
     "compile": "npx hardhat compile",
