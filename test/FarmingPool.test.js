@@ -212,4 +212,25 @@ describe("#FarmingPool", function () {
       expect(deposit.lockedUntil).equal(lockedUntil);
     });
   });
+  describe.only("#unstake", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should stake some seed", async function () {
+      const amount = ethers.utils.parseEther("1500000");
+      await seed.connect(user0).approve(pool.address, amount);
+      const balanceBefore = await seed.balanceOf(user0.address);
+      expect(balanceBefore).equal(normalize(user0sSeeds));
+
+      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
+      expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
+        .emit(pool, "DepositSaved")
+        .withArgs(user0.address, 0);
+
+      let deposit = await pool.getDepositByIndex(user0.address, 0);
+      expect(await pool.unstake(deposit.mainIndex))
+      .emit(user0.address, deposit.mainIndex)
+    });
+  });
 });
