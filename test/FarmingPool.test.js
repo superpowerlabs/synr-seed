@@ -64,7 +64,6 @@ describe("#FarmingPool", function () {
     }
 
     await seed.grantRole(await seed.MINTER_ROLE(), deployer.address);
-    await seed.grantRole(await seed.BURNER_ROLE(), pool.address);
     await seed.mint(user0.address, ethers.utils.parseEther(user0sSeeds));
 
     await weed.grantRole(await weed.MINTER_ROLE(), pool.address);

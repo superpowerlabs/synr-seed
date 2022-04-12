@@ -370,7 +370,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       // SidePool must be approve to spend SEED
       stakedToken.transferFrom(user_, address(this), tokenAmount);
       taxes += tokenAmount;
-      stakedToken.burnFrom(address(this), tokenAmount.mul(conf.burnRatio).div(10000));
+      stakedToken.burn(tokenAmount.mul(conf.burnRatio).div(10000));
     } else {
       revert("SidePool: invalid tokenType");
     }
