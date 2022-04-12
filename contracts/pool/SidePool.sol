@@ -61,7 +61,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint16 decayFactor_,
     uint16 swapFactor_,
     uint16 stakeFactor_,
-    uint16 taxPoints_
+    uint16 taxPoints_,
+    uint16 burnRatio_,
+    uint16 priceRatio_,
+    uint8 coolDownDays_
   ) external override onlyOwner {
     require(conf.maximumLockupTime == 0, "SidePool: already initiated");
     conf = Conf({
@@ -73,7 +76,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       lastRatioUpdateAt: uint32(block.timestamp),
       swapFactor: swapFactor_,
       stakeFactor: stakeFactor_,
-      taxPoints: taxPoints_
+      taxPoints: taxPoints_,
+      burnRatio: burnRatio_,
+      priceRatio: priceRatio_,
+    coolDownDays: coolDownDays_
     });
   }
 
@@ -83,7 +89,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint16 decayFactor_,
     uint16 swapFactor_,
     uint16 stakeFactor_,
-    uint16 taxPoints_
+    uint16 taxPoints_,
+    uint16 burnRatio_,
+    uint16 priceRatio_,
+    uint8 coolDownDays_
   ) external override onlyOwner {
     require(conf.maximumLockupTime > 0, "SidePool: not initiated yet");
     if (decayInterval_ > 0) {
@@ -100,6 +109,15 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     }
     if (taxPoints_ > 0) {
       conf.taxPoints = taxPoints_;
+    }
+    if (burnRatio_ > 0) {
+      conf.burnRatio = burnRatio_;
+    }
+    if (priceRatio_ > 0) {
+      conf.priceRatio = priceRatio_;
+    }
+    if (coolDownDays_ > 0) {
+      conf.coolDownDays = coolDownDays_;
     }
   }
 
@@ -333,31 +351,33 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     _collectRewards(user_);
     uint256 tokenAmount;
     if (tokenType == S_SYNR_SWAP) {
-      tokenAmount = tokenAmountOrID.mul(conf.swapFactor);
+      tokenAmount = tokenAmountOrID.mul(conf.swapFactor).mul(conf.priceRatio).div(10000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_STAKE) {
-      tokenAmount = tokenAmountOrID.mul(conf.stakeFactor);
+      tokenAmount = tokenAmountOrID.mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
       users[user_].passAmount++;
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      tokenAmount = uint256(nftConf.synrEquivalent).mul(conf.stakeFactor);
+      tokenAmount = uint256(nftConf.synrEquivalent).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
       users[user_].blueprintsAmount++;
       // SidePool must be approve to spend blueprints
       blueprint.safeTransferFrom(user_, address(this), tokenAmountOrID);
-    } else if (tokenType == SEED_STAKE) {
+    } else if (tokenType == SEED_SWAP) {
       tokenAmount = tokenAmountOrID;
       // SidePool must be approve to spend SEED
       stakedToken.transferFrom(user_, address(this), tokenAmount);
+      taxes += tokenAmount;
+      stakedToken.burn(tokenAmount.mul(conf.burnRatio).div(10000));
     } else {
       revert("SidePool: invalid tokenType");
     }
     users[user_].tokenAmount = uint96(uint256(users[user_].tokenAmount).add(tokenAmount));
     // add deposit
-    if (tokenType == 0) {
-      lockedUntil = lockedFrom + conf.decayInterval;
+    if (tokenType == S_SYNR_SWAP || tokenType == SEED_SWAP) {
+      lockedUntil = lockedFrom + uint(conf.coolDownDays).mul(1 days);
     }
     uint256 index = users[user_].deposits.length;
     Deposit memory deposit = Deposit({
@@ -473,7 +493,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
         uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
       "SidePool: inconsistent deposit"
     );
-    if (tokenType == SYNR_STAKE || tokenType == SEED_STAKE) {
+    if (tokenType == SYNR_STAKE || tokenType == SEED_SWAP) {
       uint256 vestedPercentage = getVestedPercentage(
         block.timestamp,
         uint256(deposit.lockedFrom),

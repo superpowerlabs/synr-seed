@@ -55,6 +55,9 @@ interface ISidePool {
     uint16 swapFactor;
     uint16 stakeFactor;
     uint16 taxPoints; // ex 250 = 2.5%
+    uint16 burnRatio;
+    uint16 priceRatio;
+    uint8 coolDownDays; // cool down period for
   }
 
   struct NftConf {
@@ -71,7 +74,10 @@ interface ISidePool {
     uint16 decayFactor_,
     uint16 swapFactor_,
     uint16 stakeFactor_,
-    uint16 taxPoints_
+    uint16 taxPoints_,
+    uint16 burnRatio_,
+    uint16 priceRatio_,
+    uint8 coolDownDays_
   ) external;
 
   function updateConf(
@@ -79,7 +85,10 @@ interface ISidePool {
     uint16 decayFactor_,
     uint16 swapFactor_,
     uint16 stakeFactor_,
-    uint16 taxPoints_
+    uint16 taxPoints_,
+    uint16 burnRatio_,
+    uint16 priceRatio_,
+    uint8 coolDownDays_
   ) external;
 
   // Split configuration in two struct to avoid following error calling initPool

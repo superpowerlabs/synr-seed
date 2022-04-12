@@ -6,7 +6,7 @@ const {
   getTimestamp,
   increaseBlockTimestampBy,
   bytes32Address,
-  SEED_STAKE,
+  SEED_SWAP,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -53,7 +53,7 @@ describe("#FarmingPool", function () {
     await pool.deployed();
 
     if (initPool) {
-      await pool.initPool(1000, week, 9800, 1000, 100, 800);
+      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10000, 10);
       await pool.updateNftConf(
         0,
         0,
@@ -77,14 +77,14 @@ describe("#FarmingPool", function () {
     });
 
     it("should revert if already initiated", async function () {
-      await pool.initPool(1000, week, 9800, 1000, 100, 800);
-      expect(pool.initPool(1000, week, 9800, 1000, 100, 1000)).revertedWith("SidePool: already initiated");
+      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10000, 10);
+      expect(pool.initPool(1000, week, 9800, 1000, 100, 1000, 3000, 10000, 10)).revertedWith("SidePool: already initiated");
     });
 
     it("should revert if wrong parameters", async function () {
-      await assertThrowsMessage(pool.initPool(1000, week, 129800, 1000, 100, 800), "value out-of-bounds");
-      await assertThrowsMessage(pool.initPool(1000, 1e12, 9800, 1000, 100, 800), "value out-of-bounds");
-      await assertThrowsMessage(pool.initPool(1e10, week, 9800, 1000, 100, 800), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1000, week, 129800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1000, 1e12, 9800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1e10, week, 9800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
     });
   });
 
@@ -96,7 +96,7 @@ describe("#FarmingPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: SEED_STAKE,
+        tokenType: SEED_SWAP,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -147,7 +147,7 @@ describe("#FarmingPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: SEED_STAKE,
+        tokenType: SEED_SWAP,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -201,14 +201,14 @@ describe("#FarmingPool", function () {
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
 
-      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 365;
-      expect(await pool.connect(user0).stake(SEED_STAKE, 365, amount))
+      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
+      expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
         .emit(pool, "DepositSaved")
         .withArgs(user0.address, 0);
 
       let deposit = await pool.getDepositByIndex(user0.address, 0);
       expect(deposit.tokenAmountOrID).equal(amount);
-      expect(deposit.tokenType).equal(SEED_STAKE);
+      expect(deposit.tokenType).equal(SEED_SWAP);
       expect(deposit.lockedUntil).equal(lockedUntil);
     });
   });
