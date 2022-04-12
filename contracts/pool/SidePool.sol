@@ -33,6 +33,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
 
   uint256 public penalties;
   uint256 public taxes;
+  address public oracle;
 
   //  /// @custom:oz-upgrades-unsafe-allow constructor
   //  constructor() initializer {}
@@ -63,7 +64,6 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint16 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
-    uint16 priceRatio_,
     uint8 coolDownDays_
   ) external override onlyOwner {
     require(conf.maximumLockupTime == 0, "SidePool: already initiated");
@@ -78,8 +78,9 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       stakeFactor: stakeFactor_,
       taxPoints: taxPoints_,
       burnRatio: burnRatio_,
-      priceRatio: priceRatio_,
-    coolDownDays: coolDownDays_
+      priceRatio: 10000,
+      coolDownDays: coolDownDays_,
+      status: 1
     });
   }
 
@@ -91,10 +92,9 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint16 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
-    uint16 priceRatio_,
     uint8 coolDownDays_
   ) external override onlyOwner {
-    require(conf.maximumLockupTime > 0, "SidePool: not initiated yet");
+    require(conf.status == 1, "SidePool: not active");
     if (decayInterval_ > 0) {
       conf.decayInterval = decayInterval_;
     }
@@ -113,12 +113,28 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     if (burnRatio_ > 0) {
       conf.burnRatio = burnRatio_;
     }
-    if (priceRatio_ > 0) {
-      conf.priceRatio = priceRatio_;
-    }
     if (coolDownDays_ > 0) {
       conf.coolDownDays = coolDownDays_;
     }
+  }
+
+  // put to zero any parameter that remains the same
+  function updatePriceRatio(
+    uint16 priceRatio_
+  ) external override {
+    require(conf.status == 1, "SidePool: not active");
+    require(oracle != address(0) && _msgSender() == oracle, "SidePool: not the oracle");
+    if (priceRatio_ > 0) {
+      conf.priceRatio = priceRatio_;
+    }
+  }
+
+  // put to zero any parameter that remains the same
+  function updateOracle(
+    address oracle_
+  ) external override onlyOwner {
+    require(oracle_ != address(0), "SidePool: not a valid address");
+    oracle = oracle_;
   }
 
   // put to zero any parameter that remains the same
@@ -129,7 +145,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint16 bPBoostFactor_,
     uint32 bPBoostLimit_
   ) external override onlyOwner {
-    require(conf.maximumLockupTime > 0, "SidePool: not initiated yet");
+    require(conf.status == 1, "SidePool: not active");
     if (synrEquivalent_ > 0) {
       nftConf.synrEquivalent = synrEquivalent_;
     }
@@ -145,6 +161,10 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     if (bPBoostLimit_ > 0) {
       nftConf.bPBoostLimit = bPBoostLimit_;
     }
+  }
+
+  function pausePool(bool paused) external onlyOwner {
+    conf.status = paused ? 2 : 1;
   }
 
   function version() external pure virtual override returns (uint256) {
@@ -347,6 +367,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal virtual {
+    require(conf.status == 1, "SidePool: not initiated or paused");
     updateRatio();
     _collectRewards(user_);
     uint256 tokenAmount;

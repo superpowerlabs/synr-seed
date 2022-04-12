@@ -40,6 +40,7 @@ interface IMainPool {
     uint16 minimumLockupTime;
     uint16 maximumLockupTime;
     uint16 earlyUnstakePenalty;
+    uint8 status;
   }
 
   /**
@@ -81,4 +82,6 @@ interface IMainPool {
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) external;
+
+  function pausePool(bool paused) external;
 }

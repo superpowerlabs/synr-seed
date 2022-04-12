@@ -58,6 +58,7 @@ interface ISidePool {
     uint16 burnRatio;
     uint16 priceRatio;
     uint8 coolDownDays; // cool down period for
+    uint8 status;
   }
 
   struct NftConf {
@@ -76,7 +77,6 @@ interface ISidePool {
     uint16 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
-    uint16 priceRatio_,
     uint8 coolDownDays_
   ) external;
 
@@ -87,9 +87,18 @@ interface ISidePool {
     uint16 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
-    uint16 priceRatio_,
     uint8 coolDownDays_
   ) external;
+
+  function updatePriceRatio(
+    uint16 priceRatio_
+  ) external;
+
+  function updateOracle(
+    address oracle_
+  ) external;
+
+  function pausePool(bool paused) external;
 
   // Split configuration in two struct to avoid following error calling initPool
   // CompilerError: Stack too deep when compiling inline assembly:

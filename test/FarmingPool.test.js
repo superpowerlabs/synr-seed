@@ -53,7 +53,7 @@ describe("#FarmingPool", function () {
     await pool.deployed();
 
     if (initPool) {
-      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10000, 10);
+      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10);
       await pool.updateNftConf(
         0,
         0,
@@ -77,14 +77,14 @@ describe("#FarmingPool", function () {
     });
 
     it("should revert if already initiated", async function () {
-      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10000, 10);
-      expect(pool.initPool(1000, week, 9800, 1000, 100, 1000, 3000, 10000, 10)).revertedWith("SidePool: already initiated");
+      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10);
+      expect(pool.initPool(1000, week, 9800, 1000, 100, 1000, 3000, 10)).revertedWith("SidePool: already initiated");
     });
 
     it("should revert if wrong parameters", async function () {
-      await assertThrowsMessage(pool.initPool(1000, week, 129800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
-      await assertThrowsMessage(pool.initPool(1000, 1e12, 9800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
-      await assertThrowsMessage(pool.initPool(1e10, week, 9800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1000, week, 129800, 1000, 100, 800, 3000, 10), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1000, 1e12, 9800, 1000, 100, 800, 3000, 10), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1e10, week, 9800, 1000, 100, 800, 3000, 10), "value out-of-bounds");
     });
   });
 
