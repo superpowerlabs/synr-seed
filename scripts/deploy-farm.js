@@ -29,8 +29,6 @@ async function main() {
   await weed.grantRole(await weed.MINTER_ROLE(), pool.address);
 
   console.log("FarmingPool deployed at", pool.address);
-
-  console.log("FarmingPool deployed at", pool.address);
   await deployUtils.saveDeployed(chainId, ["FarmingPool"], [pool.address]);
 
   console.log(
