@@ -35,15 +35,19 @@ async function main() {
   }
 
   const wormholeContract = wormholeConfig.byChainId[chainId];
-  const synrBridge = deployed[chainId].SynrBridge;
-  const seedFarm = deployed[chainId].SeedFarm;
 
   if (chainId < 6) {
+    const otherChain = chainId === 1 ? 56 : 97;
+    const SynrBridge = await ethers.getContractFactory("SynrBridge");
+    const synrBridge = SynrBridge.attach(deployed[chainId].SynrBridge);
     await synrBridge.wormholeInit(wormholeContract[0], wormholeContract[1]);
-    await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFarm.address));
+    await synrBridge.wormholeRegisterContract(4, bytes32Address(deployed[otherChain].SeedFactory));
   } else {
-    await seedFarm.wormholeInit(wormholeContract[0], wormholeContract[1]);
-    await seedFarm.wormholeRegisterContract(chainId === 56 ? 2 : 10001, bytes32Address(synrBridge.address));
+    const otherChain = chainId === 56 ? 1 : 3;
+    const SeedFactory = await ethers.getContractFactory("SeedFactory");
+    const seedFactory = SeedFactory.attach(deployed[chainId].SeedFactory);
+    await seedFactory.wormholeInit(wormholeContract[0], wormholeContract[1]);
+    await seedFactory.wormholeRegisterContract(chainId === 56 ? 2 : 10001, bytes32Address(deployed[otherChain].SynrBridge));
   }
 }
 
