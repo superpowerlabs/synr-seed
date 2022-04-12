@@ -53,7 +53,7 @@ describe("#FarmingPool", function () {
     await pool.deployed();
 
     if (initPool) {
-      await pool.initPool(1000, week, 9800, 1000, 100, 800);
+      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10000, 10);
       await pool.updateNftConf(
         0,
         0,
@@ -64,6 +64,7 @@ describe("#FarmingPool", function () {
     }
 
     await seed.grantRole(await seed.MINTER_ROLE(), deployer.address);
+    await seed.grantRole(await seed.BURNER_ROLE(), pool.address);
     await seed.mint(user0.address, ethers.utils.parseEther(user0sSeeds));
 
     await weed.grantRole(await weed.MINTER_ROLE(), pool.address);
@@ -77,14 +78,14 @@ describe("#FarmingPool", function () {
     });
 
     it("should revert if already initiated", async function () {
-      await pool.initPool(1000, week, 9800, 1000, 100, 800);
-      expect(pool.initPool(1000, week, 9800, 1000, 100, 1000)).revertedWith("SidePool: already initiated");
+      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10000, 10);
+      expect(pool.initPool(1000, week, 9800, 1000, 100, 1000, 3000, 10000, 10)).revertedWith("SidePool: already initiated");
     });
 
     it("should revert if wrong parameters", async function () {
-      await assertThrowsMessage(pool.initPool(1000, week, 129800, 1000, 100, 800), "value out-of-bounds");
-      await assertThrowsMessage(pool.initPool(1000, 1e12, 9800, 1000, 100, 800), "value out-of-bounds");
-      await assertThrowsMessage(pool.initPool(1e10, week, 9800, 1000, 100, 800), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1000, week, 129800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1000, 1e12, 9800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
+      await assertThrowsMessage(pool.initPool(1e10, week, 9800, 1000, 100, 800, 3000, 10000, 10), "value out-of-bounds");
     });
   });
 
@@ -201,8 +202,8 @@ describe("#FarmingPool", function () {
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
 
-      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 365;
-      expect(await pool.connect(user0).stake(SEED_SWAP, 365, amount))
+      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
+      expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
         .emit(pool, "DepositSaved")
         .withArgs(user0.address, 0);
 
