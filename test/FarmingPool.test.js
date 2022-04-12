@@ -6,7 +6,7 @@ const {
   getTimestamp,
   increaseBlockTimestampBy,
   bytes32Address,
-  SEED_STAKE,
+  SEED_SWAP,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -96,7 +96,7 @@ describe("#FarmingPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: SEED_STAKE,
+        tokenType: SEED_SWAP,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -147,7 +147,7 @@ describe("#FarmingPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: SEED_STAKE,
+        tokenType: SEED_SWAP,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -202,13 +202,13 @@ describe("#FarmingPool", function () {
       expect(balanceBefore).equal(normalize(user0sSeeds));
 
       const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 365;
-      expect(await pool.connect(user0).stake(SEED_STAKE, 365, amount))
+      expect(await pool.connect(user0).stake(SEED_SWAP, 365, amount))
         .emit(pool, "DepositSaved")
         .withArgs(user0.address, 0);
 
       let deposit = await pool.getDepositByIndex(user0.address, 0);
       expect(deposit.tokenAmountOrID).equal(amount);
-      expect(deposit.tokenType).equal(SEED_STAKE);
+      expect(deposit.tokenType).equal(SEED_SWAP);
       expect(deposit.lockedUntil).equal(lockedUntil);
     });
   });

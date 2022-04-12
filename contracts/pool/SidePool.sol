@@ -347,7 +347,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       users[user_].blueprintsAmount++;
       // SidePool must be approve to spend blueprints
       blueprint.safeTransferFrom(user_, address(this), tokenAmountOrID);
-    } else if (tokenType == SEED_STAKE) {
+    } else if (tokenType == SEED_SWAP) {
       tokenAmount = tokenAmountOrID;
       // SidePool must be approve to spend SEED
       stakedToken.transferFrom(user_, address(this), tokenAmount);
@@ -473,7 +473,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
         uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
       "SidePool: inconsistent deposit"
     );
-    if (tokenType == SYNR_STAKE || tokenType == SEED_STAKE) {
+    if (tokenType == SYNR_STAKE || tokenType == SEED_SWAP) {
       uint256 vestedPercentage = getVestedPercentage(
         block.timestamp,
         uint256(deposit.lockedFrom),

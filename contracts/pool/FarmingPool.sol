@@ -36,7 +36,7 @@ contract FarmingPool is SidePool {
     uint256 tokenAmountOrID
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
-    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == SEED_STAKE, "FarmingPool: unsupported token");
+    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == SEED_SWAP, "FarmingPool: unsupported token");
     _stake(
       _msgSender(),
       tokenType,
@@ -54,7 +54,7 @@ contract FarmingPool is SidePool {
   function unstake(uint256 depositIndex) external override {
     Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
     require(
-      deposit.tokenType == SEED_STAKE || deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST,
+      deposit.tokenType == SEED_SWAP || deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST,
       "FarmingPool: invalid tokenType"
     );
     _unstakeDeposit(deposit);
