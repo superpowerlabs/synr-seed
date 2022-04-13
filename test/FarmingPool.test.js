@@ -7,6 +7,7 @@ const {
   increaseBlockTimestampBy,
   bytes32Address,
   SEED_SWAP,
+  BLUEPRINT_STAKE_FOR_BOOST,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -190,7 +191,7 @@ describe("#FarmingPool", function () {
     });
   });
 
-  describe("#stake", async function () {
+  describe.only("#stake", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
@@ -210,6 +211,43 @@ describe("#FarmingPool", function () {
       expect(deposit.tokenAmountOrID).equal(amount);
       expect(deposit.tokenType).equal(SEED_SWAP);
       expect(deposit.lockedUntil).equal(lockedUntil);
+    });
+
+    it("should stake some blueprints", async function () {
+      let amount = 2;
+      await blueprint.mint(user0.address, 5);
+      await blueprint.connect(user0).approve(pool.address, amount);
+      expect(await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, amount))
+        .emit(pool, "DepositSaved")
+        .withArgs(user0.address, 0);
+
+      let deposit = await pool.getDepositByIndex(user0.address, 0);
+      const lockedUntil = await getTimestamp();
+      expect(deposit.tokenAmountOrID).equal(amount);
+      expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
+      expect(deposit.lockedUntil).equal(lockedUntil);
+    });
+  });
+
+  describe("#unstake", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should unstake blueprints", async function () {
+      let id = 2;
+      await blueprint.mint(user0.address, 5);
+      await blueprint.connect(user0).approve(pool.address, id);
+      await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id);
+
+      expect(await pool.connect(user0).unstake(0)).emit(pool, "DepositUnlocked");
+    });
+
+    it("should revert if unstake seed", async function () {
+      const amount = ethers.utils.parseEther("1500000");
+      await seed.connect(user0).approve(pool.address, amount);
+      await pool.connect(user0).stake(SEED_SWAP, 0, amount);
+      await assertThrowsMessage(pool.connect(user0).unstake(0), "FarmingPool: only bluprints can be unstaked");
     });
   });
 });

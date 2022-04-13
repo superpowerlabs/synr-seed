@@ -7,6 +7,7 @@ const {
   getTimestamp,
   increaseBlockTimestampBy,
   bytes32Address,
+  BLUEPRINT_STAKE_FOR_BOOST,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -171,6 +172,28 @@ describe("#SidePool", function () {
       await sidePool.updateRatio();
       conf = await sidePool.conf();
       expect(conf.rewardsFactor).equal(980);
+    });
+  });
+
+  describe.only("#stake", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should stake blueprints", async function () {
+      let id = 2;
+      await blueprint.mint(user1.address, 5);
+      await blueprint.connect(user1).approve(sidePool.address, id);
+
+      expect(await sidePool.connect(user1).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id))
+        .emit(sidePool, "DepositSaved")
+        .withArgs(user1.address, 0);
+
+      //const lockedUntil = (await getTimestamp());
+      let deposit = await sidePool.getDepositByIndex(user1.address, 0);
+      expect(deposit.tokenAmountOrID).equal(id);
+      expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
+      //expect(deposit.lockedUntil).equal(lockedUntil);
     });
   });
 });
