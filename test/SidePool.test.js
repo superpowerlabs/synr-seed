@@ -109,6 +109,84 @@ describe("#SidePool", function () {
     });
   });
 
+  describe("#updateConf", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should be updated", async function () {
+      await sidePool.updateConf(11, 22, 33, 44, 55, 66, 77);
+      const updated = await sidePool.conf();
+      //console.log(updated)
+      expect(updated[3]).equal(11);
+      expect(updated[4]).equal(22);
+      expect(updated[6]).equal(33);
+      expect(updated[7]).equal(44);
+      expect(updated[8]).equal(55);
+      expect(updated[9]).equal(66);
+      expect(updated[11]).equal(77);
+    });
+  });
+  describe("#updateOracle", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+    it("should update oracle", async function () {
+      await sidePool.updateOracle(operator.address);
+      expect(await sidePool.oracle()).equal(operator.address);
+    });
+  });
+
+  describe("#updatePriceRatio", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+    it("should revert if not oracle", async function () {
+      await assertThrowsMessage(sidePool.updatePriceRatio(0), "SidePool: not the oracle");
+    });
+    it("should update the Price Ratio", async function () {
+      const ratio = 11111;
+      await sidePool.updateOracle(operator.address);
+      await sidePool.connect(operator).updatePriceRatio(ratio);
+      const updated = await sidePool.conf();
+      //console.log(updated[10])
+      expect(updated[10]).equal(ratio);
+    });
+  });
+
+  describe("#updateNftConf", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+    it("should update the NFT conf", async function () {
+      await sidePool.updateNftConf(11, 22, 33, 44, 55);
+      const updated = await sidePool.nftConf();
+      //console.log(updated)
+      expect(updated[0]).equal(11);
+      expect(updated[1]).equal(22);
+      expect(updated[2]).equal(33);
+      expect(updated[3]).equal(44);
+      expect(updated[4]).equal(55);
+    });
+  });
+
+  describe.only("#pausePool", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+    it("should Pause the Pool", async function () {
+      await sidePool.pausePool(false);
+      let updated = await sidePool.conf();
+      expect(updated[12]).equal(1);
+      await sidePool.pausePool(true);
+      updated = await sidePool.conf();
+      expect(updated[12]).equal(2);
+      await sidePool.pausePool(false);
+      updated = await sidePool.conf();
+      expect(updated[12]).equal(1);
+    });
+  });
+
   describe("#shouldUpdateRatio", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
@@ -175,7 +253,7 @@ describe("#SidePool", function () {
     });
   });
 
-  describe.only("#stake", async function () {
+  describe("#stake", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });

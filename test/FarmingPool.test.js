@@ -20,7 +20,7 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe.only("#FarmingPool", function () {
+describe("#FarmingPool", function () {
   let SeedToken, seed;
   let WeedToken, weed;
   let coupon;

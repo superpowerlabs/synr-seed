@@ -7,7 +7,7 @@ const {
   increaseBlockTimestampBy,
   bytes32Address,
   BLUEPRINT_STAKE_FOR_BOOST,
-  SEED_SWAP
+  SEED_SWAP,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -211,28 +211,31 @@ describe("#SeedPool", function () {
     });
 
     it("should revert unsupported token", async function () {
-    const amount = ethers.utils.parseEther("1500000");
+      const amount = ethers.utils.parseEther("1500000");
       await seed.connect(user0).approve(pool.address, amount);
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
 
       const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
-      expect(pool.connect(user0).stake(SEED_SWAP, 0, amount))
-      .revertedWith("SeedPool: unsupported token")
-      });
+      expect(pool.connect(user0).stake(SEED_SWAP, 0, amount)).revertedWith("SeedPool: unsupported token");
+    });
   });
 
-  describe.only("#stakeViaFactory", async function () {
+  describe("#stakeViaFactory", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
 
     it("should stake blueprint via factory", async function () {
-    const amount = ethers.utils.parseEther("1500000");
+      const amount = ethers.utils.parseEther("1500000");
       await blueprint.connect(user0).approve(pool.address, 4);
 
       const lockedFrom = await getTimestamp();
-      expect(await pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, pool.mainIndex, amount))
+      expect(
+        await pool
+          .connect(user0)
+          .stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, pool.mainIndex, amount)
+      )
         .emit(pool, "DepositSaved")
         .withArgs(user0.address, 0);
 
