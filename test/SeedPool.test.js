@@ -6,7 +6,8 @@ const {
   getTimestamp,
   increaseBlockTimestampBy,
   bytes32Address,
-  SEED_SWAP,
+  BLUEPRINT_STAKE_FOR_BOOST,
+  SEED_SWAP
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -18,15 +19,16 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe("#FarmingPool", function () {
+describe("#SeedPool", function () {
   let SeedToken, seed;
   let WeedToken, weed;
   let coupon;
-  let FarmingPool, pool;
+  let SeedPool, pool;
   let SynCityCouponsSimplified, blueprint;
   let week = 7 * 24 * 3600;
 
   let user0sSeeds = "250000000";
+  let user0sBlueprint = "25";
 
   let deployer, user0, user1, user2, marketplace, treasury;
 
@@ -35,7 +37,7 @@ describe("#FarmingPool", function () {
     [deployer, user0, user1, user2, marketplace, treasury] = await ethers.getSigners();
     SeedToken = await ethers.getContractFactory("SeedToken");
     WeedToken = await ethers.getContractFactory("WeedToken");
-    FarmingPool = await ethers.getContractFactory("FarmingPool");
+    SeedPool = await ethers.getContractFactory("SeedPool");
     SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
   });
 
@@ -49,7 +51,7 @@ describe("#FarmingPool", function () {
     blueprint = await SynCityCouponsSimplified.deploy(8000);
     await blueprint.deployed();
 
-    pool = await upgrades.deployProxy(FarmingPool, [seed.address, weed.address, blueprint.address]);
+    pool = await upgrades.deployProxy(SeedPool, [seed.address, weed.address, blueprint.address]);
     await pool.deployed();
 
     if (initPool) {
@@ -65,8 +67,7 @@ describe("#FarmingPool", function () {
 
     await seed.grantRole(await seed.MINTER_ROLE(), deployer.address);
     await seed.mint(user0.address, ethers.utils.parseEther(user0sSeeds));
-
-    await weed.grantRole(await weed.MINTER_ROLE(), pool.address);
+    await blueprint.mint(user0.address, user0sBlueprint);
   }
 
   let deposit;
@@ -96,7 +97,7 @@ describe("#FarmingPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: SEED_SWAP,
+        tokenType: BLUEPRINT_STAKE_FOR_BOOST,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -147,7 +148,7 @@ describe("#FarmingPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       deposit = {
-        tokenType: SEED_SWAP,
+        tokenType: BLUEPRINT_STAKE_FOR_BOOST,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -195,41 +196,66 @@ describe("#FarmingPool", function () {
       await initAndDeploy(true);
     });
 
-    it("should stake some seed", async function () {
-      const amount = ethers.utils.parseEther("1500000");
+    it("should stake blueprint", async function () {
+      await blueprint.connect(user0).approve(pool.address, 4);
+
+      expect(await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 4))
+        .emit(pool, "DepositSaved")
+        .withArgs(user0.address, 0);
+
+      const lockedUntil = await getTimestamp();
+      let deposit = await pool.getDepositByIndex(user0.address, 0);
+      expect(deposit.tokenAmountOrID).equal(4);
+      expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
+      expect(deposit.lockedUntil).equal(lockedUntil);
+    });
+
+    it("should revert unsupported token", async function () {
+    const amount = ethers.utils.parseEther("1500000");
       await seed.connect(user0).approve(pool.address, amount);
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
 
       const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
-      expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
+      expect(pool.connect(user0).stake(SEED_SWAP, 0, amount))
+      .revertedWith("SeedPool: unsupported token")
+      });
+  });
+
+  describe.only("#stakeViaFactory", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should stake blueprint via factory", async function () {
+    const amount = ethers.utils.parseEther("1500000");
+      await blueprint.connect(user0).approve(pool.address, 4);
+
+      const lockedFrom = await getTimestamp();
+      expect(await pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, pool.mainIndex, amount))
         .emit(pool, "DepositSaved")
         .withArgs(user0.address, 0);
 
       let deposit = await pool.getDepositByIndex(user0.address, 0);
-      expect(deposit.tokenAmountOrID).equal(amount);
-      expect(deposit.tokenType).equal(SEED_SWAP);
-      expect(deposit.lockedUntil).equal(lockedUntil);
+      expect(deposit.lockedFrom).equal(lockedFrom);
+      expect(deposit.tokenAmountOrID).equal(4);
+      expect(deposit.mainIndex).equal(pool.mainIndex);
+      expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
+      expect(deposit.lockedUntil).equal(0);
     });
   });
+
   describe("#unstake", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
 
-    it("should stake some seed", async function () {
-      const amount = ethers.utils.parseEther("1500000");
-      await seed.connect(user0).approve(pool.address, amount);
-      const balanceBefore = await seed.balanceOf(user0.address);
-      expect(balanceBefore).equal(normalize(user0sSeeds));
+    it("should unstake blueprints", async function () {
+      await blueprint.mint(user0.address, 4);
+      await blueprint.connect(user0).approve(pool.address, 4);
+      await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 4);
 
-      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
-      expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
-        .emit(pool, "DepositSaved")
-        .withArgs(user0.address, 0);
-
-      let deposit = await pool.getDepositByIndex(user0.address, 0);
-      expect(await pool.unstake(deposit.mainIndex)).emit(user0.address, deposit.mainIndex);
+      expect(await pool.connect(user0).unstake(0)).emit(pool, "DepositUnlocked");
     });
   });
 });
