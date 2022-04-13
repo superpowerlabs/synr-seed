@@ -8,6 +8,7 @@ const {
   bytes32Address,
   SEED_SWAP,
   BLUEPRINT_STAKE_FOR_BOOST,
+  SYNR_PASS_STAKE_FOR_SEEDS,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -19,7 +20,7 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe("#FarmingPool", function () {
+describe.only("#FarmingPool", function () {
   let SeedToken, seed;
   let WeedToken, weed;
   let coupon;
@@ -191,7 +192,7 @@ describe("#FarmingPool", function () {
     });
   });
 
-  describe.only("#stake", async function () {
+  describe("#stake", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
@@ -227,6 +228,14 @@ describe("#FarmingPool", function () {
       expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
       expect(deposit.lockedUntil).equal(lockedUntil);
     });
+
+    it("should revert if not seed or blueprints", async function () {
+      const amount = ethers.utils.parseEther("1500000");
+      await assertThrowsMessage(
+        pool.connect(user0).stake(SYNR_PASS_STAKE_FOR_SEEDS, 0, amount),
+        "FarmingPool: unsupported token"
+      );
+    });
   });
 
   describe("#unstake", async function () {
@@ -240,34 +249,16 @@ describe("#FarmingPool", function () {
       await blueprint.connect(user0).approve(pool.address, id);
       await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id);
 
-      expect(await pool.connect(user0).unstake(0)).emit(pool, "DepositUnlocked");
+      expect(await pool.connect(user0).unstake(0))
+        .emit(pool, "DepositUnlocked")
+        .withArgs(user0.address, 0);
     });
 
-    it("should revert if unstake seed", async function () {
+    it("should revert if unstake is not blueprint", async function () {
       const amount = ethers.utils.parseEther("1500000");
       await seed.connect(user0).approve(pool.address, amount);
       await pool.connect(user0).stake(SEED_SWAP, 0, amount);
       await assertThrowsMessage(pool.connect(user0).unstake(0), "FarmingPool: only bluprints can be unstaked");
-    });
-  });
-  describe("#unstake", async function () {
-    beforeEach(async function () {
-      await initAndDeploy(true);
-    });
-
-    it("should stake some seed", async function () {
-      const amount = ethers.utils.parseEther("1500000");
-      await seed.connect(user0).approve(pool.address, amount);
-      const balanceBefore = await seed.balanceOf(user0.address);
-      expect(balanceBefore).equal(normalize(user0sSeeds));
-
-      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
-      expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
-        .emit(pool, "DepositSaved")
-        .withArgs(user0.address, 0);
-
-      let deposit = await pool.getDepositByIndex(user0.address, 0);
-      expect(await pool.unstake(deposit.mainIndex)).emit(user0.address, deposit.mainIndex);
     });
   });
 });
