@@ -90,13 +90,9 @@ interface ISidePool {
     uint8 coolDownDays_
   ) external;
 
-  function updatePriceRatio(
-    uint16 priceRatio_
-  ) external;
+  function updatePriceRatio(uint16 priceRatio_) external;
 
-  function updateOracle(
-    address oracle_
-  ) external;
+  function updateOracle(address oracle_) external;
 
   function pausePool(bool paused) external;
 
@@ -137,7 +133,7 @@ interface ISidePool {
 
   function canUnstakeWithoutTax(address user, uint256 mainIndex) external view returns (bool);
 
-  function getDepositIndexByMainIndex(address user, uint256 mainIndex) external view returns (uint256);
+  function getDepositIndexByMainIndex(address user, uint256 mainIndex) external view returns (uint256, bool);
 
   function getVestedPercentage(
     uint256 when,

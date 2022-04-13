@@ -119,9 +119,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   }
 
   // put to zero any parameter that remains the same
-  function updatePriceRatio(
-    uint16 priceRatio_
-  ) external override {
+  function updatePriceRatio(uint16 priceRatio_) external override {
     require(conf.status == 1, "SidePool: not active");
     require(oracle != address(0) && _msgSender() == oracle, "SidePool: not the oracle");
     if (priceRatio_ > 0) {
@@ -130,9 +128,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
   }
 
   // put to zero any parameter that remains the same
-  function updateOracle(
-    address oracle_
-  ) external override onlyOwner {
+  function updateOracle(address oracle_) external override onlyOwner {
     require(oracle_ != address(0), "SidePool: not a valid address");
     oracle = oracle_;
   }
@@ -368,6 +364,8 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     uint256 tokenAmountOrID
   ) internal virtual {
     require(conf.status == 1, "SidePool: not initiated or paused");
+    (, bool exists) = getDepositIndexByMainIndex(user_, mainIndex);
+    require(!exists, "SidePool: payload already used");
     updateRatio();
     _collectRewards(user_);
     uint256 tokenAmount;
@@ -398,7 +396,7 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
     users[user_].tokenAmount = uint96(uint256(users[user_].tokenAmount).add(tokenAmount));
     // add deposit
     if (tokenType == S_SYNR_SWAP || tokenType == SEED_SWAP) {
-      lockedUntil = lockedFrom + uint(conf.coolDownDays).mul(1 days);
+      lockedUntil = lockedFrom + uint256(conf.coolDownDays).mul(1 days);
     }
     uint256 index = users[user_].deposits.length;
     Deposit memory deposit = Deposit({
@@ -476,13 +474,13 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
    * @param mainIndex index of the deposit being searched
    * @return the deposit
    */
-  function getDepositIndexByMainIndex(address user, uint256 mainIndex) public view override returns (uint256) {
+  function getDepositIndexByMainIndex(address user, uint256 mainIndex) public view override returns (uint256, bool) {
     for (uint256 i; i < users[user].deposits.length; i++) {
       if (uint256(users[user].deposits[i].mainIndex) == mainIndex && users[user].deposits[i].lockedFrom > 0) {
-        return i;
+        return (i, true);
       }
     }
-    revert("SidePool: deposit not found");
+    return (0, false);
   }
 
   /**
@@ -505,7 +503,8 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass used as SYNR cannot be early unstaked");
     }
     _collectRewards(user_);
-    uint256 index = getDepositIndexByMainIndex(user_, mainIndex);
+    (uint256 index, bool exists) = getDepositIndexByMainIndex(user_, mainIndex);
+    require(exists, "SidePool: deposit not found");
     Deposit storage deposit = users[user_].deposits[index];
     require(
       uint256(deposit.tokenType) == tokenType &&
