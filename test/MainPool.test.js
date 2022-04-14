@@ -71,7 +71,7 @@ describe("#MainPool", function () {
         365, // 1 year
         amount
       );
-      expect(payload).equal("100000000000000000000003651");
+      expect(payload).equal("1000000000000000000000036501");
       await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
       expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
@@ -98,7 +98,7 @@ describe("#MainPool", function () {
     it("should return length of deposits", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "100000000000000000000003651";
+      const payload = "100000000000000000000036501";
       await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
       expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
@@ -110,7 +110,7 @@ describe("#MainPool", function () {
     it("should return deposit by index", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = "100000000000000000000003651";
+      const payload = "100000000000000000000036501";
       await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
       expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
@@ -136,10 +136,10 @@ describe("#MainPool", function () {
       };
 
       const expected = BN(1)
-        .add(await BNMulBy(lockedFrom, 10))
-        .add(await BNMulBy(lockedUntil, 1, 11))
-        .add(await BNMulBy(0, 1, 21))
-        .add(await BNMulBy(amount, 1, 26));
+        .add(await BNMulBy(lockedFrom, 100))
+        .add(await BNMulBy(lockedUntil, 1, 12))
+        .add(await BNMulBy(0, 1, 22))
+        .add(await BNMulBy(amount, 1, 27));
       const payload = await mainPool.fromDepositToTransferPayload(deposit);
       expect(payload).equal(expected);
     });
