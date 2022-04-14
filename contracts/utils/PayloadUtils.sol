@@ -7,10 +7,11 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 import "../interfaces/IPayloadUtils.sol";
+import "./Constants.sol";
 
 import "hardhat/console.sol";
 
-contract PayloadUtils is IPayloadUtils {
+contract PayloadUtils is IPayloadUtils, Constants {
   using SafeMathUpgradeable for uint256;
 
   function version() external pure virtual override returns (uint256) {
@@ -19,12 +20,12 @@ contract PayloadUtils is IPayloadUtils {
 
   // can be called by tests and web2 app
   function serializeInput(
-    uint256 tokenType, // 1 digit
+    uint256 tokenType, // 2 digit
     uint256 lockupTime, // 3 digits
     uint256 tokenAmountOrID
   ) external pure override returns (uint256 payload) {
     validateInput(tokenType, lockupTime, tokenAmountOrID);
-    payload = tokenType.add(lockupTime.mul(10)).add(tokenAmountOrID.mul(1e4));
+    payload = tokenType.add(lockupTime.mul(100)).add(tokenAmountOrID.mul(1e5));
   }
 
   function validateInput(
@@ -32,9 +33,11 @@ contract PayloadUtils is IPayloadUtils {
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) public pure override returns (bool) {
-    require(tokenType < 4, "PayloadUtils: invalid token type");
-    if (tokenType == 2 || tokenType == 3) {
+    //    require(tokenType < 4, "PayloadUtils: invalid token type");
+    if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(tokenAmountOrID < 889, "PayloadUtils: Not a Mobland SYNR Pass token ID");
+    } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
+      require(tokenAmountOrID < 8001, "PayloadUtils: Not a Blueprint token ID");
     } else {
       require(tokenAmountOrID < 1e28, "PayloadUtils: tokenAmountOrID out of range");
     }
@@ -52,9 +55,9 @@ contract PayloadUtils is IPayloadUtils {
       uint256 tokenAmountOrID
     )
   {
-    tokenType = payload.mod(10);
-    lockupTime = payload.div(10).mod(1e3);
-    tokenAmountOrID = payload.div(1e4);
+    tokenType = payload.mod(100);
+    lockupTime = payload.div(100).mod(1e3);
+    tokenAmountOrID = payload.div(1e5);
   }
 
   function deserializeDeposit(uint256 payload)
@@ -69,14 +72,14 @@ contract PayloadUtils is IPayloadUtils {
       uint256 tokenAmountOrID
     )
   {
-    tokenType = payload.mod(10);
-    lockedFrom = payload.div(10).mod(1e10);
-    lockedUntil = payload.div(1e11).mod(1e10);
-    mainIndex = payload.div(1e21).mod(1e5);
-    tokenAmountOrID = payload.div(1e26);
+    tokenType = payload.mod(100);
+    lockedFrom = payload.div(100).mod(1e10);
+    lockedUntil = payload.div(1e12).mod(1e10);
+    mainIndex = payload.div(1e22).mod(1e5);
+    tokenAmountOrID = payload.div(1e27);
   }
 
   function getIndexFromPayload(uint256 payload) public pure override returns (uint256) {
-    return payload.div(1e21).mod(1e5);
+    return payload.div(1e22).mod(1e5);
   }
 }

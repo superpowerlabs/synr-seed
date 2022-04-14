@@ -8,12 +8,11 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
-import "./pool/Constants.sol";
 import "./pool/SeedPool.sol";
 import "./utils/PayloadUtils.sol";
 import "hardhat/console.sol";
 
-contract SeedFactory is PayloadUtils, Constants, WormholeTunnelUpgradeable {
+contract SeedFactory is PayloadUtils, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 

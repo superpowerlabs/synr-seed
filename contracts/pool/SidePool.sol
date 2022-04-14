@@ -14,11 +14,10 @@ import "../utils/PayloadUtils.sol";
 import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
 import "../token/SynCityCouponsSimplified.sol";
-import "./Constants.sol";
 
 import "hardhat/console.sol";
 
-contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
 
@@ -315,16 +314,16 @@ contract SidePool is Constants, PayloadUtils, ISidePool, TokenReceiver, Initiali
    * @return the payload, an encoded uint256
    */
   function fromDepositToTransferPayload(Deposit memory deposit) public pure override returns (uint256) {
-    require(deposit.tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SidePool: invalid token type");
+    require(deposit.tokenType < 100, "SidePool: invalid token type");
     require(deposit.lockedFrom < deposit.lockedUntil, "SidePool: invalid interval");
     require(deposit.lockedUntil < 1e10, "SidePool: lockedTime out of range");
     require(deposit.tokenAmountOrID < 1e28, "SidePool: tokenAmountOrID out of range");
     return
       uint256(deposit.tokenType)
-        .add(uint256(deposit.lockedFrom).mul(10))
-        .add(uint256(deposit.lockedUntil).mul(1e11))
-        .add(uint256(deposit.mainIndex).mul(1e21))
-        .add(uint256(deposit.tokenAmountOrID).mul(1e26));
+        .add(uint256(deposit.lockedFrom).mul(100))
+        .add(uint256(deposit.lockedUntil).mul(1e12))
+        .add(uint256(deposit.mainIndex).mul(1e22))
+        .add(uint256(deposit.tokenAmountOrID).mul(1e27));
   }
 
   /**
