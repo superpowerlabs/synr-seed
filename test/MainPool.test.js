@@ -1,4 +1,4 @@
-const {expect, assert} = require("chai");
+const {expect, assert, use} = require("chai");
 
 const {initEthers, assertThrowsMessage, getTimestamp, increaseBlockTimestampBy, bytes32Address, BNMulBy} = require("./helpers");
 const {upgrades} = require("hardhat");
@@ -90,7 +90,7 @@ describe("#MainPool", function () {
     });
   });
 
-  describe("#Deposit", async function () {
+  describe.only("#Deposit", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });
@@ -115,6 +115,7 @@ describe("#MainPool", function () {
       expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
         .withArgs(user1.address, 0);
+      console.log(await mainPool.getDepositsLength(user1.address));
       const deposit = await mainPool.getDepositByIndex(user1.address, 0);
       expect(parseInt(deposit)).equal(1, deposit.lockedFrom, deposit.lockedUntil, 0, amount);
     });
@@ -192,4 +193,20 @@ describe("#MainPool", function () {
       expect(mainPool.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: tokenAmountOrID out of range");
     });
   });
+
+  // describe.only("#withdrawSSynr", async function () {
+  //   beforeEach(async function () {
+  //     await initAndDeploy();
+  //   });
+
+  //   it("should Withdraw the SSYNR", async function () {
+  //     const amount = ethers.utils.parseEther("10000");
+  //     await sSynr.mint(mainPool.address, amount)
+  //     await sSynr.updateRole(user1.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+  //     console.log(await sSynr.balanceOf(mainPool.address))
+  //     console.log(await sSynr.balanceOf(user1.address))
+  //     await mainPool.withdrawSSynr(0, user1.address)
+  //     console.log(await sSynr.balanceOf(user1.address))
+  //   });
+  // });
 });

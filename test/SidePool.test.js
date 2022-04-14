@@ -170,7 +170,7 @@ describe("#SidePool", function () {
     });
   });
 
-  describe.only("#pausePool", async function () {
+  describe("#pausePool", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });

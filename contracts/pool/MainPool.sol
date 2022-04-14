@@ -146,6 +146,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
    * @return the deposit
    */
   function getDepositByIndex(address user, uint256 mainIndex) public view override returns (Deposit memory) {
+    //require(getDepositsLength(user) > mainIndex, "PayloadUtils: Index too high" );
     require(users[user].deposits[mainIndex].lockedFrom > 0, "PayloadUtils: deposit not found");
     return users[user].deposits[mainIndex];
   }
@@ -201,14 +202,6 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   }
 
   /**
-   * @param user address of user
-   * @return the ammount of deposits a user has made
-   */
-  function depositsLength(address user) public view returns (uint256) {
-    return users[user].deposits.length;
-  }
-
-  /**
    * @notice updates the user, calls _updateUserAndAddDeposit
    * @param user address of user being updated
    * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.
@@ -234,7 +227,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       lockedUntil,
       tokenAmountOrID,
       otherChain,
-      depositsLength(user)
+      getDepositsLength(user)
     );
     return deposit;
   }
