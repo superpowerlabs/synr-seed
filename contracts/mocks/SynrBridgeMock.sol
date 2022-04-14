@@ -15,16 +15,4 @@ contract SynrBridgeMock is SynrBridge {
   function mockWormholeCompleteTransfer(address to, uint256 payload) public {
     _onWormholeCompleteTransfer(to, payload);
   }
-  //
-  //  function updateUserAndAddDeposit(
-  //    address user,
-  //    uint256 tokenType,
-  //    uint256 lockedFrom,
-  //    uint256 lockedUntil,
-  //    uint256 tokenAmountOrID,
-  //    uint16 otherChain,
-  //    uint256 mainIndex
-  //  ) external returns (IMainPool.Deposit memory) {
-  //    return _updateUserAndAddDeposit(user, tokenType, lockedFrom, lockedUntil, tokenAmountOrID, otherChain, mainIndex);
-  //  }
 }
