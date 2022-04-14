@@ -15,11 +15,10 @@ import "../interfaces/IMainPool.sol";
 import "../token/SyndicateERC20.sol";
 import "../token/SyntheticSyndicateERC20.sol";
 import "../token/SynCityPasses.sol";
-import "./Constants.sol";
 
 import "hardhat/console.sol";
 
-contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -68,7 +67,12 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
   function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external override onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "MainPool: contract cannot receive sSYNR");
     require(conf.maximumLockupTime == 0, "MainPool: already initiated");
-    conf = Conf({minimumLockupTime: minimumLockupTime_, maximumLockupTime: 365, earlyUnstakePenalty: earlyUnstakePenalty_, status: 1});
+    conf = Conf({
+      minimumLockupTime: minimumLockupTime_,
+      maximumLockupTime: 365,
+      earlyUnstakePenalty: earlyUnstakePenalty_,
+      status: 1
+    });
   }
 
   function version() external pure virtual override returns (uint256) {
@@ -85,16 +89,16 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
    * @return the payload, an encoded uint256
    */
   function fromDepositToTransferPayload(Deposit memory deposit) public pure override returns (uint256) {
-    require(deposit.tokenType <= SYNR_PASS_STAKE_FOR_SEEDS, "PayloadUtils: invalid token type");
+    require(deposit.tokenType < 100, "PayloadUtils: invalid token type");
     require(deposit.lockedUntil < 1e10, "PayloadUtils: lockedTime out of range");
     require(deposit.lockedUntil == 0 || deposit.lockedFrom < deposit.lockedUntil, "PayloadUtils: invalid interval");
     require(deposit.tokenAmountOrID < 1e28, "PayloadUtils: tokenAmountOrID out of range");
     return
       uint256(deposit.tokenType)
-        .add(uint256(deposit.lockedFrom).mul(10))
-        .add(uint256(deposit.lockedUntil).mul(1e11))
-        .add(uint256(deposit.mainIndex).mul(1e21))
-        .add(uint256(deposit.tokenAmountOrID).mul(1e26));
+        .add(uint256(deposit.lockedFrom).mul(100))
+        .add(uint256(deposit.lockedUntil).mul(1e12))
+        .add(uint256(deposit.mainIndex).mul(1e22))
+        .add(uint256(deposit.tokenAmountOrID).mul(1e27));
   }
 
   /**
@@ -361,7 +365,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     uint16 recipientChain
   ) internal {
     require(conf.status == 1, "MainPool: not initiated or paused");
-  (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
+    (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
     require(conf.minimumLockupTime > 0, "MainPool: pool not alive");
     payload = _makeDeposit(user, tokenType, lockupTime, tokenAmountOrID, recipientChain);
     emit DepositSaved(user, uint16(getIndexFromPayload(payload)));

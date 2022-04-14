@@ -41,7 +41,7 @@ describe("#PayloadUtils", function () {
         amount
       );
 
-      expect(payload).equal("100000000000000000000003651");
+      expect(payload).equal("1000000000000000000000036501");
     });
 
     it("should throw invalid token", async function () {

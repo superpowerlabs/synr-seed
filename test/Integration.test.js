@@ -134,21 +134,21 @@ describe("#Integration test", function () {
       365, // 1 year
       amount
     );
-    expect(payload).equal("100000000000000000000003651");
+    expect(payload).equal("1000000000000000000000036501");
 
     let payload2 = await synrBridge.serializeInput(
       SYNR_STAKE, // SYNR
       150, // 1 year
       amount2
     );
-    expect(payload2).equal("200000000000000000000001501");
+    expect(payload2).equal("2000000000000000000000015001");
 
     let payload3 = await synrBridge.serializeInput(
       S_SYNR_SWAP, // sSYNR
       0, // 1 year
       amount3
     );
-    expect(payload3).equal("50000000000000000000000000");
+    expect(payload3).equal("500000000000000000000000000");
 
     await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("35000"));
 
@@ -256,7 +256,7 @@ describe("#Integration test", function () {
       0, // 1 year
       9
     );
-    expect(payload4).equal("90002");
+    expect(payload4).equal("900002");
 
     // approve the spending of the pass
     await pass.connect(fundOwner).approve(mainPool.address, 9);
@@ -328,7 +328,7 @@ describe("#Integration test", function () {
       amount
     );
 
-    expect(payload).equal("100000000000000000000003001");
+    expect(payload).equal("1000000000000000000000030001");
 
     await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
 
@@ -389,7 +389,7 @@ describe("#Integration test", function () {
       amount
     );
 
-    expect(payload).equal("100000000000000000000003651");
+    expect(payload).equal("1000000000000000000000036501");
 
     await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("10000"));
 

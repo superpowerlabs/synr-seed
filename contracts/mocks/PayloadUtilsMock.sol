@@ -16,15 +16,15 @@ contract PayloadUtilsMock is PayloadUtils {
   }
 
   function fromDepositToTransferPayload(Deposit memory deposit) public pure returns (uint256) {
-    require(deposit.tokenType < 4, "invalid token type");
+    require(deposit.tokenType < 100, "invalid token type");
     require(deposit.lockedFrom < deposit.lockedUntil, "invalid interval");
     require(deposit.lockedUntil < 1e10, "lockedTime out of range");
     require(deposit.tokenAmountOrID < 1e28, "tokenAmountOrID out of range");
     return
       uint256(deposit.tokenType)
-        .add(uint256(deposit.lockedFrom).mul(10))
-        .add(uint256(deposit.lockedUntil).mul(1e11))
-        .add(uint256(deposit.mainIndex).mul(1e21))
-        .add(uint256(deposit.tokenAmountOrID).mul(1e26));
+        .add(uint256(deposit.lockedFrom).mul(100))
+        .add(uint256(deposit.lockedUntil).mul(1e12))
+        .add(uint256(deposit.mainIndex).mul(1e22))
+        .add(uint256(deposit.tokenAmountOrID).mul(1e27));
   }
 }
