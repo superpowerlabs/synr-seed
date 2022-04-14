@@ -68,7 +68,12 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
   function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external override onlyOwner {
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "MainPool: contract cannot receive sSYNR");
     require(conf.maximumLockupTime == 0, "MainPool: already initiated");
-    conf = Conf({minimumLockupTime: minimumLockupTime_, maximumLockupTime: 365, earlyUnstakePenalty: earlyUnstakePenalty_, status: 1});
+    conf = Conf({
+      minimumLockupTime: minimumLockupTime_,
+      maximumLockupTime: 365,
+      earlyUnstakePenalty: earlyUnstakePenalty_,
+      status: 1
+    });
   }
 
   function version() external pure virtual override returns (uint256) {
@@ -170,6 +175,9 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     uint16 otherChain
   ) internal returns (uint256) {
     validateInput(tokenType, lockupTime, tokenAmountOrID);
+    if (tokenType == S_SYNR_SWAP || tokenType == SYNR_STAKE) {
+      require(tokenAmountOrID >= 1e18, "MainPool: must stake at least one unity");
+    }
     if (tokenType == SYNR_STAKE || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(
         lockupTime > conf.minimumLockupTime - 1 && lockupTime < conf.maximumLockupTime + 1,
@@ -361,7 +369,7 @@ contract MainPool is Constants, IMainPool, PayloadUtils, TokenReceiver, Initiali
     uint16 recipientChain
   ) internal {
     require(conf.status == 1, "MainPool: not initiated or paused");
-  (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
+    (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
     require(conf.minimumLockupTime > 0, "MainPool: pool not alive");
     payload = _makeDeposit(user, tokenType, lockupTime, tokenAmountOrID, recipientChain);
     emit DepositSaved(user, uint16(getIndexFromPayload(payload)));
