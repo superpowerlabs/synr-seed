@@ -8,13 +8,6 @@ async function BNMulBy(param, num = 1, repeat = 0) {
   return BN(param.toString()).mul(num);
 }
 
-const S_SYNR_SWAP = 0;
-const SYNR_STAKE = 1;
-const SYNR_PASS_STAKE_FOR_BOOST = 2;
-const SYNR_PASS_STAKE_FOR_SEEDS = 3;
-const BLUEPRINT_STAKE_FOR_BOOST = 4;
-const SEED_SWAP = 5;
-
 const PayloadUtils = {
   async fromDepositToTransferPayload(deposit) {
     return BN(deposit.tokenType)
