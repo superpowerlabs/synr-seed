@@ -51,7 +51,7 @@ describe("#SeedPool", function () {
     blueprint = await SynCityCouponsSimplified.deploy(8000);
     await blueprint.deployed();
 
-    pool = await upgrades.deployProxy(SeedPool, [seed.address, weed.address, blueprint.address]);
+    pool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await pool.deployed();
 
     if (initPool) {
