@@ -18,16 +18,6 @@ contract PayloadUtils is IPayloadUtils, Constants {
     return 1;
   }
 
-  // can be called by tests and web2 app
-  function serializeInput(
-    uint256 tokenType, // 2 digit
-    uint256 lockupTime, // 3 digits
-    uint256 tokenAmountOrID
-  ) external pure override returns (uint256 payload) {
-    validateInput(tokenType, lockupTime, tokenAmountOrID);
-    payload = tokenType.add(lockupTime.mul(100)).add(tokenAmountOrID.mul(1e5));
-  }
-
   function validateInput(
     uint256 tokenType,
     uint256 lockupTime,

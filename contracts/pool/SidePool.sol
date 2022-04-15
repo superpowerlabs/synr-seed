@@ -458,7 +458,6 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   function getDepositIndexByMainIndex(address user, uint256 mainIndex) public view override returns (uint256, bool) {
     for (uint256 i; i < users[user].deposits.length; i++) {
       if (uint256(users[user].deposits[i].mainIndex) == mainIndex && users[user].deposits[i].lockedFrom > 0) {
-        console.log("i %s", i);
         return (i, true);
       }
     }
@@ -481,7 +480,6 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal virtual {
-    console.log(">>>>>>>> %s", mainIndex);
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass used as SYNR cannot be early unstaked");
     }

@@ -7,13 +7,6 @@ pragma solidity ^0.8.2;
 interface IPayloadUtils {
   function version() external pure returns (uint256);
 
-  // can be called by web2 app for consistency
-  function serializeInput(
-    uint256 tokenType, // 2 digit
-    uint256 lockupTime, // 4 digits
-    uint256 tokenAmountOrID
-  ) external pure returns (uint256);
-
   function validateInput(
     uint256 tokenType,
     uint256 lockupTime,

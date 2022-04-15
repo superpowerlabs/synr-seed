@@ -1,5 +1,7 @@
 const {expect, assert, use} = require("chai");
 
+const {serializeInput} = require("../scripts/lib/PayloadUtils");
+
 const {initEthers, assertThrowsMessage, getTimestamp, increaseBlockTimestampBy, bytes32Address, BNMulBy} = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -66,7 +68,7 @@ describe("#MainPool", function () {
       // console.log(await synr.balanceOf(user1.address))
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = await mainPool.serializeInput(
+      const payload = await serializeInput(
         1, // SYNR
         365, // 1 year
         amount
@@ -98,7 +100,7 @@ describe("#MainPool", function () {
     it("should withdraw any ammount Taxes", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = await mainPool.serializeInput(
+      const payload = await serializeInput(
         1, // SYNR
         365, // 1 year
         amount
@@ -132,7 +134,7 @@ describe("#MainPool", function () {
     it("should all Taxes when using 0", async function () {
       const amount = ethers.utils.parseEther("10000");
       await synr.connect(fundOwner).transferFrom(fundOwner.address, user1.address, amount);
-      const payload = await mainPool.serializeInput(
+      const payload = await serializeInput(
         1, // SYNR
         365, // 1 year
         amount

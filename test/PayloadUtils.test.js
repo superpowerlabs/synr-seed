@@ -1,6 +1,8 @@
 const {expect, assert, use} = require("chai");
 
-const {initEthers, assertThrowsMessage, getTimestamp, increaseBlockTimestampBy, bytes32Address, BNMulBy} = require("./helpers");
+const {fromDepositToTransferPayload, serializeInput} = require("../scripts/lib/PayloadUtils");
+
+const {initEthers, assertThrowsMessage, getTimestamp, increaseBlockTimestampBy, bytes32Address} = require("./helpers");
 const {upgrades} = require("hardhat");
 
 // tests to be fixed
@@ -19,7 +21,7 @@ describe("#PayloadUtils", function () {
   before(async function () {
     initEthers(ethers);
     [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
-    PayloadUtils = await ethers.getContractFactory("PayloadUtilsMock");
+    PayloadUtils = await ethers.getContractFactory("PayloadUtils");
   });
 
   async function initAndDeploy() {
@@ -35,7 +37,7 @@ describe("#PayloadUtils", function () {
     it("should serialize input", async function () {
       const amount = ethers.utils.parseEther("10000");
 
-      const payload = await payloadUtils.serializeInput(
+      const payload = await serializeInput(
         1, // SYNR
         365, // 1 year
         amount
@@ -47,25 +49,25 @@ describe("#PayloadUtils", function () {
     it("should throw invalid token", async function () {
       const amount = ethers.utils.parseEther("10000");
 
-      expect(payloadUtils.serializeInput(120, 365, amount)).revertedWith("PayloadUtils: invalid token type");
+      expect(serializeInput(120, 365, amount)).revertedWith("PayloadUtils: invalid token type");
     });
 
     it("should throw not a mobland pass", async function () {
       const amount = ethers.utils.parseEther("10000");
-      payloadUtils.serializeInput;
-      expect(payloadUtils.serializeInput(2, 365, amount)).revertedWith("PayloadUtils: Not a Mobland SYNR Pass token ID");
+      serializeInput;
+      expect(serializeInput(2, 365, amount)).revertedWith("PayloadUtils: Not a Mobland SYNR Pass token ID");
     });
 
     it("should throw amount of range", async function () {
       const amount = ethers.utils.parseEther("1000000000000");
 
-      expect(payloadUtils.serializeInput(1, 365, amount)).revertedWith("PayloadUtils: tokenAmountOrID out of range");
+      expect(serializeInput(1, 365, amount)).revertedWith("PayloadUtils: tokenAmountOrID out of range");
     });
 
     it("should throw lockedTime out of range", async function () {
       const amount = ethers.utils.parseEther("10000");
 
-      expect(payloadUtils.serializeInput(1, 1e5, amount)).revertedWith("PayloadUtils: lockedTime out of range");
+      expect(serializeInput(1, 1e5, amount)).revertedWith("PayloadUtils: lockedTime out of range");
     });
   });
 
@@ -77,7 +79,7 @@ describe("#PayloadUtils", function () {
     it("should deserialize", async function () {
       const amount = ethers.utils.parseEther("10000");
 
-      const payload = await payloadUtils.serializeInput(
+      const payload = await serializeInput(
         2, // SYNR
         365, // 1 year
         200
@@ -104,7 +106,7 @@ describe("#PayloadUtils", function () {
         mainIndex: 0,
       };
 
-      const payload = await payloadUtils.fromDepositToTransferPayload(deposit);
+      const payload = await fromDepositToTransferPayload(deposit);
       const [tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID] = await payloadUtils.deserializeDeposit(payload);
 
       expect(tokenType).equal(deposit.tokenType);
