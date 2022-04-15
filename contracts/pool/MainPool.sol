@@ -330,8 +330,9 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     if (amount == 0) {
       amount = availableAmount;
     }
-    // beneficiary must be whitelisted to receive sSYNR
+    // the approve is necessary, because of a bug in the sSYNR contract
     sSynr.approve(address(this), amount);
+    // beneficiary must be whitelisted to receive sSYNR
     sSynr.transferFrom(address(this), beneficiary, amount);
   }
 
