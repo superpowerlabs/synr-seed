@@ -221,12 +221,12 @@ describe("#SeedPool", function () {
     });
   });
 
-  describe.only("#stakeViaFactory", async function () {
+  describe("#stakeViaFactory", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
 
-    it("should stake blueprint via factory", async function () {
+    it("should not stake blueprint via factory", async function () {
       const amount = ethers.utils.parseEther("1500000");
       await blueprint.connect(user0).approve(pool.address, 4);
 
@@ -240,19 +240,7 @@ describe("#SeedPool", function () {
 
       expect(
         pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
-      ).revertedWith("SeedPool: forbidden");
-
-      expect(await pool.connect(factory).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount))
-        .emit(pool, "DepositSaved")
-        .withArgs(user0.address, 0);
-      console.log(11);
-
-      let deposit = await pool.getDepositByIndex(user0.address, 0);
-      expect(deposit.lockedFrom).equal(lockedFrom);
-      expect(deposit.tokenAmountOrID).equal(4);
-      expect(deposit.mainIndex).equal(0);
-      expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
-      expect(deposit.lockedUntil).equal(0);
+      ).revertedWith("SeedPool: unsupported token");
     });
   });
 
