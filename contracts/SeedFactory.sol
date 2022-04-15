@@ -31,13 +31,9 @@ contract SeedFactory is PayloadUtils, WormholeTunnelUpgradeable {
 
   // UNSTAKE starts on the side chain and completes on the main chain
   function wormholeTransfer(
-    // solhint-disable-next-line
     uint256 payload,
-    // solhint-disable-next-line
     uint16 recipientChain,
-    // solhint-disable-next-line
     bytes32 recipient,
-    // solhint-disable-next-line
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
     // this limitation is necessary to avoid problems during the unstake
