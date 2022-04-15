@@ -244,6 +244,25 @@ describe("#SeedPool", function () {
     });
   });
 
+  describe.only("#unstakeViaFactory", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should unstake blueprint via factory", async function () {
+      const amount = ethers.utils.parseEther("1500000");
+      await blueprint.connect(user0).approve(pool.address, 4);
+
+      expect(await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 4))
+        .emit(pool, "DepositSaved")
+        .withArgs(user0.address, 0);
+      const lockedFrom = await getTimestamp();
+      expect(
+        pool.connect(user0).unstakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
+      ).revertedWith("SeedPool: forbidden");
+    });
+  });
+
   describe("#unstake", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
