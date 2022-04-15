@@ -142,12 +142,12 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   /**
    * @notice Searches for deposit from the user and its index
    * @param user address of user who made deposit being searched
-   * @param mainIndex index of the deposit being searched
+   * @param index index of the deposit being searched
    * @return the deposit
    */
-  function getDepositByIndex(address user, uint256 mainIndex) public view override returns (Deposit memory) {
-    require(users[user].deposits[mainIndex].lockedFrom > 0, "PayloadUtils: deposit not found");
-    return users[user].deposits[mainIndex];
+  function getDepositByIndex(address user, uint256 index) public view override returns (Deposit memory) {
+    require(users[user].deposits[index].lockedFrom > 0, "MainPool: deposit not found");
+    return users[user].deposits[index];
   }
 
   /**
@@ -201,14 +201,6 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   }
 
   /**
-   * @param user address of user
-   * @return the ammount of deposits a user has made
-   */
-  function depositsLength(address user) public view returns (uint256) {
-    return users[user].deposits.length;
-  }
-
-  /**
    * @notice updates the user, calls _updateUserAndAddDeposit
    * @param user address of user being updated
    * @param tokenType identifies the type of transaction being made, 0=SSYNR, 1=SYNR, 2 or 3 = SYNR PASS.
@@ -234,7 +226,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       lockedUntil,
       tokenAmountOrID,
       otherChain,
-      depositsLength(user)
+      getDepositsLength(user)
     );
     return deposit;
   }
@@ -334,10 +326,12 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
    */
   function withdrawSSynr(uint256 amount, address beneficiary) external override onlyOwner {
     uint256 availableAmount = sSynr.balanceOf(address(this));
-    require(amount <= availableAmount, "MainPool: sSYNR amount not available");
+    require(availableAmount > 0 && amount <= availableAmount, "MainPool: sSYNR amount not available");
     if (amount == 0) {
       amount = availableAmount;
     }
+    // the approve is necessary, because of a bug in the sSYNR contract
+    sSynr.approve(address(this), amount);
     // beneficiary must be whitelisted to receive sSYNR
     sSynr.transferFrom(address(this), beneficiary, amount);
   }
@@ -348,12 +342,12 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
    * @param beneficiary address to which the withdrawl will go to
    */
   function withdrawPenalties(uint256 amount, address beneficiary) external override onlyOwner {
-    require(amount <= penalties, "MainPool: amount not available");
+    require(penalties > 0 && amount <= penalties, "MainPool: amount not available");
     if (amount == 0) {
       amount = penalties;
     }
     penalties -= amount;
-    synr.transferFrom(address(this), beneficiary, amount);
+    synr.safeTransferFrom(address(this), beneficiary, amount, "");
   }
 
   /**

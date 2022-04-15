@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # must be run from the root
 
-#rm -rf artifacts
-#rm -rf cache
-#npx hardhat compile
+npx hardhat compile
 
 if [[ "$2" == "ropsten" ]]; then
 # bin/deploy.sh pool localhost 360000000000000000000 91252 7120725 200

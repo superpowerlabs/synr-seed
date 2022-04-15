@@ -27,7 +27,7 @@ contract SeedPool is SidePool {
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
-  function setFactory(address farmer_) external onlyOwner {
+  function setFactory(address farmer_) external virtual onlyOwner {
     require(farmer_.isContract(), "SeedPool: farmer_ not a contract");
     factory = farmer_;
   }
@@ -63,6 +63,7 @@ contract SeedPool is SidePool {
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) external onlyFactory {
+    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
     _stake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
