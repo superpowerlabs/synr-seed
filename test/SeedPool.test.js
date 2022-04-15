@@ -30,14 +30,14 @@ describe("#SeedPool", function () {
   let user0sSeeds = "250000000";
   let user0sBlueprint = "25";
 
-  let deployer, user0, user1, user2, marketplace, treasury;
+  let deployer, user0, user1, user2, factory;
 
   before(async function () {
     initEthers(ethers);
-    [deployer, user0, user1, user2, marketplace, treasury] = await ethers.getSigners();
+    [deployer, user0, user1, user2, factory] = await ethers.getSigners();
     SeedToken = await ethers.getContractFactory("SeedToken");
     WeedToken = await ethers.getContractFactory("WeedToken");
-    SeedPool = await ethers.getContractFactory("SeedPool");
+    SeedPool = await ethers.getContractFactory("SeedPoolMock");
     SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
   });
 
@@ -221,7 +221,7 @@ describe("#SeedPool", function () {
     });
   });
 
-  describe("#stakeViaFactory", async function () {
+  describe.only("#stakeViaFactory", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
@@ -231,18 +231,26 @@ describe("#SeedPool", function () {
       await blueprint.connect(user0).approve(pool.address, 4);
 
       const lockedFrom = await getTimestamp();
+
       expect(
-        await pool
-          .connect(user0)
-          .stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, pool.mainIndex, amount)
-      )
+        pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
+      ).revertedWith("SeedPool: forbidden");
+
+      await pool.setFactory(factory.address);
+
+      expect(
+        pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
+      ).revertedWith("SeedPool: forbidden");
+
+      expect(await pool.connect(factory).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount))
         .emit(pool, "DepositSaved")
         .withArgs(user0.address, 0);
+      console.log(11);
 
       let deposit = await pool.getDepositByIndex(user0.address, 0);
       expect(deposit.lockedFrom).equal(lockedFrom);
       expect(deposit.tokenAmountOrID).equal(4);
-      expect(deposit.mainIndex).equal(pool.mainIndex);
+      expect(deposit.mainIndex).equal(0);
       expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
       expect(deposit.lockedUntil).equal(0);
     });

@@ -142,13 +142,12 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   /**
    * @notice Searches for deposit from the user and its index
    * @param user address of user who made deposit being searched
-   * @param mainIndex index of the deposit being searched
+   * @param index index of the deposit being searched
    * @return the deposit
    */
-  function getDepositByIndex(address user, uint256 mainIndex) public view override returns (Deposit memory) {
-    //require(getDepositsLength(user) > mainIndex, "PayloadUtils: Index too high" );
-    require(users[user].deposits[mainIndex].lockedFrom > 0, "PayloadUtils: deposit not found");
-    return users[user].deposits[mainIndex];
+  function getDepositByIndex(address user, uint256 index) public view override returns (Deposit memory) {
+    require(users[user].deposits[index].lockedFrom > 0, "MainPool: deposit not found");
+    return users[user].deposits[index];
   }
 
   /**
