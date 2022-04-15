@@ -30,14 +30,14 @@ describe("#SeedPool", function () {
   let user0sSeeds = "250000000";
   let user0sBlueprint = "25";
 
-  let deployer, user0, user1, user2, marketplace, treasury;
+  let deployer, user0, user1, user2, factory;
 
   before(async function () {
     initEthers(ethers);
-    [deployer, user0, user1, user2, marketplace, treasury] = await ethers.getSigners();
+    [deployer, user0, user1, user2, factory] = await ethers.getSigners();
     SeedToken = await ethers.getContractFactory("SeedToken");
     WeedToken = await ethers.getContractFactory("WeedToken");
-    SeedPool = await ethers.getContractFactory("SeedPool");
+    SeedPool = await ethers.getContractFactory("SeedPoolMock");
     SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
   });
 
@@ -51,7 +51,7 @@ describe("#SeedPool", function () {
     blueprint = await SynCityCouponsSimplified.deploy(8000);
     await blueprint.deployed();
 
-    pool = await upgrades.deployProxy(SeedPool, [seed.address, weed.address, blueprint.address]);
+    pool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await pool.deployed();
 
     if (initPool) {
@@ -226,25 +226,21 @@ describe("#SeedPool", function () {
       await initAndDeploy(true);
     });
 
-    it("should stake blueprint via factory", async function () {
+    it("should not stake blueprint via factory", async function () {
       const amount = ethers.utils.parseEther("1500000");
       await blueprint.connect(user0).approve(pool.address, 4);
 
       const lockedFrom = await getTimestamp();
-      expect(
-        await pool
-          .connect(user0)
-          .stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, pool.mainIndex, amount)
-      )
-        .emit(pool, "DepositSaved")
-        .withArgs(user0.address, 0);
 
-      let deposit = await pool.getDepositByIndex(user0.address, 0);
-      expect(deposit.lockedFrom).equal(lockedFrom);
-      expect(deposit.tokenAmountOrID).equal(4);
-      expect(deposit.mainIndex).equal(pool.mainIndex);
-      expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
-      expect(deposit.lockedUntil).equal(0);
+      expect(
+        pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
+      ).revertedWith("SeedPool: forbidden");
+
+      await pool.setFactory(factory.address);
+
+      expect(
+        pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
+      ).revertedWith("SeedPool: unsupported token");
     });
   });
 

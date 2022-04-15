@@ -90,7 +90,7 @@ describe("#MainPool", function () {
     });
   });
 
-  describe.only("#Deposit", async function () {
+  describe("#Deposit", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });

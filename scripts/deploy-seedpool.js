@@ -21,7 +21,7 @@ async function main() {
   const SeedPool = await ethers.getContractFactory("SeedPool");
 
   console.log("Deploying SeedPool");
-  const seedPool = await upgrades.deployProxy(SeedPool, [seedAddress, seedAddress, blueprintAddress]);
+  const seedPool = await upgrades.deployProxy(SeedPool, [seedAddress, blueprintAddress]);
   await seedPool.deployed();
 
   console.log("SeedPool deployed at", seedPool.address);
