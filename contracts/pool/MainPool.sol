@@ -326,11 +326,12 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
    */
   function withdrawSSynr(uint256 amount, address beneficiary) external override onlyOwner {
     uint256 availableAmount = sSynr.balanceOf(address(this));
-    require(amount <= availableAmount, "MainPool: sSYNR amount not available");
+    require(availableAmount > 0 && amount <= availableAmount, "MainPool: sSYNR amount not available");
     if (amount == 0) {
       amount = availableAmount;
     }
     // beneficiary must be whitelisted to receive sSYNR
+    sSynr.approve(address(this), amount);
     sSynr.transferFrom(address(this), beneficiary, amount);
   }
 
@@ -340,12 +341,12 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
    * @param beneficiary address to which the withdrawl will go to
    */
   function withdrawPenalties(uint256 amount, address beneficiary) external override onlyOwner {
-    require(amount <= penalties, "MainPool: amount not available");
+    require(penalties > 0 && amount <= penalties, "MainPool: amount not available");
     if (amount == 0) {
       amount = penalties;
     }
     penalties -= amount;
-    synr.transferFrom(address(this), beneficiary, amount);
+    synr.safeTransferFrom(address(this), beneficiary, amount, "");
   }
 
   /**

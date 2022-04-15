@@ -194,19 +194,17 @@ describe("#MainPool", function () {
     });
   });
 
-  // describe.only("#withdrawSSynr", async function () {
-  //   beforeEach(async function () {
-  //     await initAndDeploy();
-  //   });
+  describe("#withdrawSSynr", async function () {
+    beforeEach(async function () {
+      await initAndDeploy();
+    });
 
-  //   it("should Withdraw the SSYNR", async function () {
-  //     const amount = ethers.utils.parseEther("10000");
-  //     await sSynr.mint(mainPool.address, amount)
-  //     await sSynr.updateRole(user1.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
-  //     console.log(await sSynr.balanceOf(mainPool.address))
-  //     console.log(await sSynr.balanceOf(user1.address))
-  //     await mainPool.withdrawSSynr(0, user1.address)
-  //     console.log(await sSynr.balanceOf(user1.address))
-  //   });
-  // });
+    it("should Withdraw the sSYNR", async function () {
+      const amount = ethers.utils.parseEther("10000");
+      await sSynr.mint(mainPool.address, amount);
+      await sSynr.updateRole(treasury.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
+      await mainPool.withdrawSSynr(0, treasury.address);
+      expect(await sSynr.balanceOf(treasury.address)).equal(amount);
+    });
+  });
 });

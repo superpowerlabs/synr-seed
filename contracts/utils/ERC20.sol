@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
+import "hardhat/console.sol";
+
 import "../interfaces/IERC20.sol";
 
 /**
@@ -161,6 +163,7 @@ contract ERC20 is IERC20 {
     uint256 amount
   ) public virtual override returns (bool) {
     _transfer(sender, recipient, amount);
+    //    console.log("_allowances[sender][msg.sender] %s", _allowances[sender][msg.sender]);
     _approve(sender, msg.sender, _allowances[sender][msg.sender] - amount);
     return true;
   }
