@@ -244,7 +244,7 @@ describe("#SeedPool", function () {
     });
   });
 
-  describe.only("#unstakeViaFactory", async function () {
+  describe("#unstakeViaFactory", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
