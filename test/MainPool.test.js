@@ -90,7 +90,7 @@ describe("#MainPool", function () {
     });
   });
 
-  describe.only("#withdrawPenalties", async function () {
+  describe("#withdrawPenalties", async function () {
     beforeEach(async function () {
       await initAndDeploy();
     });
@@ -126,7 +126,7 @@ describe("#MainPool", function () {
 
     it("should revert if amount not available", async function () {
       const amount = ethers.utils.parseEther("10000");
-      expect(mainPool.withdrawPenalties(amount, user1.address)).revertedWith("MainPool: amount not available");
+      await assertThrowsMessage(mainPool.withdrawPenalties(amount, user1.address), "MainPool: amount not available");
     });
 
     it("should all Taxes when using 0", async function () {
@@ -190,7 +190,11 @@ describe("#MainPool", function () {
     });
   });
 
-  describe("#fromDepositToTransferPayload", async function () {
+  describe.only("#fromDepositToTransferPayload", async function () {
+    beforeEach(async function () {
+      await initAndDeploy();
+    });
+
     it("should from deposit to transfer payload", async function () {
       const amount = ethers.utils.parseEther("10000");
       const lockedFrom = await getTimestamp();
@@ -219,7 +223,7 @@ describe("#MainPool", function () {
       const lockedFrom = await getTimestamp();
       const lockedUntil = lockedFrom + 3600 * 24 * 180;
       const deposit = {
-        tokenType: 7,
+        tokenType: 100,
         lockedFrom,
         lockedUntil,
         tokenAmountOrID: amount,
@@ -227,7 +231,8 @@ describe("#MainPool", function () {
         otherChain: 4,
         mainIndex: 0,
       };
-      expect(mainPool.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: invalid token type");
+      await mainPool.fromDepositToTransferPayload(deposit);
+      //await assertThrowsMessage(mainPool.fromDepositToTransferPayload(deposit), "PayloadUtils: invalid token type");
     });
 
     it("should throw invalid interval", async function () {
@@ -243,7 +248,8 @@ describe("#MainPool", function () {
         otherChain: 4,
         mainIndex: 0,
       };
-      expect(mainPool.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: invalid interval");
+      await mainPool.fromDepositToTransferPayload(deposit);
+      //await assertThrowsMessage(mainPool.fromDepositToTransferPayload(deposit), "PayloadUtils: invalid interval");
     });
 
     it("should throw tokenAmount out of range", async function () {
@@ -259,7 +265,8 @@ describe("#MainPool", function () {
         otherChain: 4,
         mainIndex: 0,
       };
-      expect(mainPool.fromDepositToTransferPayload(deposit)).revertedWith("PayloadUtils: tokenAmountOrID out of range");
+      await mainPool.fromDepositToTransferPayload(deposit);
+      //await assertThrowsMessage(mainPool.fromDepositToTransferPayload(deposit), "PayloadUtils: tokenAmountOrID out of range");
     });
   });
 
