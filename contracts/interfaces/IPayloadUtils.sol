@@ -9,7 +9,7 @@ interface IPayloadUtils {
 
   // can be called by web2 app for consistency
   function serializeInput(
-    uint256 tokenType, // 1 digit
+    uint256 tokenType, // 2 digit
     uint256 lockupTime, // 4 digits
     uint256 tokenAmountOrID
   ) external pure returns (uint256);

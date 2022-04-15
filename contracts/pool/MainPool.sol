@@ -88,11 +88,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
    * @param deposit The deposit
    * @return the payload, an encoded uint256
    */
-  function fromDepositToTransferPayload(Deposit memory deposit) public pure override returns (uint256) {
-    require(deposit.tokenType < 100, "PayloadUtils: invalid token type");
-    require(deposit.lockedUntil < 1e10, "PayloadUtils: lockedTime out of range");
-    require(deposit.lockedUntil == 0 || deposit.lockedFrom < deposit.lockedUntil, "PayloadUtils: invalid interval");
-    require(deposit.tokenAmountOrID < 1e28, "PayloadUtils: tokenAmountOrID out of range");
+  function _fromDepositToTransferPayload(Deposit memory deposit) internal pure returns (uint256) {
     return
       uint256(deposit.tokenType)
         .add(uint256(deposit.lockedFrom).mul(100))
@@ -197,7 +193,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       // MainPool must be approved to make the transfer
       pass.safeTransferFrom(user, address(this), tokenAmountOrID);
     }
-    return fromDepositToTransferPayload(_updateUser(user, tokenType, lockupTime, tokenAmountOrID, otherChain));
+    return _fromDepositToTransferPayload(_updateUser(user, tokenType, lockupTime, tokenAmountOrID, otherChain));
   }
 
   /**

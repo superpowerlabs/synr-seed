@@ -33,7 +33,7 @@ contract PayloadUtils is IPayloadUtils, Constants {
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) public pure override returns (bool) {
-    //    require(tokenType < 4, "PayloadUtils: invalid token type");
+    require(tokenType < 100, "PayloadUtils: invalid token type");
     if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(tokenAmountOrID < 889, "PayloadUtils: Not a Mobland SYNR Pass token ID");
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {

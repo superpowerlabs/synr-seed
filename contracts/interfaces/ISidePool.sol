@@ -125,8 +125,6 @@ interface ISidePool {
 
   function untaxedPendingRewards(address user_, uint256 timestamp) external view returns (uint256);
 
-  function fromDepositToTransferPayload(Deposit memory deposit) external pure returns (uint256);
-
   function getDepositByIndex(address user, uint256 mainIndex) external view returns (Deposit memory);
 
   function getDepositsLength(address user) external view returns (uint256);

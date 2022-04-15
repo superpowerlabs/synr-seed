@@ -43,13 +43,6 @@ interface IMainPool {
     uint8 status;
   }
 
-  /**
-   * @notice Converts the input payload to the transfer payload
-   * @param deposit The deposit
-   * @return the payload, an encoded uint256
-   */
-  function fromDepositToTransferPayload(Deposit memory deposit) external pure returns (uint256);
-
   function getDepositByIndex(address user, uint256 mainIndex) external view returns (Deposit memory);
 
   function getDepositsLength(address user) external view returns (uint256);

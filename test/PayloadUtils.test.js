@@ -47,7 +47,7 @@ describe("#PayloadUtils", function () {
     it("should throw invalid token", async function () {
       const amount = ethers.utils.parseEther("10000");
 
-      expect(payloadUtils.serializeInput(4, 365, amount)).revertedWith("PayloadUtils: invalid token type");
+      expect(payloadUtils.serializeInput(120, 365, amount)).revertedWith("PayloadUtils: invalid token type");
     });
 
     it("should throw not a mobland pass", async function () {

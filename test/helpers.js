@@ -36,6 +36,8 @@ const Helpers = {
     return BN(param.toString()).mul(num);
   },
 
+  fromDepositToTransferPayload(deposit) {},
+
   async increaseBlockTimestampBy(offset) {
     await this.ethers.provider.send("evm_increaseTime", [offset]);
     await this.ethers.provider.send("evm_mine");

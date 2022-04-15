@@ -309,24 +309,6 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   }
 
   /**
-   * @notice Converts the input payload to the transfer payload
-   * @param deposit The deposit
-   * @return the payload, an encoded uint256
-   */
-  function fromDepositToTransferPayload(Deposit memory deposit) public pure override returns (uint256) {
-    require(deposit.tokenType < 100, "SidePool: invalid token type");
-    require(deposit.lockedFrom < deposit.lockedUntil, "SidePool: invalid interval");
-    require(deposit.lockedUntil < 1e10, "SidePool: lockedTime out of range");
-    require(deposit.tokenAmountOrID < 1e28, "SidePool: tokenAmountOrID out of range");
-    return
-      uint256(deposit.tokenType)
-        .add(uint256(deposit.lockedFrom).mul(100))
-        .add(uint256(deposit.lockedUntil).mul(1e12))
-        .add(uint256(deposit.mainIndex).mul(1e22))
-        .add(uint256(deposit.tokenAmountOrID).mul(1e27));
-  }
-
-  /**
    * @notice Searches for deposit from the user and its index
    * @param user address of user who made deposit being searched
    * @param index index of the deposit being searched
@@ -476,6 +458,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   function getDepositIndexByMainIndex(address user, uint256 mainIndex) public view override returns (uint256, bool) {
     for (uint256 i; i < users[user].deposits.length; i++) {
       if (uint256(users[user].deposits[i].mainIndex) == mainIndex && users[user].deposits[i].lockedFrom > 0) {
+        console.log("i %s", i);
         return (i, true);
       }
     }
@@ -498,6 +481,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal virtual {
+    console.log(">>>>>>>> %s", mainIndex);
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass used as SYNR cannot be early unstaked");
     }
