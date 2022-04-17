@@ -57,7 +57,28 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     synr = SyndicateERC20(synr_);
     sSynr = SyntheticSyndicateERC20(sSynr_);
     pass = SynCityPasses(pass_);
-    tvl = TVL(0, 0, 0);
+  }
+
+  function _updateTvl(
+    uint256 tokenType,
+    uint256 tokenAmountOrID,
+    bool increase
+  ) internal {
+    if (increase) {
+      if (tokenType == SYNR_STAKE) {
+        tvl.synrAmount += uint96(tokenAmountOrID);
+      } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
+        tvl.passAmount++;
+      } else if (tokenType == S_SYNR_SWAP) {
+        tvl.sSynrAmount += uint96(tokenAmountOrID);
+      }
+    } else {
+      if (tokenType == SYNR_STAKE) {
+        tvl.synrAmount = uint96(uint256(tvl.synrAmount).sub(tokenAmountOrID));
+      } else {
+        tvl.passAmount--;
+      }
+    }
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
@@ -122,13 +143,10 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   ) internal returns (Deposit memory) {
     if (tokenType == SYNR_STAKE) {
       users[user].synrAmount += uint96(tokenAmountOrID);
-      tvl.synrAmount += uint96(tokenAmountOrID);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       users[user].passAmount++;
-      tvl.passAmount++;
-    } else if (tokenType == S_SYNR_SWAP) {
-      tvl.sSynrAmount += uint96(tokenAmountOrID);
     }
+    _updateTvl(tokenType, tokenAmountOrID, true);
     Deposit memory deposit = Deposit({
       tokenType: uint8(tokenType),
       lockedFrom: uint32(lockedFrom),
@@ -259,8 +277,8 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       users[user].synrAmount = uint96(uint256(users[user].synrAmount).sub(tokenAmountOrID));
     } else {
       users[user].passAmount = uint16(uint256(users[user].passAmount).sub(1));
-      tvl.passAmount = uint16(uint256(tvl.passAmount).sub(1));
     }
+    _updateTvl(tokenType, tokenAmountOrID, false);
     Deposit storage deposit = users[user].deposits[mainIndex];
     require(
       uint256(deposit.mainIndex) == mainIndex &&

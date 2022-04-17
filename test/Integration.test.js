@@ -165,6 +165,9 @@ describe("#Integration test", function () {
       .emit(synrBridge, "DepositSaved")
       .withArgs(fundOwner.address, 0);
 
+    let tvl = await mainPool.tvl();
+    expect(tvl.synrAmount).equal(amount);
+
     let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
     expect(deposit.tokenAmountOrID).equal(amount);
     expect(deposit.tokenType).equal(SYNR_STAKE);
@@ -194,6 +197,9 @@ describe("#Integration test", function () {
       .emit(synrBridge, "DepositSaved")
       .withArgs(user2.address, 0);
 
+    tvl = await mainPool.tvl();
+    expect(tvl.sSynrAmount).equal(amount3);
+
     let deposit3 = await mainPool.getDepositByIndex(user2.address, 0);
     expect(deposit3.tokenAmountOrID).equal(amount3);
     expect(deposit3.tokenType).equal(S_SYNR_SWAP);
@@ -210,6 +216,9 @@ describe("#Integration test", function () {
     )
       .emit(synrBridge, "DepositSaved")
       .withArgs(fundOwner.address, 1);
+
+    tvl = await mainPool.tvl();
+    expect(tvl.synrAmount).equal(amount.add(amount2));
 
     let deposit2 = await mainPool.getDepositByIndex(fundOwner.address, 1);
     expect(deposit2.tokenAmountOrID).equal(amount2);

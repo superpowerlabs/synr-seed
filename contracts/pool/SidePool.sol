@@ -34,6 +34,8 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   uint256 public taxes;
   address public oracle;
 
+  TVl public tvl;
+
   //  /// @custom:oz-upgrades-unsafe-allow constructor
   //  constructor() initializer {}
 
@@ -327,6 +329,26 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     return users[user].deposits.length;
   }
 
+  function _updateTvl(
+    uint256 tokenType,
+    uint256 tokenAmountOrID,
+    bool increase
+  ) internal {
+    if (increase) {
+      if (tokenType == SEED_SWAP) {
+        tvl.stakedTokenAmount += uint96(tokenAmountOrID);
+      } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
+        tvl.blueprintAmount++;
+      }
+    } else {
+      if (tokenType == SEED_SWAP) {
+        tvl.stakedTokenAmount = uint96(uint256(tvl.stakedTokenAmount).sub(tokenAmountOrID));
+      } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
+        tvl.blueprintAmount--;
+      }
+    }
+  }
+
   /**
    * @notice stakes if the pool is active
    * @param user_ address of user being updated
@@ -374,6 +396,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     } else {
       revert("SidePool: invalid tokenType");
     }
+    _updateTvl(tokenType, tokenAmountOrID, true);
     users[user_].tokenAmount = uint96(uint256(users[user_].tokenAmount).add(tokenAmount));
     // add deposit
     if (tokenType == S_SYNR_SWAP || tokenType == SEED_SWAP) {
@@ -518,6 +541,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     } else {
       revert("SidePool: invalid tokenType");
     }
+    _updateTvl(tokenType, tokenAmountOrID, false);
     deposit.unstakedAt = uint32(block.timestamp);
     emit DepositUnlocked(user_, uint16(index));
   }
