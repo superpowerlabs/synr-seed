@@ -382,6 +382,4 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   ) external virtual onlyFactory {
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
-
-  uint256[50] private __gap;
 }

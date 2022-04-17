@@ -77,6 +77,4 @@ contract SeedPool is SidePool {
   ) external onlyFactory {
     _unstake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
-
-  uint256[50] private __gap;
 }
