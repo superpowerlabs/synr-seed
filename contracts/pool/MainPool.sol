@@ -61,20 +61,20 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
 
   function _updateTvl(
     uint256 tokenType,
-    uint256 tokenAmountOrID,
+    uint256 tokenAmount,
     bool increase
   ) internal {
     if (increase) {
       if (tokenType == SYNR_STAKE) {
-        tvl.synrAmount += uint96(tokenAmountOrID);
+        tvl.synrAmount += uint96(tokenAmount);
       } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
         tvl.passAmount++;
       } else if (tokenType == S_SYNR_SWAP) {
-        tvl.sSynrAmount += uint96(tokenAmountOrID);
+        tvl.sSynrAmount += uint96(tokenAmount);
       }
     } else {
       if (tokenType == SYNR_STAKE) {
-        tvl.synrAmount = uint96(uint256(tvl.synrAmount).sub(tokenAmountOrID));
+        tvl.synrAmount = uint96(uint256(tvl.synrAmount).sub(tokenAmount));
       } else {
         tvl.passAmount--;
       }
