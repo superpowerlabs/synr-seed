@@ -55,6 +55,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     synr = SyndicateERC20(synr_);
     sSynr = SyntheticSyndicateERC20(sSynr_);
     pass = SynCityPasses(pass_);
+    tvl = TVL(0, 0, 0);
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
@@ -119,8 +120,12 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   ) internal returns (Deposit memory) {
     if (tokenType == SYNR_STAKE) {
       users[user].synrAmount += uint96(tokenAmountOrID);
+      tvl.synrAmount += uint96(tokenAmountOrID);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       users[user].passAmount++;
+      tvl.passAmount++;
+    } else if (tokenType == S_SYNR_SWAP) {
+      tvl.sSynrAmount += uint96(tokenAmountOrID);
     }
     Deposit memory deposit = Deposit({
       tokenType: uint8(tokenType),
@@ -252,6 +257,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       users[user].synrAmount = uint96(uint256(users[user].synrAmount).sub(tokenAmountOrID));
     } else {
       users[user].passAmount = uint16(uint256(users[user].passAmount).sub(1));
+      tvl.passAmount = uint16(uint256(tvl.passAmount).sub(1));
     }
     Deposit storage deposit = users[user].deposits[mainIndex];
     require(
@@ -384,4 +390,6 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   }
 
   uint256[50] private __gap;
+
+  TVL public tvl;
 }
