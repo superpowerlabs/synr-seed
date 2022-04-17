@@ -69,8 +69,6 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
         tvl.synrAmount += uint96(tokenAmount);
       } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
         tvl.passAmount++;
-      } else if (tokenType == S_SYNR_SWAP) {
-        tvl.sSynrAmount += uint96(tokenAmount);
       }
     } else {
       if (tokenType == SYNR_STAKE) {

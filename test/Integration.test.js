@@ -197,9 +197,6 @@ describe("#Integration test", function () {
       .emit(synrBridge, "DepositSaved")
       .withArgs(user2.address, 0);
 
-    tvl = await mainPool.tvl();
-    expect(tvl.sSynrAmount).equal(amount3);
-
     let deposit3 = await mainPool.getDepositByIndex(user2.address, 0);
     expect(deposit3.tokenAmountOrID).equal(amount3);
     expect(deposit3.tokenType).equal(S_SYNR_SWAP);
