@@ -165,6 +165,9 @@ describe("#Integration test", function () {
       .emit(synrBridge, "DepositSaved")
       .withArgs(fundOwner.address, 0);
 
+    let tvl = await mainPool.tvl();
+    expect(tvl.synrAmount).equal(amount);
+
     let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
     expect(deposit.tokenAmountOrID).equal(amount);
     expect(deposit.tokenType).equal(SYNR_STAKE);
@@ -211,6 +214,9 @@ describe("#Integration test", function () {
       .emit(synrBridge, "DepositSaved")
       .withArgs(fundOwner.address, 1);
 
+    tvl = await mainPool.tvl();
+    expect(tvl.synrAmount).equal(amount.add(amount2));
+
     let deposit2 = await mainPool.getDepositByIndex(fundOwner.address, 1);
     expect(deposit2.tokenAmountOrID).equal(amount2);
     expect(deposit2.tokenType).equal(1);
@@ -223,6 +229,11 @@ describe("#Integration test", function () {
       .emit(seedFactory, "DepositSaved")
       .withArgs(fundOwner.address, 0);
 
+    let conf2 = await seedPool.conf();
+    let tvl2 = await seedPool.tvl();
+    let seedAmount = amount.mul(conf2.stakeFactor).mul(conf2.priceRatio).div(10000);
+    expect(tvl2.stakedTokenAmount).equal(seedAmount);
+
     expect(await seed.balanceOf(fundOwner.address)).equal(0);
 
     expect(await seedFactory.mockWormholeCompleteTransfer(fundOwner.address, finalPayload2))
@@ -234,6 +245,13 @@ describe("#Integration test", function () {
     expect(await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload3))
       .emit(seedFactory, "DepositSaved")
       .withArgs(user2.address, 0);
+
+    conf2 = await seedPool.conf();
+    tvl2 = await seedPool.tvl();
+    let seedAmount2 = amount2.mul(conf2.stakeFactor).mul(conf2.priceRatio).div(10000);
+    let seedAmount3 = amount3.mul(conf2.swapFactor).mul(conf2.priceRatio).div(10000);
+
+    expect(tvl2.stakedTokenAmount).equal(seedAmount.add(seedAmount2).add(seedAmount3));
 
     await increaseBlockTimestampBy(20 * 24 * 3600);
 

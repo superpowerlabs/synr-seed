@@ -61,6 +61,11 @@ interface ISidePool {
     uint8 status;
   }
 
+  struct TVL {
+    uint16 blueprintAmount;
+    uint96 stakedTokenAmount;
+  }
+
   struct NftConf {
     uint32 synrEquivalent; // 100,000
     uint16 sPBoostFactor; // 12500 > 112.5% > +12.5% of boost
