@@ -18,22 +18,12 @@ contract PayloadUtils is IPayloadUtils, Constants {
     return 1;
   }
 
-  // can be called by tests and web2 app
-  function serializeInput(
-    uint256 tokenType, // 2 digit
-    uint256 lockupTime, // 3 digits
-    uint256 tokenAmountOrID
-  ) external pure override returns (uint256 payload) {
-    validateInput(tokenType, lockupTime, tokenAmountOrID);
-    payload = tokenType.add(lockupTime.mul(100)).add(tokenAmountOrID.mul(1e5));
-  }
-
   function validateInput(
     uint256 tokenType,
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) public pure override returns (bool) {
-    //    require(tokenType < 4, "PayloadUtils: invalid token type");
+    require(tokenType < 100, "PayloadUtils: invalid token type");
     if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(tokenAmountOrID < 889, "PayloadUtils: Not a Mobland SYNR Pass token ID");
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
