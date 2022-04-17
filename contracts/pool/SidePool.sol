@@ -33,6 +33,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   uint256 public penalties;
   uint256 public taxes;
   address public oracle;
+  address public factory;
 
   TVl public tvl;
 

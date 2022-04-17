@@ -27,8 +27,10 @@ async function main() {
   console.log("SeedPool deployed at", seedPool.address);
   await deployUtils.saveDeployed(chainId, ["SeedPool"], [seedPool.address]);
 
-  await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10, {gasLimit: 70000});
-  await seedPool.updateNftConf(100000, 1500, 500000, 150, 1000, {gasLimit: 60000});
+  console.log("#initPool");
+  await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10, {gasLimit: 80000});
+  console.log("#updateNftConf");
+  await seedPool.updateNftConf(100000, 1500, 500000, 150, 1000, {gasLimit: 80000});
 
   const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress);
