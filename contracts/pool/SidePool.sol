@@ -394,7 +394,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       tokenAmount = tokenAmountOrID;
       // SidePool must be approve to spend SEED
       stakedToken.transferFrom(user_, address(this), tokenAmount);
-      taxes += tokenAmount;
+      taxes += tokenAmount.sub(tokenAmount.mul(conf.burnRatio).div(10000));
       stakedToken.burn(tokenAmount.mul(conf.burnRatio).div(10000));
     } else {
       revert("SidePool: invalid tokenType");
