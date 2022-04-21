@@ -218,14 +218,18 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       return 0;
     }
     uint256 lockedUntil = uint256(deposit.lockedUntil);
+    if (deposit.lastRewardsAt > uint32(lockedUntil)) {
+      // rewards already collected
+      return 0;
+    }
     uint256 now_ = lockedUntil > timestamp ? timestamp : lockedUntil;
     return
       uint256(deposit.tokenAmount)
         .mul(deposit.rewardsFactor)
         .mul(now_.sub(deposit.lastRewardsAt))
-        .div(lockedUntil.sub(deposit.lockedFrom))
+        .mul(lockedUntil.sub(deposit.lockedFrom))
         .mul(yieldWeight(deposit))
-        .div(1000000);
+        .div(1e18);
   }
 
   /**
@@ -531,7 +535,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
         uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
       "SidePool: inconsistent deposit"
     );
-    if (tokenType == SYNR_STAKE || tokenType == SEED_SWAP) {
+    if (tokenType == SYNR_STAKE || tokenType == SEED_SWAP || tokenType == S_SYNR_SWAP) {
       uint256 vestedPercentage = getVestedPercentage(
         block.timestamp,
         uint256(deposit.lockedFrom),

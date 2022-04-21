@@ -240,7 +240,7 @@ describe("#Integration test", function () {
       .emit(seedFactory, "DepositSaved")
       .withArgs(fundOwner.address, 1);
 
-    expect(await seed.balanceOf(fundOwner.address)).equal("3500761035007610350");
+    expect(await seed.balanceOf(fundOwner.address)).equal("3481574400000000000000");
 
     expect(await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload3))
       .emit(seedFactory, "DepositSaved")
@@ -325,6 +325,14 @@ describe("#Integration test", function () {
     expect(await seedFactory.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1))
       .emit(seedFactory, "DepositUnlocked")
       .withArgs(fundOwner.address, 0);
+
+    // unstake SEED from sSYNR
+
+    expect(await seed.balanceOf(user2.address)).equal("35276265676800000000000000");
+
+    await seedPool.connect(user2).unstake(0);
+
+    expect(await seed.balanceOf(user2.address)).equal("40276265676800000000000000");
 
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);

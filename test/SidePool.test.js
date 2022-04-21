@@ -224,7 +224,7 @@ describe("#SidePool", function () {
 
     it("should calculate the rewards", async function () {
       await increaseBlockTimestampBy(21 * 24 * 3600);
-      expect(await sidePool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("1680981749999999999999999");
+      expect(await sidePool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("406570153393152000000000000");
     });
   });
 
