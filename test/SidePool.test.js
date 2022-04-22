@@ -10,6 +10,7 @@ const {
   BLUEPRINT_STAKE_FOR_BOOST,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
+const PayloadUtils = require("../scripts/lib/PayloadUtils");
 
 // tests to be fixed
 
@@ -215,8 +216,8 @@ describe("#SidePool", function () {
         lockedUntil,
         tokenAmountOrID: amount,
         unstakedAt: 0,
-        mainIndex: 0,
         tokenAmount: amount.mul(100),
+        mainIndex: 0,
         lastRewardsAt: lockedFrom,
         rewardsFactor: 1000,
       };
@@ -224,7 +225,29 @@ describe("#SidePool", function () {
 
     it("should calculate the rewards", async function () {
       await increaseBlockTimestampBy(21 * 24 * 3600);
-      expect(await sidePool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("406570153393152000000000000");
+      expect(await sidePool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("82897730136986301369863013");
+    });
+
+    it.only("should verify that collecting rewards by week or at the end sums to same amount", async function () {
+      let count = ethers.BigNumber.from("0");
+      for (let i = 0; i < 54; i++) {
+        await increaseBlockTimestampBy(7 * 24 * 3600);
+        let ts = await getTimestamp();
+        count = count.add(await sidePool.calculateUntaxedRewards(deposit, ts));
+        console.log(count);
+        console.log(PayloadUtils.calculateUntaxedRewards(deposit, ts));
+        process.exit();
+        deposit.lastRewardsAt = ts;
+      }
+      await increaseBlockTimestampBy(1 * 24 * 3600);
+      deposit.lockedFrom = lockedFrom = await getTimestamp();
+      deposit.lockedUntil = deposit.lockedFrom + 3600 * 24 * 180;
+      await increaseBlockTimestampBy(365 * 24 * 3600);
+      let total = await sidePool.calculateUntaxedRewards(deposit, await getTimestamp());
+      console.log(ethers.utils.formatEther(count));
+      console.log(ethers.utils.formatEther(total));
+
+      expect(total).equal(count);
     });
   });
 

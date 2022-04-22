@@ -132,13 +132,11 @@ describe("#Params Calculator", function () {
 
   it.skip("should verify possible combination", async function () {
     const params = [
-      [25, 60000],
-      [20, 50000],
-      [10, 30000],
-      [20, 55000],
+      [650, 50000],
+      [700, 50000], // < best setting
     ];
 
-    const report = [
+    let report = [
       [
         "stakeFactor",
         "swapFactor",
@@ -147,7 +145,6 @@ describe("#Params Calculator", function () {
         "SEED after swapping sSYNR",
         "Final SEED for SYNR",
         "Final SEED for sSYNR",
-        "SEED after swapping sSYNR",
         "Ratio",
       ],
     ];
@@ -224,8 +221,10 @@ describe("#Params Calculator", function () {
       }
     }
     await fs.ensureDir(path.resolve(__dirname, "../tmp"));
-    await fs.writeFile(path.resolve(__dirname, "../tmp/report.csv"), report.map((e) => e.join(",")).join("\n"));
-    console.info();
+    report = report.map((e) => e.join(",")).join("\n");
+    await fs.writeFile(path.resolve(__dirname, "../tmp/report.csv"), report);
+    console.info(report);
+
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 });

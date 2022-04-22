@@ -217,19 +217,25 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     if (deposit.tokenAmount == 0) {
       return 0;
     }
+    return
+      multiplyByRewardablePeriod(
+        uint256(deposit.tokenAmount).mul(deposit.rewardsFactor).mul(yieldWeight(deposit)).div(10000),
+        deposit,
+        timestamp
+      );
+  }
+
+  function multiplyByRewardablePeriod(
+    uint256 input,
+    Deposit memory deposit,
+    uint256 timestamp
+  ) public view returns (uint256) {
     uint256 lockedUntil = uint256(deposit.lockedUntil);
-    if (deposit.lastRewardsAt > uint32(lockedUntil)) {
-      // rewards already collected
+    if (uint256(deposit.lastRewardsAt) > lockedUntil) {
       return 0;
     }
-    uint256 now_ = lockedUntil > timestamp ? timestamp : lockedUntil;
-    return
-      uint256(deposit.tokenAmount)
-        .mul(deposit.rewardsFactor)
-        .mul(now_.sub(deposit.lastRewardsAt))
-        .mul(lockedUntil.sub(deposit.lockedFrom))
-        .mul(yieldWeight(deposit))
-        .div(1e18);
+    uint256 when = lockedUntil > timestamp ? timestamp : lockedUntil;
+    return input.mul(when.sub(deposit.lastRewardsAt)).div(365 days);
   }
 
   /**

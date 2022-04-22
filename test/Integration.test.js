@@ -240,7 +240,7 @@ describe("#Integration test", function () {
       .emit(seedFactory, "DepositSaved")
       .withArgs(fundOwner.address, 1);
 
-    expect(await seed.balanceOf(fundOwner.address)).equal("3481574400000000000000");
+    expect(await seed.balanceOf(fundOwner.address)).equal("350076103500761035007");
 
     expect(await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload3))
       .emit(seedFactory, "DepositSaved")
