@@ -326,6 +326,14 @@ describe("#Integration test", function () {
       .emit(seedFactory, "DepositUnlocked")
       .withArgs(fundOwner.address, 0);
 
+    // unstake SEED from sSYNR
+
+    expect(await seed.balanceOf(user2.address)).equal("47255800000000000000000000");
+
+    await seedPool.connect(user2).unstake(0);
+
+    expect(await seed.balanceOf(user2.address)).equal("52255800000000000000000000");
+
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);
     expect(seedDeposit.unstakedAt).equal(ts + 1);
