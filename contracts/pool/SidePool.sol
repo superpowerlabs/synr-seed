@@ -183,8 +183,8 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
    * @param deposit The deposit
    * @return the time it will be locked
    */
-  function getLockupTime(Deposit memory deposit) public pure override returns (uint256) {
-    return uint256(deposit.lockedUntil).sub(deposit.lockedFrom).div(1 days);
+  function getLockupTime(Deposit memory deposit) public view override returns (uint256) {
+    return uint256(deposit.lockedUntil).sub(deposit.lockedFrom);
   }
 
   function updateRatio() public override {
@@ -205,7 +205,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
    * @return the weighted yield
    */
   function yieldWeight(Deposit memory deposit) public view override returns (uint256) {
-    return uint256(10000).add(getLockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
+    return uint256(10000).add(getLockupTime(deposit).mul(10000).div(conf.maximumLockupTime).div(1 days));
   }
 
   /**
@@ -217,18 +217,25 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     if (deposit.tokenAmount == 0) {
       return 0;
     }
+    return
+      multiplyByRewardablePeriod(
+        uint256(deposit.tokenAmount).mul(deposit.rewardsFactor).mul(yieldWeight(deposit)).div(10000),
+        deposit,
+        timestamp
+      );
+  }
+
+  function multiplyByRewardablePeriod(
+    uint256 input,
+    Deposit memory deposit,
+    uint256 timestamp
+  ) public view returns (uint256) {
     uint256 lockedUntil = uint256(deposit.lockedUntil);
     if (uint256(deposit.lastRewardsAt) > lockedUntil) {
       return 0;
     }
-    uint256 now_ = lockedUntil > timestamp ? timestamp : lockedUntil;
-    return
-      uint256(deposit.tokenAmount)
-        .mul(deposit.rewardsFactor)
-        .mul(now_.sub(deposit.lastRewardsAt))
-        .div(lockedUntil.sub(deposit.lockedFrom))
-        .mul(yieldWeight(deposit))
-        .div(1000000);
+    uint256 when = lockedUntil > timestamp ? timestamp : lockedUntil;
+    return input.mul(when.sub(deposit.lastRewardsAt)).div(365 days);
   }
 
   /**
