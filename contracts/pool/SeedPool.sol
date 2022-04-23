@@ -11,6 +11,8 @@ contract SeedPool is SidePool {
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
 
+  address public factory;
+
   modifier onlyFactory() {
     require(factory != address(0) && _msgSender() == factory, "SeedPool: forbidden");
     _;
