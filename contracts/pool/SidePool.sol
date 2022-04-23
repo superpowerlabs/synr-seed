@@ -420,7 +420,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     } else {
       revert("SidePool: invalid tokenType");
     }
-    users[user_].tokenAmount = uint96(uint256(users[user_].tokenAmount).add(tokenAmount));
+    users[user_].tokenAmount = uint128(uint256(users[user_].tokenAmount).add(tokenAmount));
     _updateTvl(tokenType, tokenAmount, true);
     // add deposit
     if (tokenType == S_SYNR_SWAP || tokenType == SEED_SWAP) {

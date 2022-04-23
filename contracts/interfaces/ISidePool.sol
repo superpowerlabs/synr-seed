@@ -41,7 +41,7 @@ interface ISidePool {
     // @dev Total blueprints staked for boost
     uint16 blueprintsAmount;
     // @dev Total staked amount
-    uint256 tokenAmount;
+    uint128 tokenAmount;
     Deposit[] deposits;
   }
 
