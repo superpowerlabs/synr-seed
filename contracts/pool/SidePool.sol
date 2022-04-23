@@ -33,7 +33,6 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   uint256 public penalties;
   uint256 public taxes;
   address public oracle;
-  address public factory;
 
   TVL public tvl;
 
@@ -267,7 +266,6 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     if (baseAmount == 0) {
       return boost;
     }
-    console.log(type(uint128).max);
     uint256 boostedAmount = baseAmount;
     uint256 limit;
     uint256 passAmount = passForBoostAmount(user_);
