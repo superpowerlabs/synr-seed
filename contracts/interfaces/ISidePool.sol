@@ -122,6 +122,12 @@ interface ISidePool {
 
   function calculateUntaxedRewards(Deposit memory deposit, uint256 timestamp) external view returns (uint256);
 
+  function multiplyByRewardablePeriod(
+    uint256 input,
+    Deposit memory deposit,
+    uint256 timestamp
+  ) external view returns (uint256);
+
   function calculateTaxOnRewards(uint256 rewards) external view returns (uint256);
 
   function passForBoostAmount(address user) external view returns (uint256);

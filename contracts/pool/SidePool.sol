@@ -229,7 +229,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     uint256 input,
     Deposit memory deposit,
     uint256 timestamp
-  ) public view returns (uint256) {
+  ) public view override returns (uint256) {
     uint256 lockedUntil = uint256(deposit.lockedUntil);
     if (uint256(deposit.lastRewardsAt) > lockedUntil) {
       return 0;
