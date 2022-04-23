@@ -183,8 +183,8 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
    * @param deposit The deposit
    * @return the time it will be locked
    */
-  function getLockupTime(Deposit memory deposit) public pure override returns (uint256) {
-    return uint256(deposit.lockedUntil).sub(deposit.lockedFrom).div(1 days);
+  function getLockupTime(Deposit memory deposit) public view override returns (uint256) {
+    return uint256(deposit.lockedUntil).sub(deposit.lockedFrom);
   }
 
   function updateRatio() public override {
@@ -205,7 +205,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
    * @return the weighted yield
    */
   function yieldWeight(Deposit memory deposit) public view override returns (uint256) {
-    return uint256(10000).add(getLockupTime(deposit).mul(10000).div(conf.maximumLockupTime));
+    return uint256(10000).add(getLockupTime(deposit).mul(10000).div(conf.maximumLockupTime).div(1 days));
   }
 
   /**

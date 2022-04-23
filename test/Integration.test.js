@@ -136,21 +136,21 @@ describe("#Integration test", function () {
       365, // 1 year
       amount
     );
-    expect(payload).equal("1000000000000000000000036501");
+    expect(payload).equal("1000000000000000000000036502");
 
     let payload2 = await serializeInput(
       SYNR_STAKE, // SYNR
       150, // 1 year
       amount2
     );
-    expect(payload2).equal("2000000000000000000000015001");
+    expect(payload2).equal("2000000000000000000000015002");
 
     let payload3 = await serializeInput(
       S_SYNR_SWAP, // sSYNR
       0, // 1 year
       amount3
     );
-    expect(payload3).equal("500000000000000000000000000");
+    expect(payload3).equal("500000000000000000000000001");
 
     await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("35000"));
 
@@ -219,7 +219,7 @@ describe("#Integration test", function () {
 
     let deposit2 = await mainPool.getDepositByIndex(fundOwner.address, 1);
     expect(deposit2.tokenAmountOrID).equal(amount2);
-    expect(deposit2.tokenType).equal(1);
+    expect(deposit2.tokenType).equal(SYNR_STAKE);
     expect(deposit2.otherChain).equal(4);
     const finalPayload2 = await fromDepositToTransferPayload(deposit2);
 
@@ -278,7 +278,7 @@ describe("#Integration test", function () {
       0, // 1 year
       9
     );
-    expect(payload4).equal("900002");
+    expect(payload4).equal("900003");
 
     // approve the spending of the pass
     await pass.connect(fundOwner).approve(mainPool.address, 9);
@@ -328,11 +328,11 @@ describe("#Integration test", function () {
 
     // unstake SEED from sSYNR
 
-    expect(await seed.balanceOf(user2.address)).equal("35276265676800000000000000");
+    expect(await seed.balanceOf(user2.address)).equal("129467945205479452054794520");
 
     await seedPool.connect(user2).unstake(0);
 
-    expect(await seed.balanceOf(user2.address)).equal("40276265676800000000000000");
+    expect(await seed.balanceOf(user2.address)).equal("134467945205479452054794520");
 
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);
@@ -358,7 +358,7 @@ describe("#Integration test", function () {
       amount
     );
 
-    expect(payload).equal("1000000000000000000000030001");
+    expect(payload).equal("1000000000000000000000030002");
 
     await synr.connect(user1).approve(mainPool.address, ethers.utils.parseEther("10000"));
 
@@ -419,7 +419,7 @@ describe("#Integration test", function () {
       amount
     );
 
-    expect(payload).equal("1000000000000000000000036501");
+    expect(payload).equal("1000000000000000000000036502");
 
     await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("10000"));
 

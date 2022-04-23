@@ -10,6 +10,7 @@ async function BNMulBy(param, num = 1, repeat = 0) {
 
 const DAY = 24 * 3600;
 const WEEK = DAY * 7;
+const YEAR = 365 * DAY;
 
 const PayloadUtils = {
   async fromDepositToTransferPayload(deposit) {
@@ -31,9 +32,8 @@ const PayloadUtils = {
       return 0;
     }
     let when = deposit.lockedUntil > timestamp ? timestamp : deposit.lockedUntil;
-    let lockupTime = BN(deposit.lockedUntil.toString()).sub(deposit.lockedFrom).div(DAY);
-    let yieldWeight = BN("10000").add(lockupTime.mul(10000).div(365 * DAY));
-
+    let lockupTime = BN(deposit.lockedUntil.toString()).sub(deposit.lockedFrom);
+    let yieldWeight = BN("10000").add(lockupTime.mul(10000).div(365).div(DAY));
     return ethers.BigNumber.from(deposit.tokenAmount.toString())
       .mul(deposit.rewardsFactor)
       .mul(BN(when).sub(deposit.lastRewardsAt))

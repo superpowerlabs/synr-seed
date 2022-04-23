@@ -110,7 +110,7 @@ describe("#SeedPool", function () {
     });
 
     it("should calculate the yield weight", async function () {
-      expect(await pool.getLockupTime(deposit)).equal(180);
+      expect(await pool.getLockupTime(deposit)).equal(15552000);
     });
   });
 

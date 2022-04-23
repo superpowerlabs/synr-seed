@@ -133,7 +133,12 @@ describe("#Params Calculator", function () {
   it.skip("should verify possible combination", async function () {
     const params = [
       [650, 50000],
-      [700, 50000], // < best setting
+      [550, 45000],
+      [600, 50000],
+      [680, 48000],
+      [750, 60000],
+      [700, 50000],
+      [720, 49000],
     ];
 
     let report = [
@@ -221,6 +226,11 @@ describe("#Params Calculator", function () {
       }
     }
     await fs.ensureDir(path.resolve(__dirname, "../tmp"));
+    report.sort((a, b) => {
+      a = a[7];
+      b = b[7];
+      return a > b ? 1 : a < b ? -1 : 0;
+    });
     report = report.map((e) => e.join(",")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report.csv"), report);
     console.info(report);
