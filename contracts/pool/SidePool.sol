@@ -229,7 +229,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     uint256 input,
     Deposit memory deposit,
     uint256 timestamp
-  ) public view returns (uint256) {
+  ) public view override returns (uint256) {
     uint256 lockedUntil = uint256(deposit.lockedUntil);
     if (uint256(deposit.lastRewardsAt) > lockedUntil) {
       return 0;
@@ -277,15 +277,15 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       if (limit < baseAmount) {
         baseAmount = limit;
       }
-      boostedAmount += baseAmount.mul(uint256(passAmount).mul(nftConf.sPBoostFactor)).div(10000);
+      boostedAmount += baseAmount.mul(nftConf.sPBoostFactor).div(10000);
+      baseAmount = uint256(user.tokenAmount).sub(baseAmount);
     }
-    baseAmount = uint256(user.tokenAmount);
     if (user.blueprintsAmount > 0) {
       limit = uint256(user.blueprintsAmount).mul(nftConf.bPBoostLimit).mul(1e18);
       if (limit < boostedAmount) {
         baseAmount = limit;
       }
-      boostedAmount += baseAmount.mul(uint256(user.blueprintsAmount).mul(nftConf.bPBoostFactor)).div(10000);
+      boostedAmount += baseAmount.mul(nftConf.bPBoostFactor).div(10000);
     }
     return boost.mul(boostedAmount).div(user.tokenAmount);
   }
@@ -420,7 +420,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     } else {
       revert("SidePool: invalid tokenType");
     }
-    users[user_].tokenAmount = uint96(uint256(users[user_].tokenAmount).add(tokenAmount));
+    users[user_].tokenAmount = uint128(uint256(users[user_].tokenAmount).add(tokenAmount));
     _updateTvl(tokenType, tokenAmount, true);
     // add deposit
     if (tokenType == S_SYNR_SWAP || tokenType == SEED_SWAP) {
