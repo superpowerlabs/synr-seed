@@ -139,6 +139,7 @@ describe("#Params Calculator", function () {
       [750, 60000],
       [700, 50000],
       [720, 49000],
+      [1, 84],
     ];
 
     let report = [
@@ -231,7 +232,7 @@ describe("#Params Calculator", function () {
       b = b[7];
       return a > b ? 1 : a < b ? -1 : 0;
     });
-    report = report.map((e) => e.join(",")).join("\n");
+    report = report.map((e) => e.join("\t")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report.csv"), report);
     console.info(report);
 

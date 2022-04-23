@@ -277,15 +277,15 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       if (limit < baseAmount) {
         baseAmount = limit;
       }
-      boostedAmount += baseAmount.mul(uint256(passAmount).mul(nftConf.sPBoostFactor)).div(10000);
+      boostedAmount += baseAmount.mul(nftConf.sPBoostFactor).div(10000);
+      baseAmount = uint256(user.tokenAmount).sub(baseAmount);
     }
-    baseAmount = uint256(user.tokenAmount);
     if (user.blueprintsAmount > 0) {
       limit = uint256(user.blueprintsAmount).mul(nftConf.bPBoostLimit).mul(1e18);
       if (limit < boostedAmount) {
         baseAmount = limit;
       }
-      boostedAmount += baseAmount.mul(uint256(user.blueprintsAmount).mul(nftConf.bPBoostFactor)).div(10000);
+      boostedAmount += baseAmount.mul(nftConf.bPBoostFactor).div(10000);
     }
     return boost.mul(boostedAmount).div(user.tokenAmount);
   }
