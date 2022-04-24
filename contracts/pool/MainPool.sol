@@ -81,9 +81,9 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
-  function setFactory(address farmer_) external onlyOwner {
-    require(farmer_.isContract(), "SeedPool: farmer_ not a contract");
-    factory = farmer_;
+  function setFactory(address factory_) external onlyOwner {
+    require(factory_.isContract(), "SeedPool: farmer_ not a contract");
+    factory = factory_;
   }
 
   function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external override onlyOwner {

@@ -140,14 +140,14 @@ describe("#Integration test", function () {
 
     let payload2 = await serializeInput(
       SYNR_STAKE, // SYNR
-      150, // 1 year
+      150, // 150 days
       amount2
     );
     expect(payload2).equal("2000000000000000000000015001");
 
     let payload3 = await serializeInput(
       S_SYNR_SWAP, // sSYNR
-      0, // 1 year
+      0, // swap
       amount3
     );
     expect(payload3).equal("500000000000000000000000000");

@@ -27,12 +27,12 @@ contract FarmingPool is SidePool {
   /**
    * @notice calls _stake function
    * @param tokenType is the type of token
-   * @param lockupTime time which the stake will be lock
+   * @param lockupDays time in days which the stake will be lock
    * @param tokenAmountOrID amount to be staked
    */
   function stake(
     uint256 tokenType,
-    uint256 lockupTime,
+    uint256 lockupDays,
     uint256 tokenAmountOrID
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
@@ -41,7 +41,7 @@ contract FarmingPool is SidePool {
       _msgSender(),
       tokenType,
       block.timestamp,
-      block.timestamp.add(lockupTime * 1 days),
+      block.timestamp.add(lockupDays * 1 days),
       type(uint16).max,
       tokenAmountOrID
     );
