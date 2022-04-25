@@ -468,4 +468,109 @@ describe("#Integration test", function () {
     const synrBalanceAfter = await synr.balanceOf(fundOwner.address);
     expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount);
   });
+
+  it.only("should stake pass for boost", async function () {
+    let nft = await seedPool.nftConf();
+    console.log(nft);
+    let boostWeight = await seedPool.boostWeight(fundOwner.address);
+    console.log(boostWeight);
+    // stake SYNR in the SynrBridge
+    const payload = await serializeInput(
+      SYNR_PASS_STAKE_FOR_BOOST,
+      365, // 1 year
+      9
+    );
+    expect(payload).equal("936503");
+    await pass.connect(fundOwner).approve(mainPool.address, 9);
+    await synrBridge.connect(fundOwner).wormholeTransfer(
+      payload,
+      4, // BSC
+      bytes32Address(fundOwner.address),
+      1
+    );
+
+    let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
+    expect(deposit.tokenAmountOrID).equal(9);
+    expect(deposit.tokenType).equal(SYNR_PASS_STAKE_FOR_BOOST);
+    expect(deposit.otherChain).equal(4);
+
+    const finalPayload = await fromDepositToTransferPayload(deposit);
+    await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
+    nft = await seedPool.nftConf();
+    console.log(nft);
+    boostWeight = await seedPool.boostWeight(fundOwner.address);
+    console.log(boostWeight);
+
+    await increaseBlockTimestampBy(366 * 24 * 3600);
+
+    let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+    console.log(seedDeposit);
+    expect(seedDeposit.unstakedAt).equal(0);
+    const seedPayload = await fromDepositToTransferPayload(seedDeposit);
+    const ts = await getTimestamp();
+
+    // unstake
+    await seedFactory.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
+    seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+
+    expect(seedDeposit.unstakedAt).greaterThan(ts);
+
+    const passBefore = await pass.balanceOf(fundOwner.address);
+
+    await synrBridge.mockWormholeCompleteTransfer(fundOwner.address, seedPayload);
+    const passAfter = await pass.balanceOf(fundOwner.address);
+
+    expect(passAfter.sub(passBefore)).equal(1);
+  });
+
+  it("should stake pass for seed", async function () {
+    const nft1 = await seedPool.nftConf();
+    console.log(nft1);
+    // stake SYNR in the SynrBridge
+    const payload = await serializeInput(
+      SYNR_PASS_STAKE_FOR_SEEDS,
+      365, // 1 year
+      9
+    );
+    expect(payload).equal("936504");
+    await pass.connect(fundOwner).approve(mainPool.address, 9);
+    await synrBridge.connect(fundOwner).wormholeTransfer(
+      payload,
+      4, // BSC
+      bytes32Address(fundOwner.address),
+      1
+    );
+
+    let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
+    expect(deposit.tokenAmountOrID).equal(9);
+    expect(deposit.tokenType).equal(SYNR_PASS_STAKE_FOR_SEEDS);
+    expect(deposit.otherChain).equal(4);
+
+    const finalPayload = await fromDepositToTransferPayload(deposit);
+    await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
+    const nft = await seedPool.nftConf();
+    console.log(nft);
+
+    await increaseBlockTimestampBy(366 * 24 * 3600);
+
+    let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+    console.log(seedDeposit);
+    expect(seedDeposit.unstakedAt).equal(0);
+    const seedPayload = await fromDepositToTransferPayload(seedDeposit);
+    const ts = await getTimestamp();
+
+    // unstake
+    await seedFactory.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
+    seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+
+    expect(seedDeposit.unstakedAt).greaterThan(ts);
+
+    const passBefore = await pass.balanceOf(fundOwner.address);
+
+    await synrBridge.mockWormholeCompleteTransfer(fundOwner.address, seedPayload);
+    const passAfter = await pass.balanceOf(fundOwner.address);
+    console.log(passBefore);
+    console.log(passAfter);
+    expect(passAfter.sub(passBefore)).equal(1);
+  });
 });
