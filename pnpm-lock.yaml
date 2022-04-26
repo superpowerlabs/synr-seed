@@ -1,6 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@ethersproject/bytes': ^5.6.1
   '@ethersproject/contracts': ^5.6.0
   '@ndujalabs/wormhole-tunnel': ^0.3.0
   '@nomiclabs/hardhat-ethers': ^2.0.5
@@ -31,6 +32,7 @@ specifiers:
   typescript: ^4.6.3
 
 devDependencies:
+  '@ethersproject/bytes': 5.6.1
   '@ethersproject/contracts': 5.6.0
   '@ndujalabs/wormhole-tunnel': 0.3.0
   '@nomiclabs/hardhat-ethers': 2.0.5_ethers@5.6.2+hardhat@2.9.3
