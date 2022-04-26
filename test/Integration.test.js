@@ -140,7 +140,7 @@ describe("#Integration test", function () {
 
     let payload2 = await serializeInput(
       SYNR_STAKE, // SYNR
-      150, // 1 year
+      150,
       amount2
     );
     expect(payload2).equal("2000000000000000000000015002");
@@ -277,7 +277,7 @@ describe("#Integration test", function () {
 
     let payload4 = await serializeInput(
       SYNR_PASS_STAKE_FOR_BOOST, // sSYNR
-      0, // 1 year
+      0,
       9
     );
     expect(payload4).equal("900003");
