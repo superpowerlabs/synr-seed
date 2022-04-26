@@ -93,9 +93,9 @@ describe("#Integration test", function () {
 
     blueprint = await SynCityCouponsSimplified.deploy(8000);
     await blueprint.deployed();
-
     await blueprint.mint(user1.address, 2);
     await blueprint.mint(user3.address, 1);
+    await blueprint.mint(fundOwner.address, 1);
 
     seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await seedPool.deployed();
@@ -540,7 +540,7 @@ describe("#Integration test", function () {
     expect(passAfter.sub(passBefore)).equal(1);
   });
 
-  it.only("should stake pass for seed", async function () {
+  it("should stake pass for seed", async function () {
     // stake SYNR in the SynrBridge
     const payload = await serializeInput(
       SYNR_PASS_STAKE_FOR_SEEDS,
@@ -583,5 +583,35 @@ describe("#Integration test", function () {
     const passAfter = await pass.balanceOf(fundOwner.address);
     expect(passAfter.sub(passBefore)).equal(1);
     expect(seedDeposit.tokenType).equal(4);
+  });
+
+  it.only("should stake blueprints for boost and increase boostWeight", async function () {
+    const amount = ethers.utils.parseEther("10000");
+    // stake SYNR in the SynrBridge
+    const payload = await serializeInput(
+      SYNR_STAKE, // SYNR
+      365, // 1 year
+      amount
+    );
+    await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("10000"));
+    await synrBridge.connect(fundOwner).wormholeTransfer(
+      payload,
+      4, // BSC
+      bytes32Address(fundOwner.address),
+      1
+    );
+    let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
+    const finalPayload = await fromDepositToTransferPayload(deposit);
+    await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
+    console.log(await seedPool.getDepositByIndex(fundOwner.address, 0));
+    //stake blueprints for boost
+
+    await blueprint.connect(fundOwner).approve(seedPool.address, 4);
+    expect(await seedPool.connect(fundOwner).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 4))
+      .emit(seedPool, "DepositSaved")
+      .withArgs(fundOwner.address, 0);
+
+    console.log(await seedPool.getDepositByIndex(fundOwner.address, 1));
+    console.log(await seedPool.boostWeight(fundOwner.address));
   });
 });
