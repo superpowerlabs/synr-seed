@@ -125,7 +125,7 @@ describe("#Integration test", function () {
     await initAndDeploy();
   });
 
-  it("should manage the entire flow", async function () {
+  it.only("should manage the entire flow", async function () {
     const amount = ethers.utils.parseEther("10000");
     const amount2 = ethers.utils.parseEther("20000");
     const amount3 = ethers.utils.parseEther("5000");
@@ -224,6 +224,8 @@ describe("#Integration test", function () {
     const finalPayload2 = await fromDepositToTransferPayload(deposit2);
 
     expect(await synr.balanceOf(mainPool.address)).equal(amount.add(amount2));
+
+    expect((await mainPool.users(fundOwner.address)).synrAmount).equal("30000000000000000000000");
 
     expect(await seedFactory.mockWormholeCompleteTransfer(fundOwner.address, finalPayload))
       .emit(seedFactory, "DepositSaved")
