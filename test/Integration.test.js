@@ -469,55 +469,72 @@ describe("#Integration test", function () {
     expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount);
   });
 
-  it.only("should stake pass for boost", async function () {
-    let nft = await seedPool.nftConf();
-    console.log(nft);
-    let boostWeight = await seedPool.boostWeight(fundOwner.address);
-    console.log(boostWeight);
-    // stake SYNR in the SynrBridge
+  it.only("should stake pass for boost and increase boostWeight", async function () {
+    //Stake SYNR TO BE BOOSTED
+    const amount = ethers.utils.parseEther("10000");
     const payload = await serializeInput(
-      SYNR_PASS_STAKE_FOR_BOOST,
+      SYNR_STAKE, // SYNR
       365, // 1 year
-      9
+      amount
     );
-    expect(payload).equal("936503");
-    await pass.connect(fundOwner).approve(mainPool.address, 9);
+    await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("10000"));
     await synrBridge.connect(fundOwner).wormholeTransfer(
       payload,
       4, // BSC
       bytes32Address(fundOwner.address),
       1
     );
+    let depositSYNR = await mainPool.getDepositByIndex(fundOwner.address, 0);
+    const finalPayloadSynr = await fromDepositToTransferPayload(depositSYNR);
+    await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayloadSynr);
 
-    let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
+    //STAKE PASS
+    let boostWeightBefore = Number((await seedPool.boostWeight(fundOwner.address)).toString());
+    console.log(boostWeightBefore);
+    const payloadPass = await serializeInput(
+      SYNR_PASS_STAKE_FOR_BOOST,
+      365, // 1 year
+      9
+    );
+    expect(payloadPass).equal("936503");
+    await pass.connect(fundOwner).approve(mainPool.address, 9);
+    await synrBridge.connect(fundOwner).wormholeTransfer(
+      payloadPass,
+      4, // BSC
+      bytes32Address(fundOwner.address),
+      1
+    );
+
+    let deposit = await mainPool.getDepositByIndex(fundOwner.address, 1);
     expect(deposit.tokenAmountOrID).equal(9);
     expect(deposit.tokenType).equal(SYNR_PASS_STAKE_FOR_BOOST);
     expect(deposit.otherChain).equal(4);
 
     const finalPayload = await fromDepositToTransferPayload(deposit);
     await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
-    nft = await seedPool.nftConf();
-    console.log(nft);
-    boostWeight = await seedPool.boostWeight(fundOwner.address);
-    console.log(boostWeight);
+
+    boostWeightAfter = Number((await seedPool.boostWeight(fundOwner.address)).toString());
+    console.log(boostWeightAfter);
+    expect(boostWeightAfter).greaterThan(boostWeightBefore);
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
-    let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
-    console.log(seedDeposit);
+    let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 1);
+
     expect(seedDeposit.unstakedAt).equal(0);
     const seedPayload = await fromDepositToTransferPayload(seedDeposit);
     const ts = await getTimestamp();
 
     // unstake
     await seedFactory.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
-    seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+    seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 1);
 
     expect(seedDeposit.unstakedAt).greaterThan(ts);
 
     const passBefore = await pass.balanceOf(fundOwner.address);
 
     await synrBridge.mockWormholeCompleteTransfer(fundOwner.address, seedPayload);
+
     const passAfter = await pass.balanceOf(fundOwner.address);
 
     expect(passAfter.sub(passBefore)).equal(1);
