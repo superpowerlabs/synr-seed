@@ -125,7 +125,7 @@ describe("#Integration test", function () {
     await initAndDeploy();
   });
 
-  it.only("should manage the entire flow", async function () {
+  it("should manage the entire flow", async function () {
     const amount = ethers.utils.parseEther("10000");
     const amount2 = ethers.utils.parseEther("20000");
     const amount3 = ethers.utils.parseEther("5000");
@@ -492,7 +492,7 @@ describe("#Integration test", function () {
 
     //STAKE PASS
     let boostWeightBefore = Number((await seedPool.boostWeight(fundOwner.address)).toString());
-    console.log(boostWeightBefore);
+    // console.log(boostWeightBefore);
     const payloadPass = await serializeInput(
       SYNR_PASS_STAKE_FOR_BOOST,
       365, // 1 year
@@ -516,7 +516,7 @@ describe("#Integration test", function () {
     await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
 
     boostWeightAfter = Number((await seedPool.boostWeight(fundOwner.address)).toString());
-    console.log(boostWeightAfter);
+    // console.log(boostWeightAfter);
     expect(boostWeightAfter).greaterThan(boostWeightBefore);
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
@@ -542,7 +542,7 @@ describe("#Integration test", function () {
     expect(passAfter.sub(passBefore)).equal(1);
   });
 
-  it.only("should stake pass for seed", async function () {
+  it("should stake pass for seed", async function () {
     // stake SYNR in the SynrBridge
     const payload = await serializeInput(
       SYNR_PASS_STAKE_FOR_SEEDS,

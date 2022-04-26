@@ -27,7 +27,7 @@ contract FarmingPool is SidePool {
   /**
    * @notice calls _stake function
    * @param tokenType is the type of token
-   * @param lockupTime time which the stake will be lock
+   * @param lockupTime time in days. For how many days the stake will be locked
    * @param tokenAmountOrID amount to be staked
    */
   function stake(
