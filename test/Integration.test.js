@@ -541,7 +541,6 @@ describe("#Integration test", function () {
   });
 
   it.only("should stake pass for seed", async function () {
-    const nft1 = await seedPool.nftConf();
     // stake SYNR in the SynrBridge
     const payload = await serializeInput(
       SYNR_PASS_STAKE_FOR_SEEDS,
@@ -564,7 +563,6 @@ describe("#Integration test", function () {
 
     const finalPayload = await fromDepositToTransferPayload(deposit);
     await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
-    const nft = await seedPool.nftConf();
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
