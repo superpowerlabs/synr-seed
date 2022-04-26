@@ -588,6 +588,7 @@ describe("#Integration test", function () {
   });
 
   it.only("should stake blueprints for boost and increase boostWeight", async function () {
+    let boostWeightBefore = Number((await seedPool.boostWeight(fundOwner.address)).toString());
     const amount = ethers.utils.parseEther("10000");
     // stake SYNR in the SynrBridge
     const payload = await serializeInput(
@@ -613,7 +614,9 @@ describe("#Integration test", function () {
       .emit(seedPool, "DepositSaved")
       .withArgs(fundOwner.address, 0);
 
-    console.log(await seedPool.getDepositByIndex(fundOwner.address, 1));
-    console.log(await seedPool.boostWeight(fundOwner.address));
+    //console.log(await seedPool.getDepositByIndex(fundOwner.address, 1));
+    //console.log(await seedPool.boostWeight(fundOwner.address));
+    boostWeightAfter = Number((await seedPool.boostWeight(fundOwner.address)).toString());
+    expect(boostWeightAfter).greaterThan(boostWeightBefore);
   });
 });
