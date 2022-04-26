@@ -27,9 +27,9 @@ contract SeedPool is SidePool {
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
-  function setFactory(address farmer_) external virtual onlyOwner {
-    require(farmer_.isContract(), "SeedPool: farmer_ not a contract");
-    factory = farmer_;
+  function setFactory(address factory_) external virtual onlyOwner {
+    require(factory_.isContract(), "SeedPool: factory_ not a contract");
+    factory = factory_;
   }
 
   function stake(

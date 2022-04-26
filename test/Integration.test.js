@@ -225,6 +225,8 @@ describe("#Integration test", function () {
 
     expect(await synr.balanceOf(mainPool.address)).equal(amount.add(amount2));
 
+    expect((await mainPool.users(fundOwner.address)).synrAmount).equal("30000000000000000000000");
+
     expect(await seedFactory.mockWormholeCompleteTransfer(fundOwner.address, finalPayload))
       .emit(seedFactory, "DepositSaved")
       .withArgs(fundOwner.address, 0);
@@ -490,7 +492,7 @@ describe("#Integration test", function () {
 
     //STAKE PASS
     let boostWeightBefore = Number((await seedPool.boostWeight(fundOwner.address)).toString());
-    console.log(boostWeightBefore);
+    // console.log(boostWeightBefore);
     const payloadPass = await serializeInput(
       SYNR_PASS_STAKE_FOR_BOOST,
       365, // 1 year
@@ -514,7 +516,7 @@ describe("#Integration test", function () {
     await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
 
     boostWeightAfter = Number((await seedPool.boostWeight(fundOwner.address)).toString());
-    console.log(boostWeightAfter);
+    // console.log(boostWeightAfter);
     expect(boostWeightAfter).greaterThan(boostWeightBefore);
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
