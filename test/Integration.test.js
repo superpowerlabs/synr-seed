@@ -304,7 +304,7 @@ describe("#Integration test", function () {
       .withArgs(fundOwner.address, 2);
 
     boostWeight = await seedPool.boostWeight(fundOwner.address);
-    expect(boostWeight).equal(10250);
+    expect(boostWeight).equal(1025000000);
 
     await increaseBlockTimestampBy(20 * 24 * 3600);
 
@@ -615,9 +615,7 @@ describe("#Integration test", function () {
       .withArgs(fundOwner.address, 0);
 
     //console.log(await seedPool.getDepositByIndex(fundOwner.address, 1));
-    console.log(boostWeightBefore);
     boostWeightAfter = Number((await seedPool.boostWeight(fundOwner.address)).toString());
-    console.log(boostWeightAfter);
 
     expect(boostWeightAfter).greaterThan(boostWeightBefore);
   });
