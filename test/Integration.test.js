@@ -125,7 +125,7 @@ describe("#Integration test", function () {
     await initAndDeploy();
   });
 
-  it("should manage the entire flow", async function () {
+  it.only("should manage the entire flow", async function () {
     const amount = ethers.utils.parseEther("10000");
     const amount2 = ethers.utils.parseEther("20000");
     const amount3 = ethers.utils.parseEther("5000");
@@ -261,7 +261,7 @@ describe("#Integration test", function () {
     const untaxedPendingRewards = await seedPool.untaxedPendingRewards(fundOwner.address, ts + 1);
 
     let boostWeight = await seedPool.boostWeight(fundOwner.address);
-    expect(boostWeight).equal(10000);
+    expect(boostWeight).equal(1e9);
 
     await seedPool.connect(fundOwner).collectRewards();
     let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
