@@ -589,14 +589,14 @@ describe("#Integration test", function () {
 
   it.only("should stake blueprints for boost and increase boostWeight", async function () {
     let boostWeightBefore = Number((await seedPool.boostWeight(fundOwner.address)).toString());
-    const amount = ethers.utils.parseEther("10000");
+    const amount = ethers.utils.parseEther("100");
     // stake SYNR in the SynrBridge
     const payload = await serializeInput(
       SYNR_STAKE, // SYNR
       365, // 1 year
       amount
     );
-    await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("10000"));
+    await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("100"));
     await synrBridge.connect(fundOwner).wormholeTransfer(
       payload,
       4, // BSC
@@ -606,7 +606,7 @@ describe("#Integration test", function () {
     let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
     const finalPayload = await fromDepositToTransferPayload(deposit);
     await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
-    console.log(await seedPool.getDepositByIndex(fundOwner.address, 0));
+    //console.log(await seedPool.getDepositByIndex(fundOwner.address, 0));
     //stake blueprints for boost
 
     await blueprint.connect(fundOwner).approve(seedPool.address, 4);
@@ -615,8 +615,10 @@ describe("#Integration test", function () {
       .withArgs(fundOwner.address, 0);
 
     //console.log(await seedPool.getDepositByIndex(fundOwner.address, 1));
-    //console.log(await seedPool.boostWeight(fundOwner.address));
+    console.log(boostWeightBefore);
     boostWeightAfter = Number((await seedPool.boostWeight(fundOwner.address)).toString());
+    console.log(boostWeightAfter);
+
     expect(boostWeightAfter).greaterThan(boostWeightBefore);
   });
 });
