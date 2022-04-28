@@ -570,7 +570,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   }
 
   /**
-   * @notice Withdraws SEED that has been collected as tax for unstaking early
+   * @notice Withdraws penalties that has been collected as tax for unstaking early
    * @param amount amount of ssynr to be withdrawn
    * @param beneficiary address to which the withdrawl will go to
    * @param what what is available
