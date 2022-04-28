@@ -306,5 +306,20 @@ describe("#SidePool", function () {
       expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
       //expect(deposit.lockedUntil).equal(lockedUntil);
     });
+
+    it("should stake blueprints", async function () {
+      let id = 2;
+      await blueprint.mint(user1.address, 5);
+      await blueprint.connect(user1).approve(sidePool.address, id);
+
+      expect(await sidePool.connect(user1).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id))
+        .emit(sidePool, "DepositSaved")
+        .withArgs(user1.address, 0);
+
+      await assertThrowsMessage(
+        sidePool.connect(user1).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id),
+        "SidePool: payload already used"
+      );
+    });
   });
 });
