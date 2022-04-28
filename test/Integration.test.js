@@ -347,6 +347,14 @@ describe("#Integration test", function () {
 
     const synrBalanceAfter = await synr.balanceOf(fundOwner.address);
     expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount);
+
+    let treasuryBalanceBefore = await seed.balanceOf(treasury.address);
+    await seedPool.withdrawPenaltiesOrTaxes(10, treasury.address, 0);
+    let treasuryBalanceAfter = await seed.balanceOf(treasury.address);
+    expect(treasuryBalanceAfter - treasuryBalanceBefore).equal(10);
+    await seedPool.withdrawPenaltiesOrTaxes(0, treasury.address, 0);
+    expect(await seedPool.taxes()).equal(0);
+    await assertThrowsMessage(seedPool.withdrawPenaltiesOrTaxes(10, treasury.address, 0), "SidePool: amount not available");
   });
 
   it("should verify early unstake", async function () {
@@ -587,7 +595,7 @@ describe("#Integration test", function () {
     expect(seedDeposit.tokenType).equal(4);
   });
 
-  it.only("should stake blueprints for boost and increase boostWeight", async function () {
+  it("should stake blueprints for boost and increase boostWeight", async function () {
     let boostWeightBefore = Number((await seedPool.boostWeight(fundOwner.address)).toString());
     const amount = ethers.utils.parseEther("100");
     // stake SYNR in the SynrBridge
