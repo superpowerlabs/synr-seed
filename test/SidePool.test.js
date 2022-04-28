@@ -307,7 +307,7 @@ describe("#SidePool", function () {
       //expect(deposit.lockedUntil).equal(lockedUntil);
     });
 
-    it("should stake blueprints", async function () {
+    it("should throw payload already used", async function () {
       let id = 2;
       await blueprint.mint(user1.address, 5);
       await blueprint.connect(user1).approve(sidePool.address, id);
