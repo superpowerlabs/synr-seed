@@ -321,5 +321,13 @@ describe("#SidePool", function () {
         "SidePool: payload already used"
       );
     });
+
+    it("should throw not a blueprint", async function () {
+      let id = 2;
+      await blueprint.mint(user1.address, 5);
+      await blueprint.connect(user1).approve(sidePool.address, id);
+
+      await assertThrowsMessage(sidePool.connect(user1).stake(SYNR_STAKE, 0, id), "SidePool: not a blueprint");
+    });
   });
 });
