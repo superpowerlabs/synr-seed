@@ -15,7 +15,7 @@ const {
   SYNR_PASS_STAKE_FOR_BOOST,
   SYNR_PASS_STAKE_FOR_SEEDS,
   BLUEPRINT_STAKE_FOR_BOOST,
-} = require("./helpers");
+} = require("../test/helpers");
 const {upgrades} = require("hardhat");
 
 // tests to be fixed
@@ -130,7 +130,7 @@ describe("#Params Calculator", function () {
     await seedFactory.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
   }
 
-  it.skip("should verify possible combination", async function () {
+  it("should verify possible combination", async function () {
     const params = [
       [650, 50000],
       [550, 45000],

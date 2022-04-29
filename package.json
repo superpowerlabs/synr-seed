@@ -39,6 +39,7 @@
     "test-frontend": "react-scripts test",
     "eject": "react-scripts eject",
     "test": "npx hardhat test",
+    "report": "npx hardhat test ./report/*.utils.js ",
     "coverage": "npx hardhat coverage",
     "test:gas": "GAS_REPORT=yes npx hardhat test",
     "clean": "rm -rf cache && rm -rf src/artifacts",
