@@ -197,7 +197,7 @@ describe("#FarmingPool", function () {
       await initAndDeploy(true);
     });
 
-    it("should revert is staking seed when allowance is paused", async function () {
+    it("should revert if staking seed when allowance is paused", async function () {
       const amount = ethers.utils.parseEther("1500000");
       await seed.connect(user0).approve(pool.address, amount);
       const balanceBefore = await seed.balanceOf(user0.address);
