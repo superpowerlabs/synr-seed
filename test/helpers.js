@@ -1,5 +1,5 @@
 const {assert} = require("chai");
-
+const {hexZeroPad} = require("@ethersproject/bytes");
 const Helpers = {
   initEthers(ethers) {
     this.ethers = ethers;
@@ -34,7 +34,7 @@ const Helpers = {
   },
 
   bytes32Address(address) {
-    return "0x000000000000000000000000" + address.replace(/^0x/, "");
+    return hexZeroPad(address, 32);
   },
 };
 

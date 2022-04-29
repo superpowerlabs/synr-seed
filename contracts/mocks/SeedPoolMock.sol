@@ -5,8 +5,8 @@ import "../pool/SeedPool.sol";
 import "hardhat/console.sol";
 
 contract SeedPoolMock is SeedPool {
-  function setFactory(address farmer_) external override onlyOwner {
-    //    require(farmer_.isContract(), "SeedPool: farmer_ not a contract");
-    factory = farmer_;
+  function setFactory(address factory_) external override onlyOwner {
+    //    require(factory_.isContract(), "SeedPool: factory_ not a contract");
+    factory = factory_;
   }
 }

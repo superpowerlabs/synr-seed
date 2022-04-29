@@ -48,7 +48,7 @@ interface IMainPool {
     uint96 synrAmount;
   }
 
-  function getDepositByIndex(address user, uint256 mainIndex) external view returns (Deposit memory);
+  function getDepositByIndex(address user, uint256 index) external view returns (Deposit memory);
 
   function getDepositsLength(address user) external view returns (uint256);
 

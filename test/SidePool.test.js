@@ -3,6 +3,7 @@ const {expect, assert} = require("chai");
 const {
   initEthers,
   SYNR_STAKE,
+  S_SYNR_SWAP,
   assertThrowsMessage,
   getTimestamp,
   increaseBlockTimestampBy,
@@ -305,6 +306,67 @@ describe("#SidePool", function () {
       expect(deposit.tokenAmountOrID).equal(id);
       expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
       //expect(deposit.lockedUntil).equal(lockedUntil);
+    });
+
+    it("should throw payload already used", async function () {
+      let id = 2;
+      await blueprint.mint(user1.address, 5);
+      await blueprint.connect(user1).approve(sidePool.address, id);
+
+      expect(await sidePool.connect(user1).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id))
+        .emit(sidePool, "DepositSaved")
+        .withArgs(user1.address, 0);
+
+      await assertThrowsMessage(
+        sidePool.connect(user1).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id),
+        "SidePool: payload already used"
+      );
+    });
+
+    it("should throw not a blueprint", async function () {
+      let id = 2;
+      await blueprint.mint(user1.address, 5);
+      await blueprint.connect(user1).approve(sidePool.address, id);
+
+      await assertThrowsMessage(sidePool.connect(user1).stake(SYNR_STAKE, 0, id), "SidePool: not a blueprint");
+    });
+  });
+
+  describe("#unstakeIfSSynr", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should throw unstake if SSynr", async function () {
+      let id = 2;
+      await blueprint.mint(user1.address, 5);
+      await blueprint.connect(user1).approve(sidePool.address, id);
+
+      expect(await sidePool.connect(user1).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id))
+        .emit(sidePool, "DepositSaved")
+        .withArgs(user1.address, 0);
+
+      await assertThrowsMessage(sidePool.connect(user1).unstakeIfSSynr(0), "SidePool: not a sSYNR > SEED swap");
+    });
+  });
+
+  describe("#unstake", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should unstake", async function () {
+      let id = 2;
+      await blueprint.mint(user1.address, 5);
+      await blueprint.connect(user1).approve(sidePool.address, id);
+
+      expect(await sidePool.connect(user1).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id))
+        .emit(sidePool, "DepositSaved")
+        .withArgs(user1.address, 0);
+
+      expect(await sidePool.connect(user1).unstake(0))
+        .emit(sidePool, "DepositUnlocked")
+        .withArgs(user1.address, 0);
     });
   });
 });

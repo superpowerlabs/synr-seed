@@ -198,7 +198,6 @@ describe("#SeedPool", function () {
 
     it("should stake blueprint", async function () {
       await blueprint.connect(user0).approve(pool.address, 4);
-
       expect(await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 4))
         .emit(pool, "DepositSaved")
         .withArgs(user0.address, 0);
@@ -272,8 +271,9 @@ describe("#SeedPool", function () {
       await blueprint.mint(user0.address, 4);
       await blueprint.connect(user0).approve(pool.address, 4);
       await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 4);
-
-      expect(await pool.connect(user0).unstake(0)).emit(pool, "DepositUnlocked");
+      expect(await pool.connect(user0).unstake(0))
+        .emit(pool, "DepositUnlocked")
+        .withArgs(user0.address, 0);
     });
   });
 });

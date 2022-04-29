@@ -262,7 +262,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   function boostWeight(address user_) public view override returns (uint256) {
     User storage user = users[user_];
     uint256 baseAmount = uint256(user.tokenAmount);
-    uint256 boost = 10000;
+    uint256 boost = 1e9;
     if (baseAmount == 0) {
       return boost;
     }
@@ -305,7 +305,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       user.deposits[i].lastRewardsAt = uint32(block.timestamp);
     }
     if (rewards > 0) {
-      rewards = rewards.mul(boostWeight(user_)).div(10000);
+      rewards = rewards.mul(boostWeight(user_)).div(1e9);
       uint256 tax = calculateTaxOnRewards(rewards);
       rewardsToken.mint(user_, rewards.sub(tax));
       rewardsToken.mint(address(this), tax);
@@ -326,7 +326,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       rewards += calculateUntaxedRewards(user.deposits[i], timestamp);
     }
     if (rewards > 0) {
-      rewards = rewards.mul(boostWeight(user_)).div(10000);
+      rewards = rewards.mul(boostWeight(user_)).div(1e9);
     }
     return rewards;
   }
@@ -570,7 +570,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   }
 
   /**
-   * @notice Withdraws SYNR that has been collected as tax for unstaking early
+   * @notice Withdraws penalties that has been collected as tax for unstaking early
    * @param amount amount of ssynr to be withdrawn
    * @param beneficiary address to which the withdrawl will go to
    * @param what what is available

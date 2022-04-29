@@ -4,5 +4,5 @@
 npx hardhat compile
 
 node scripts/exportABIs.js
-cp export/ABIs.json ../syn-staking/src/config/.
+cp export/ABIs.json ../syn-staking/src/config/seedABIs.json
 cp export/deployed.json ../syn-staking/src/config/.
