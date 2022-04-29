@@ -2,7 +2,7 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "../interfaces/IERC20Receiver.sol";
+import "../previously-deployed/interfaces/IERC20Receiver.sol";
 
 import "hardhat/console.sol";
 
