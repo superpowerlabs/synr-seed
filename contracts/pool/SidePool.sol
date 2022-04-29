@@ -579,7 +579,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     uint256 amount,
     address beneficiary,
     uint256 what
-  ) external override onlyOwner {
+  ) external virtual override onlyOwner {
     uint256 available = what == 1 ? penalties : taxes;
     require(amount <= available, "SidePool: amount not available");
     if (amount == 0) {
