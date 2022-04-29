@@ -396,10 +396,10 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     _collectRewards(user_);
     uint256 tokenAmount;
     if (tokenType == S_SYNR_SWAP) {
-      tokenAmount = tokenAmountOrID.mul(conf.swapFactor).mul(conf.priceRatio).div(10000);
+      tokenAmount = tokenAmountOrID.mul(conf.swapFactor).mul(conf.priceRatio).div(1000000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_STAKE) {
-      tokenAmount = tokenAmountOrID.mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
+      tokenAmount = tokenAmountOrID.mul(conf.stakeFactor).mul(conf.priceRatio).div(1000000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
       users[user_].passAmount++;

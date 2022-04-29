@@ -233,7 +233,7 @@ describe("#Integration test", function () {
 
     let conf2 = await seedPool.conf();
     let tvl2 = await seedPool.tvl();
-    let seedAmount = amount.mul(conf2.stakeFactor).mul(conf2.priceRatio).div(10000);
+    let seedAmount = amount.mul(conf2.stakeFactor).mul(conf2.priceRatio).div(1000000);
     expect(tvl2.stakedTokenAmount).equal(seedAmount);
 
     expect(await seed.balanceOf(fundOwner.address)).equal(0);
@@ -242,7 +242,7 @@ describe("#Integration test", function () {
       .emit(seedFactory, "DepositSaved")
       .withArgs(fundOwner.address, 1);
 
-    expect(await seed.balanceOf(fundOwner.address)).equal("350076103500761035007");
+    expect(await seed.balanceOf(fundOwner.address)).equal("3500761035007610350");
 
     expect(await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload3))
       .emit(seedFactory, "DepositSaved")
@@ -250,8 +250,8 @@ describe("#Integration test", function () {
 
     conf2 = await seedPool.conf();
     tvl2 = await seedPool.tvl();
-    let seedAmount2 = amount2.mul(conf2.stakeFactor).mul(conf2.priceRatio).div(10000);
-    let seedAmount3 = amount3.mul(conf2.swapFactor).mul(conf2.priceRatio).div(10000);
+    let seedAmount2 = amount2.mul(conf2.stakeFactor).mul(conf2.priceRatio).div(1000000);
+    let seedAmount3 = amount3.mul(conf2.swapFactor).mul(conf2.priceRatio).div(1000000);
 
     expect(tvl2.stakedTokenAmount).equal(seedAmount.add(seedAmount2).add(seedAmount3));
 
@@ -304,7 +304,7 @@ describe("#Integration test", function () {
       .withArgs(fundOwner.address, 2);
 
     boostWeight = await seedPool.boostWeight(fundOwner.address);
-    expect(boostWeight).equal(1025000000);
+    expect(boostWeight).equal(1150000000);
 
     await increaseBlockTimestampBy(20 * 24 * 3600);
 
@@ -318,7 +318,7 @@ describe("#Integration test", function () {
     await increaseBlockTimestampBy(330 * 24 * 3600);
 
     expect(seedDeposit.unstakedAt).equal(0);
-    expect(seedDeposit.tokenAmount).equal(ethers.utils.parseEther("1000000"));
+    expect(seedDeposit.tokenAmount).equal(ethers.utils.parseEther("10000"));
     const seedPayload = await fromDepositToTransferPayload(seedDeposit);
 
     ts = await getTimestamp();
@@ -330,11 +330,11 @@ describe("#Integration test", function () {
 
     // unstake SEED from sSYNR
 
-    expect(await seed.balanceOf(user2.address)).equal("129467945205479452054794520");
+    expect(await seed.balanceOf(user2.address)).equal("1294679452054794520547945");
 
     await seedPool.connect(user2).unstake(0);
 
-    expect(await seed.balanceOf(user2.address)).equal("134467945205479452054794520");
+    expect(await seed.balanceOf(user2.address)).equal("1344679452054794520547945");
 
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);
