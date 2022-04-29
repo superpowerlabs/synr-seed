@@ -61,8 +61,8 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     uint32 rewardsFactor_,
     uint32 decayInterval_,
     uint16 decayFactor_,
-    uint16 swapFactor_,
-    uint16 stakeFactor_,
+    uint32 swapFactor_,
+    uint32 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
     uint8 coolDownDays_
@@ -89,8 +89,8 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   function updateConf(
     uint32 decayInterval_,
     uint16 decayFactor_,
-    uint16 swapFactor_,
-    uint16 stakeFactor_,
+    uint32 swapFactor_,
+    uint32 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
     uint8 coolDownDays_
@@ -396,10 +396,10 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     _collectRewards(user_);
     uint256 tokenAmount;
     if (tokenType == S_SYNR_SWAP) {
-      tokenAmount = tokenAmountOrID.mul(conf.swapFactor).mul(conf.priceRatio).div(10000);
+      tokenAmount = tokenAmountOrID.mul(conf.swapFactor).mul(conf.priceRatio).div(1000000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_STAKE) {
-      tokenAmount = tokenAmountOrID.mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
+      tokenAmount = tokenAmountOrID.mul(conf.stakeFactor).mul(conf.priceRatio).div(1000000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
       users[user_].passAmount++;

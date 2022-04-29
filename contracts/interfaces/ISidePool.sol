@@ -52,8 +52,8 @@ interface ISidePool {
     uint32 decayInterval; // ex. 7 * 24 * 3600, 7 days
     uint16 decayFactor; // ex. 9850 >> decays of 1.5% every 7 days
     uint32 lastRatioUpdateAt;
-    uint16 swapFactor;
-    uint16 stakeFactor;
+    uint32 swapFactor;
+    uint32 stakeFactor;
     uint16 taxPoints; // ex 250 = 2.5%
     uint16 burnRatio;
     uint16 priceRatio;
@@ -78,8 +78,8 @@ interface ISidePool {
     uint32 rewardsFactor_,
     uint32 decayInterval_,
     uint16 decayFactor_,
-    uint16 swapFactor_,
-    uint16 stakeFactor_,
+    uint32 swapFactor_,
+    uint32 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
     uint8 coolDownDays_
@@ -88,8 +88,8 @@ interface ISidePool {
   function updateConf(
     uint32 decayInterval_,
     uint16 decayFactor_,
-    uint16 swapFactor_,
-    uint16 stakeFactor_,
+    uint32 swapFactor_,
+    uint32 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
     uint8 coolDownDays_
