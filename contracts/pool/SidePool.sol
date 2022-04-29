@@ -61,8 +61,8 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     uint32 rewardsFactor_,
     uint32 decayInterval_,
     uint16 decayFactor_,
-    uint16 swapFactor_,
-    uint16 stakeFactor_,
+    uint32 swapFactor_,
+    uint32 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
     uint8 coolDownDays_
@@ -89,8 +89,8 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   function updateConf(
     uint32 decayInterval_,
     uint16 decayFactor_,
-    uint16 swapFactor_,
-    uint16 stakeFactor_,
+    uint32 swapFactor_,
+    uint32 stakeFactor_,
     uint16 taxPoints_,
     uint16 burnRatio_,
     uint8 coolDownDays_
