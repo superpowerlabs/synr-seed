@@ -12,8 +12,8 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../token/TokenReceiver.sol";
 import "../utils/PayloadUtils.sol";
 import "../interfaces/IMainPool.sol";
-import "../token/SyndicateERC20.sol";
-import "../token/SyntheticSyndicateERC20.sol";
+import "../previously-deployed/SyndicateERC20.sol";
+import "../previously-deployed/SyntheticSyndicateERC20.sol";
 import "../token/SynCityPasses.sol";
 
 import "hardhat/console.sol";
