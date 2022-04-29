@@ -215,7 +215,6 @@ describe("#SeedPool", function () {
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
 
-      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
       expect(pool.connect(user0).stake(SEED_SWAP, 0, amount)).revertedWith("SeedPool: unsupported token");
     });
   });

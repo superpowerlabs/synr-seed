@@ -244,6 +244,14 @@ describe("#Integration test", function () {
 
     expect(await seed.balanceOf(fundOwner.address)).equal("3500761035007610350");
 
+    await seed.connect(fundOwner).approve(operator.address, ethers.utils.parseEther("10"));
+    // seed token is locked
+    expect(await seed.allowance(fundOwner.address, operator.address)).equal(0);
+
+    await seed.unpauseAllowance();
+
+    expect(await seed.allowance(fundOwner.address, operator.address)).equal(ethers.utils.parseEther("10"));
+
     expect(await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload3))
       .emit(seedFactory, "DepositSaved")
       .withArgs(user2.address, 0);
