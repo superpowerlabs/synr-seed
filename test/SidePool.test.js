@@ -349,4 +349,24 @@ describe("#SidePool", function () {
       await assertThrowsMessage(sidePool.connect(user1).unstakeIfSSynr(0), "SidePool: not a sSYNR > SEED swap");
     });
   });
+
+  describe("#unstake", async function () {
+    beforeEach(async function () {
+      await initAndDeploy(true);
+    });
+
+    it("should unstake", async function () {
+      let id = 2;
+      await blueprint.mint(user1.address, 5);
+      await blueprint.connect(user1).approve(sidePool.address, id);
+
+      expect(await sidePool.connect(user1).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id))
+        .emit(sidePool, "DepositSaved")
+        .withArgs(user1.address, 0);
+
+      expect(await sidePool.connect(user1).unstake(0))
+        .emit(sidePool, "DepositUnlocked")
+        .withArgs(user1.address, 0);
+    });
+  });
 });
