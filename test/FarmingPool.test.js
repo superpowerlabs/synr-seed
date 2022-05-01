@@ -197,11 +197,22 @@ describe("#FarmingPool", function () {
       await initAndDeploy(true);
     });
 
+    it("should revert if staking seed when allowance is paused", async function () {
+      const amount = ethers.utils.parseEther("1500000");
+      await seed.connect(user0).approve(pool.address, amount);
+      const balanceBefore = await seed.balanceOf(user0.address);
+      expect(balanceBefore).equal(normalize(user0sSeeds));
+
+      expect(pool.connect(user0).stake(SEED_SWAP, 0, amount)).revertedWith("ERC20: insufficient allowance");
+    });
+
     it("should stake some seed", async function () {
       const amount = ethers.utils.parseEther("1500000");
       await seed.connect(user0).approve(pool.address, amount);
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
+
+      await seed.unpauseAllowance();
 
       const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
       expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
@@ -212,6 +223,25 @@ describe("#FarmingPool", function () {
       expect(deposit.tokenAmountOrID).equal(amount);
       expect(deposit.tokenType).equal(SEED_SWAP);
       expect(deposit.lockedUntil).equal(lockedUntil);
+    });
+
+    it("should stake some seed and collect rewards", async function () {
+      const amount = ethers.utils.parseEther("1500000");
+      await seed.connect(user0).approve(pool.address, amount);
+      const balanceBefore = await seed.balanceOf(user0.address);
+      expect(balanceBefore).equal(normalize(user0sSeeds));
+
+      await seed.unpauseAllowance();
+
+      const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
+      expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
+        .emit(pool, "DepositSaved")
+        .withArgs(user0.address, 0);
+
+      await increaseBlockTimestampBy(50 * 24 * 3600);
+
+      await pool.connect(user0).collectRewards();
+      expect(await weed.balanceOf(user0.address)).equal("38840383561643835616438356");
     });
 
     it("should stake some blueprints", async function () {
@@ -257,8 +287,9 @@ describe("#FarmingPool", function () {
     it("should revert if unstake is not blueprint", async function () {
       const amount = ethers.utils.parseEther("1500000");
       await seed.connect(user0).approve(pool.address, amount);
+      await seed.unpauseAllowance();
       await pool.connect(user0).stake(SEED_SWAP, 0, amount);
-      await assertThrowsMessage(pool.connect(user0).unstake(0), "FarmingPool: only bluprints can be unstaked");
+      await assertThrowsMessage(pool.connect(user0).unstake(0), "FarmingPool: only blueprints can be unstaked");
     });
   });
 });

@@ -570,16 +570,16 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   }
 
   /**
-   * @notice Withdraws penalties that has been collected as tax for unstaking early
-   * @param amount amount of ssynr to be withdrawn
-   * @param beneficiary address to which the withdrawl will go to
+   * @notice Withdraws penalties that has been collected as tax for un-staking early
+   * @param amount amount of sSynr to be withdrawn
+   * @param beneficiary address to which the withdrawn will go to
    * @param what what is available
    */
   function withdrawPenaltiesOrTaxes(
     uint256 amount,
     address beneficiary,
     uint256 what
-  ) external override onlyOwner {
+  ) external virtual override onlyOwner {
     uint256 available = what == 1 ? penalties : taxes;
     require(amount <= available, "SidePool: amount not available");
     if (amount == 0) {
