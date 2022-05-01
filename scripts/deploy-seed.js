@@ -22,7 +22,9 @@ async function main() {
   console.log(`
 To verify SeedToken source code:
     
-  npx hardhat verify --show-stack-traces \\
+  npx hardhat verify \\
+      --contract contracts/token/SeedToken.sol:SeedToken \\
+      --show-stack-traces \\
       --network ${network} \\
       ${seed.address}
       

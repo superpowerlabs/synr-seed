@@ -21,8 +21,8 @@ async function main() {
   const network =
     chainId === 1
       ? "ethereum"
-      : chainId === 3
-      ? "ropsten"
+      : chainId === 5
+      ? "goerli"
       : chainId === 56
       ? "bsc"
       : chainId === 97
@@ -45,7 +45,7 @@ async function main() {
     console.log("Configuring the side chain");
     await synrBridge.wormholeRegisterContract(4, bytes32Address(deployed[otherChain].SeedFactory));
   } else {
-    const otherChain = chainId === 56 ? 1 : 3;
+    const otherChain = chainId === 56 ? 1 : 5;
     const SeedFactory = await ethers.getContractFactory("SeedFactory");
     const seedFactory = SeedFactory.attach(deployed[chainId].SeedFactory);
     console.log("Configuring wormhole");

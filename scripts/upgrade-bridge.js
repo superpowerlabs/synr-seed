@@ -15,10 +15,10 @@ async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
 
-  const address = deployed[chainId].MainPool;
-  const MainPool = await ethers.getContractFactory("MainPool");
-  console.log("Upgrading MainPool");
-  const upgraded = await upgrades.upgradeProxy(address, MainPool);
+  const address = deployed[chainId].SynrBridge;
+  const SynrBridge = await ethers.getContractFactory("SynrBridge");
+  console.log("Upgrading SynrBridge");
+  const upgraded = await upgrades.upgradeProxy(address, SynrBridge);
 }
 
 main()

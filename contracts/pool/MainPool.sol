@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity 0.8.11;
 
 // Author: Francesco Sullo <francesco@sullo.co>
 // (c) 2022+ SuperPower Labs Inc.
@@ -14,7 +14,7 @@ import "../utils/PayloadUtils.sol";
 import "../interfaces/IMainPool.sol";
 import "../previously-deployed/SyndicateERC20.sol";
 import "../previously-deployed/SyntheticSyndicateERC20.sol";
-import "../token/SynCityPasses.sol";
+import "../previously-deployed/SynCityPasses.sol";
 
 import "hardhat/console.sol";
 

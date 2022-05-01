@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity 0.8.11;
 
 import "../SynrBridge.sol";
 
@@ -14,4 +14,6 @@ contract SynrBridgeV2Mock is SynrBridge {
   function mockWormholeCompleteTransfer(address to, uint256 payload) public {
     _onWormholeCompleteTransfer(to, payload);
   }
+
+  uint256[50] private __gap;
 }

@@ -52,6 +52,11 @@ module.exports = {
       gasLimit: 6000000,
       accounts: [envJson.testnet.privateKey],
     },
+    goerli: {
+      url: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      gasLimit: 6000000,
+      accounts: [envJson.testnet.privateKey],
+    },
     bsc_testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
@@ -72,6 +77,6 @@ module.exports = {
     coinmarketcap: process.env.COINMARKETCAP,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_KEY,
+    apiKey: process.env.BSCSCAN_KEY, // process.env.ETHERSCAN_KEY,
   },
 };
