@@ -38,7 +38,7 @@ async function main() {
 
   console.log("Init MainPool");
   // define right parameters
-  await mainPool.initPool(7, 4000, {gasLimit: 50000});
+  await mainPool.initPool(16 * 7, 4000, {gasLimit: 50000});
 
   await deployUtils.saveDeployed(chainId, ["MainPool"], [mainPool.address]);
 

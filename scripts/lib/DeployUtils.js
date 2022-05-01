@@ -6,6 +6,7 @@ const abi = require("ethereumjs-abi");
 const oZChainName = {
   1: "mainnet",
   3: "ropsten",
+  5: "goerli",
   56: "bsc",
 };
 
@@ -13,6 +14,7 @@ const scanner = {
   1337: "localhost",
   1: "etherscan.io",
   3: "ropsten.etherscan.io",
+  5: "goerli.etherscan.io",
   56: "bscscan.com",
   97: "testnet.bscscan.com",
 };
@@ -120,13 +122,6 @@ class DeployUtils {
     
 https://${scanner[chainId]}/address/${address}    
 
-${
-  values.length
-    ? `The encoded arguments are:
-
-${this.encodeArguments(types, values)}`
-    : ""
-}
 `;
     const logDir = path.resolve(__dirname, "../../log");
     await fs.ensureDir(logDir);

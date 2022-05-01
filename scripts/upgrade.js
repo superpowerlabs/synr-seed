@@ -15,10 +15,14 @@ async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
 
-  const address = deployed[chainId].MainPool;
-  const MainPool = await ethers.getContractFactory("MainPool");
-  console.log("Upgrading MainPool");
-  const upgraded = await upgrades.upgradeProxy(address, MainPool);
+  const contract = process.env.CONTRACT;
+  const gasLimit = parseInt(process.env.GAS_LIMIT || "0");
+
+  const address = deployed[chainId][contract];
+  const Contract = await ethers.getContractFactory(contract);
+  console.log("Upgrading", contract);
+  await upgrades.upgradeProxy(address, Contract, gasLimit ? {gasLimit} : {});
+  console.log("Done");
 }
 
 main()
