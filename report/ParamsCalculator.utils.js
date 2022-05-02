@@ -157,6 +157,8 @@ describe("#Params Calculator", function () {
         "Final SEED for SYNR",
         "Final SEED for sSYNR",
         "Ratio",
+        "Balance after boost",
+        "Balance after Stake for Seed",
       ],
     ];
 
@@ -262,7 +264,6 @@ describe("#Params Calculator", function () {
       row.push(seedFromSYNR);
 
       // unstake SEED from sSYNR
-
       await seedPool.connect(user2).unstake(0);
       let seedFromSSYNR = ethers.utils
         .formatEther((await seed.balanceOf(user2.address)).toString())
@@ -276,19 +277,18 @@ describe("#Params Calculator", function () {
       seedPayload = await fromDepositToTransferPayload(seedDeposit);
       await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
       await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
-      const balanceAfterBoost = await seed.balanceOf(user3.address);
+      let balanceAfterBoost = await seed.balanceOf(user3.address);
+      balanceAfterBoost = ethers.utils.formatEther(balanceAfterBoost).toString().split(".")[0];
+      row.push(balanceAfterBoost);
 
       //unstake from user4
       seedDeposit = await seedPool.getDepositByIndex(user4.address, 1);
       seedPayload = await fromDepositToTransferPayload(seedDeposit);
       await seedFactory.connect(user4).wormholeTransfer(seedPayload, 2, bytes32Address(user4.address), 1);
       await synrBridge.mockWormholeCompleteTransfer(user4.address, seedPayload);
-      const balanceAfterStakeforSeed = await seed.balanceOf(user4.address);
-
-      console.log(balanceAfterBoost);
-      console.log(ethers.utils.formatEther(balanceAfterBoost).toString().split(".")[0]);
-      console.log(balanceAfterStakeforSeed);
-      console.log(ethers.utils.formatEther(balanceAfterStakeforSeed).toString().split(".")[0]);
+      let balanceAfterStakeforSeed = await seed.balanceOf(user4.address);
+      balanceAfterStakeforSeed = ethers.utils.formatEther(balanceAfterStakeforSeed).toString().split(".")[0];
+      row.push(balanceAfterStakeforSeed);
 
       report.push(row);
 
