@@ -248,7 +248,7 @@ describe("#Params Calculator", function () {
 
   it("should verify possible combination", async function () {
     const params = [
-      [100000, 1500, 100000],
+      [1000000000, 1500, 100000],
       [100000, 2000, 100000],
       [100000, 2500, 100000],
       [100000, 3000, 100000],
@@ -312,13 +312,7 @@ describe("#Params Calculator", function () {
       finalPayload = await fromDepositToTransferPayload(deposit);
       await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
 
-      //approve and transfer SYNR and pass for user 4
-      await synr.connect(user4).approve(mainPool.address, amount);
-      payload = await serializeInput(SYNR_STAKE, 365, amount);
-      await synrBridge.connect(user4).wormholeTransfer(payload, 4, bytes32Address(user4.address), 1);
-      deposit = await mainPool.getDepositByIndex(user4.address, 0);
-      finalPayload = await fromDepositToTransferPayload(deposit);
-      await seedFactory.mockWormholeCompleteTransfer(user4.address, finalPayload);
+      //approve and transfer pass for user 4
       payloadPass = await serializeInput(
         SYNR_PASS_STAKE_FOR_SEEDS,
         365, // 1 year
@@ -331,7 +325,7 @@ describe("#Params Calculator", function () {
         bytes32Address(user4.address),
         1
       );
-      deposit = await mainPool.getDepositByIndex(user4.address, 1);
+      deposit = await mainPool.getDepositByIndex(user4.address, 0);
       finalPayload = await fromDepositToTransferPayload(deposit);
       await seedFactory.mockWormholeCompleteTransfer(user4.address, finalPayload);
 
@@ -361,7 +355,7 @@ describe("#Params Calculator", function () {
       row.push(balanceAfterBoost);
 
       //unstake from user4
-      seedDeposit = await seedPool.getDepositByIndex(user4.address, 1);
+      seedDeposit = await seedPool.getDepositByIndex(user4.address, 0);
       seedPayload = await fromDepositToTransferPayload(seedDeposit);
       await seedFactory.connect(user4).wormholeTransfer(seedPayload, 2, bytes32Address(user4.address), 1);
       await synrBridge.mockWormholeCompleteTransfer(user4.address, seedPayload);
