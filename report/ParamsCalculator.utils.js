@@ -248,19 +248,16 @@ describe("#Params Calculator", function () {
 
   it("should verify possible combination", async function () {
     const params = [
-      [10000, 1500, 100000],
-      [10500, 1500, 100000],
-      [11000, 1500, 100000],
-      [12000, 2000, 100000],
-      [13000, 2500, 100000],
-      [14000, 3000, 100000],
-      [15000, 3500, 100000],
-      [16000, 4500, 100000],
+      [1000, 1500, 100000],
+      [1100, 1500, 100000],
+      [1200, 1500, 100000],
+      [1300, 2000, 100000],
+      [1400, 2500, 100000],
+      [1500, 3000, 100000],
+      [1500, 9500, 100000],
+      [1000, 9500, 100000],
+      [1000, 9700, 100000],
     ];
-    //default
-    // synrEquivalent = 100000,
-    // sPBoostFactor = 1500,
-    // sPBoostLimit = 500000
 
     let report = [
       [
@@ -269,7 +266,8 @@ describe("#Params Calculator", function () {
         "sPBoostLimit",
         "SYNR amount",
         "SEED after staking SYNR",
-        "Final SEED for Boost",
+        "SEED for Boost",
+        "Final Boost without SYNR",
         "Final SEED for Stake for Seed",
         "Ratio",
       ],
@@ -346,13 +344,14 @@ describe("#Params Calculator", function () {
       row.push(seedFromSYNR);
 
       //unstake from user3
-      seedDeposit = await seedPool.getDepositByIndex(user3.address, 1);
+      seedDeposit = await seedPool.getDepositByIndex(user3.address, 0);
       seedPayload = await fromDepositToTransferPayload(seedDeposit);
       await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
       await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
 
-      seedDeposit = await seedPool.getDepositByIndex(user3.address, 0);
+      seedDeposit = await seedPool.getDepositByIndex(user3.address, 1);
       seedPayload = await fromDepositToTransferPayload(seedDeposit);
+
       await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
       await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
 
@@ -361,6 +360,7 @@ describe("#Params Calculator", function () {
         .toString()
         .split(".")[0];
       row.push(balanceAfterBoost);
+      row.push(balanceAfterBoost - seedFromSYNR);
 
       //unstake from user4
       seedDeposit = await seedPool.getDepositByIndex(user4.address, 0);
@@ -373,7 +373,7 @@ describe("#Params Calculator", function () {
         .split(".")[0];
       row.push(balanceAfterStakeforSeed);
 
-      row.push(parseInt(balanceAfterBoost) / parseInt(balanceAfterStakeforSeed));
+      row.push(parseInt(balanceAfterBoost - seedFromSYNR) / parseInt(balanceAfterStakeforSeed));
 
       report.push(row);
     }
