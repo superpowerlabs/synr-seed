@@ -248,12 +248,14 @@ describe("#Params Calculator", function () {
 
   it("should verify possible combination", async function () {
     const params = [
-      [1000000000, 1500, 100000],
-      [100000, 2000, 100000],
-      [100000, 2500, 100000],
-      [100000, 3000, 100000],
-      [100000, 3500, 100000],
-      [100000, 4500, 100000],
+      [10000, 1500, 100000],
+      [10500, 1500, 100000],
+      [11000, 1500, 100000],
+      [12000, 2000, 100000],
+      [13000, 2500, 100000],
+      [14000, 3000, 100000],
+      [15000, 3500, 100000],
+      [16000, 4500, 100000],
     ];
     //default
     // synrEquivalent = 100000,
@@ -348,6 +350,12 @@ describe("#Params Calculator", function () {
       seedPayload = await fromDepositToTransferPayload(seedDeposit);
       await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
       await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
+
+      seedDeposit = await seedPool.getDepositByIndex(user3.address, 0);
+      seedPayload = await fromDepositToTransferPayload(seedDeposit);
+      await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
+      await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
+
       let balanceAfterBoost = ethers.utils
         .formatEther((await seed.balanceOf(user3.address)).toString())
         .toString()
