@@ -404,7 +404,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
       users[user_].passAmount++;
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      tokenAmount = uint256(nftConf.synrEquivalent).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
+      tokenAmount = uint256(nftConf.synrEquivalent).mul(1e18).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
       users[user_].blueprintsAmount++;
