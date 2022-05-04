@@ -391,7 +391,7 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report2.csv"));
   });
 
-  it.only("should verify possible combination", async function () {
+  it("should verify possible combination", async function () {
     const params = [
       [1000, 1500, 100000],
       [1000, 1500, 100000],
