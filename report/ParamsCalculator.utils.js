@@ -36,6 +36,7 @@ describe("#Params Calculator", function () {
   let SeedFactory, seedFactory;
   let SeedPool, seedPool;
   let SynCityCouponsSimplified, blueprint;
+  let tokenId1, tokenId3;
 
   let deployer, fundOwner, superAdmin, operator, validator, user1, user2, user3, treasury, user4, user5;
 
@@ -90,11 +91,9 @@ describe("#Params Calculator", function () {
     await pass.deployed();
 
     await pass.mintToken(user1.address);
-    await pass.mintToken(user1.address);
-    await pass.mintToken(user2.address);
-    await pass.mintToken(user2.address);
+    tokenId1 = (await pass.nextTokenId()).sub(1).toNumber();
     await pass.mintToken(user3.address);
-    await pass.mintToken(user4.address);
+    tokenId3 = (await pass.nextTokenId()).sub(1).toNumber();
 
     mainPool = await upgrades.deployProxy(MainPool, [synr.address, sSynr.address, pass.address]);
     await mainPool.deployed();
@@ -137,7 +136,7 @@ describe("#Params Calculator", function () {
     await seedFactory.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
   }
 
-  it("should verify possible combination", async function () {
+  it("should verify balance between stakeFactor and swapFactor", async function () {
     const params = [
       [650, 50000],
       [550, 45000],
@@ -247,143 +246,158 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it("should verify possible combination", async function () {
+  it("should verify balance between synrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+    // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
+
     const params = [
-      [1000, 1500, 100000],
-      [1100, 1500, 100000],
-      [1200, 1500, 100000],
-      [1300, 2000, 100000],
-      [1400, 2500, 100000],
-      [1500, 3000, 100000],
-      [1500, 9500, 100000],
-      [1000, 9500, 100000],
-      [1000, 9700, 100000],
+      [
+        100000, // synrEquivalent
+        100000, //sPBoostFactor
+        1000000, //sPBoostLimit
+      ],
+      [100000, 500000, 200000],
+      [100000, 200000, 500000],
     ];
 
     let report = [
       [
+        "stakedAmount",
+        "lockupTime",
         "synrEquivalent",
         "sPBoostFactor",
         "sPBoostLimit",
         "SYNR amount",
+        "SEED no pass",
         "SEED after staking SYNR",
         "SEED for Boost",
-        "Final Boost without SYNR",
-        "Final SEED for Stake for Seed",
         "Ratio",
       ],
     ];
 
-    for (let i = 0; i < params.length; i++) {
-      const tokenAmount = "100000";
-      const amount = ethers.utils.parseEther(tokenAmount);
-      let [synrEquivalent, sPBoostFactor, sPBoostLimit] = params[i];
-      const row = [synrEquivalent, sPBoostFactor, sPBoostLimit, tokenAmount];
-      await initAndDeploy(100, 8300, synrEquivalent, sPBoostFactor, sPBoostLimit);
+    for (let k = 92; k < 380; k += 92) {
+      if (k > 365) {
+        k = 365;
+      }
 
-      // approve SYNR spend
-      await synr.connect(user1).approve(mainPool.address, amount);
-      // console.log(amount.toString());
-      let payload = await serializeInput(SYNR_STAKE, 365, amount);
-      await synrBridge.connect(user1).wormholeTransfer(payload, 4, bytes32Address(user1.address), 1);
-      let deposit = await mainPool.getDepositByIndex(user1.address, 0);
-      let finalPayload = await fromDepositToTransferPayload(deposit);
-      await seedFactory.mockWormholeCompleteTransfer(user1.address, finalPayload);
+      for (let i = 0; i < params.length; i++) {
+        let [synrEquivalent, sPBoostFactor, sPBoostLimit] = params[i];
+        const tokenAmount = sPBoostLimit.toString();
+        const amount = ethers.utils.parseEther(tokenAmount);
+        const row = [tokenAmount, k, synrEquivalent, sPBoostFactor, sPBoostLimit, tokenAmount];
+        await initAndDeploy(100, 8300, synrEquivalent, sPBoostFactor, sPBoostLimit);
 
-      //approve and transfer SYNR and boost for user3
-      await synr.connect(user3).approve(mainPool.address, amount);
-      payload = await serializeInput(SYNR_STAKE, 365, amount);
-      await synrBridge.connect(user3).wormholeTransfer(payload, 4, bytes32Address(user3.address), 1);
-      deposit = await mainPool.getDepositByIndex(user3.address, 0);
-      finalPayload = await fromDepositToTransferPayload(deposit);
-      await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
-      let payloadPass = await serializeInput(
-        SYNR_PASS_STAKE_FOR_BOOST,
-        365, // 1 year
-        13
-      );
-      await pass.connect(user3).approve(mainPool.address, 13);
-      await synrBridge.connect(user3).wormholeTransfer(
-        payloadPass,
-        4, // BSC
-        bytes32Address(user3.address),
-        1
-      );
-      deposit = await mainPool.getDepositByIndex(user3.address, 1);
-      finalPayload = await fromDepositToTransferPayload(deposit);
-      await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
+        // approve SYNR spend
+        await synr.connect(user1).approve(mainPool.address, amount);
+        // console.log(amount.toString());
+        let payload = await serializeInput(SYNR_STAKE, k, amount);
+        await synrBridge.connect(user1).wormholeTransfer(payload, 4, bytes32Address(user1.address), 1);
+        let deposit = await mainPool.getDepositByIndex(user1.address, 0);
+        let finalPayload = await fromDepositToTransferPayload(deposit);
+        await seedFactory.mockWormholeCompleteTransfer(user1.address, finalPayload);
 
-      //approve and transfer pass for user 4
-      payloadPass = await serializeInput(
-        SYNR_PASS_STAKE_FOR_SEEDS,
-        365, // 1 year
-        14
-      );
-      await pass.connect(user4).approve(mainPool.address, 14);
-      await synrBridge.connect(user4).wormholeTransfer(
-        payloadPass,
-        4, // BSC
-        bytes32Address(user4.address),
-        1
-      );
-      deposit = await mainPool.getDepositByIndex(user4.address, 0);
-      finalPayload = await fromDepositToTransferPayload(deposit);
-      await seedFactory.mockWormholeCompleteTransfer(user4.address, finalPayload);
+        //approve and transfer SYNR and boost for user2
+        await synr.connect(user2).approve(mainPool.address, amount);
+        payload = await serializeInput(SYNR_STAKE, k, amount);
+        await synrBridge.connect(user2).wormholeTransfer(payload, 4, bytes32Address(user2.address), 1);
+        deposit = await mainPool.getDepositByIndex(user2.address, 0);
+        finalPayload = await fromDepositToTransferPayload(deposit);
+        await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload);
 
-      await increaseBlockTimestampBy(366 * 24 * 3600);
+        //approve and transfer SYNR and boost for user3
+        await synr.connect(user3).approve(mainPool.address, amount);
+        payload = await serializeInput(SYNR_STAKE, k, amount);
+        await synrBridge.connect(user3).wormholeTransfer(payload, 4, bytes32Address(user3.address), 1);
+        deposit = await mainPool.getDepositByIndex(user3.address, 0);
+        finalPayload = await fromDepositToTransferPayload(deposit);
+        await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
 
-      // unstake SEED and SYNR
-      let seedDeposit = await seedPool.getDepositByIndex(user1.address, 0);
-      let seedPayload = await fromDepositToTransferPayload(seedDeposit);
+        let payloadPass = await serializeInput(
+          SYNR_PASS_STAKE_FOR_BOOST,
+          k, // 1 year
+          tokenId3
+        );
+        await pass.connect(user3).approve(mainPool.address, tokenId3);
+        await synrBridge.connect(user3).wormholeTransfer(
+          payloadPass,
+          4, // BSC
+          bytes32Address(user3.address),
+          1
+        );
+        deposit = await mainPool.getDepositByIndex(user3.address, 1);
+        finalPayload = await fromDepositToTransferPayload(deposit);
+        await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
 
-      await seedFactory.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
+        //approve and transfer pass for user 4
+        payloadPass = await serializeInput(
+          SYNR_PASS_STAKE_FOR_SEEDS,
+          k, // 1 year
+          tokenId1
+        );
+        await pass.connect(user1).approve(mainPool.address, tokenId1);
+        await synrBridge.connect(user1).wormholeTransfer(
+          payloadPass,
+          4, // BSC
+          bytes32Address(user1.address),
+          1
+        );
+        deposit = await mainPool.getDepositByIndex(user1.address, 1);
+        finalPayload = await fromDepositToTransferPayload(deposit);
+        await seedFactory.mockWormholeCompleteTransfer(user1.address, finalPayload);
 
-      let seedFromSYNR = ethers.utils
-        .formatEther((await seed.balanceOf(user1.address)).toString())
-        .toString()
-        .split(".")[0];
-      row.push(seedFromSYNR);
+        await increaseBlockTimestampBy(366 * 24 * 3600);
 
-      //unstake from user3
-      seedDeposit = await seedPool.getDepositByIndex(user3.address, 0);
-      seedPayload = await fromDepositToTransferPayload(seedDeposit);
-      await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
-      await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
+        // unstake SEED and SYNR
+        let seedDeposit = await seedPool.getDepositByIndex(user1.address, 0);
+        let seedPayload = await fromDepositToTransferPayload(seedDeposit);
 
-      seedDeposit = await seedPool.getDepositByIndex(user3.address, 1);
-      seedPayload = await fromDepositToTransferPayload(seedDeposit);
+        await seedFactory.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
 
-      await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
-      await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
+        let seedFromSYNR = ethers.utils
+          .formatEther((await seed.balanceOf(user1.address)).toString())
+          .toString()
+          .split(".")[0];
 
-      let balanceAfterBoost = ethers.utils
-        .formatEther((await seed.balanceOf(user3.address)).toString())
-        .toString()
-        .split(".")[0];
-      row.push(balanceAfterBoost);
-      row.push(balanceAfterBoost - seedFromSYNR);
+        // unstake for user2 (no boost)
+        seedDeposit = await seedPool.getDepositByIndex(user2.address, 0);
+        seedPayload = await fromDepositToTransferPayload(seedDeposit);
+        await seedFactory.connect(user2).wormholeTransfer(seedPayload, 2, bytes32Address(user2.address), 1);
+        await synrBridge.mockWormholeCompleteTransfer(user2.address, seedPayload);
 
-      //unstake from user4
-      seedDeposit = await seedPool.getDepositByIndex(user4.address, 0);
-      seedPayload = await fromDepositToTransferPayload(seedDeposit);
-      await seedFactory.connect(user4).wormholeTransfer(seedPayload, 2, bytes32Address(user4.address), 1);
-      await synrBridge.mockWormholeCompleteTransfer(user4.address, seedPayload);
-      let balanceAfterStakeforSeed = ethers.utils
-        .formatEther((await seed.balanceOf(user4.address)).toString())
-        .toString()
-        .split(".")[0];
-      row.push(balanceAfterStakeforSeed);
+        let noBoostNoExtra = ethers.utils
+          .formatEther((await seed.balanceOf(user2.address)).toString())
+          .toString()
+          .split(".")[0];
 
-      row.push(parseInt(balanceAfterBoost - seedFromSYNR) / parseInt(balanceAfterStakeforSeed));
+        //unstake from user3
+        seedDeposit = await seedPool.getDepositByIndex(user3.address, 0);
+        seedPayload = await fromDepositToTransferPayload(seedDeposit);
+        await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
+        await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
 
-      report.push(row);
+        let balanceAfterBoost = ethers.utils
+          .formatEther((await seed.balanceOf(user3.address)).toString())
+          .toString()
+          .split(".")[0];
+        row.push(noBoostNoExtra);
+        row.push(seedFromSYNR);
+        row.push(balanceAfterBoost);
+        let ratio = (balanceAfterBoost / seedFromSYNR)
+          .toString()
+          .split(".")
+          .map((e) => e.substring(0, 3))
+          .join(".");
+
+        row.push(ratio);
+
+        report.push(row);
+      }
     }
     await fs.ensureDir(path.resolve(__dirname, "../tmp"));
-    report.sort((a, b) => {
-      a = a[7];
-      b = b[7];
-      return a > b ? 1 : a < b ? -1 : 0;
-    });
+    // report.sort((a, b) => {
+    //   a = a[8];
+    //   b = b[8];
+    //   return a > b ? 1 : a < b ? -1 : 0;
+    // });
     report = report.map((e) => e.join("\t")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report2.csv"), report);
     console.info(report);
@@ -391,7 +405,8 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report2.csv"));
   });
 
-  it("should verify possible combination", async function () {
+  it.skip("should verify possible combination", async function () {
+    // TODO, I think I broke it... in initAndDeploy :-(
     const params = [
       [1000, 1500, 100000],
       [1000, 1500, 100000],

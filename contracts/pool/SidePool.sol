@@ -137,9 +137,9 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   // put to zero any parameter that remains the same
   function updateNftConf(
     uint32 synrEquivalent_,
-    uint16 sPBoostFactor_,
+    uint32 sPBoostFactor_,
     uint32 sPBoostLimit_,
-    uint16 bPBoostFactor_,
+    uint32 bPBoostFactor_,
     uint32 bPBoostLimit_
   ) external override onlyOwner {
     require(conf.status == 1, "SidePool: not active");
