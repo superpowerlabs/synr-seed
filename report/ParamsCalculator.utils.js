@@ -408,7 +408,6 @@ describe("#Params Calculator", function () {
   });
 
   it("should verify the balance between blueprint boost and pass boost", async function () {
-    // TODO, I think I broke it... in initAndDeploy :-(
     const params = [
       [
         100000, //sPBoostFactor
