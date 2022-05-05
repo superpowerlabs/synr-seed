@@ -407,7 +407,7 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report2.csv"));
   });
 
-  it.only("should verify possible combination", async function () {
+  it("should verify the balance between blueprint boost and pass boost", async function () {
     // TODO, I think I broke it... in initAndDeploy :-(
     const params = [
       [
