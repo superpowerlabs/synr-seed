@@ -68,9 +68,9 @@ interface ISidePool {
 
   struct NftConf {
     uint32 synrEquivalent; // 100,000
-    uint16 sPBoostFactor; // 12500 > 112.5% > +12.5% of boost
+    uint32 sPBoostFactor; // 12500 > 112.5% > +12.5% of boost
     uint32 sPBoostLimit;
-    uint16 bPBoostFactor;
+    uint32 bPBoostFactor;
     uint32 bPBoostLimit;
   }
 
@@ -106,9 +106,9 @@ interface ISidePool {
   // Variable value0 is 1 slot(s) too deep inside the stack.
   function updateNftConf(
     uint32 synrEquivalent_,
-    uint16 sPBoostFactor_,
+    uint32 sPBoostFactor_,
     uint32 sPBoostLimit_,
-    uint16 bPBoostFactor_,
+    uint32 bPBoostFactor_,
     uint32 bPBoostLimit_
   ) external;
 
