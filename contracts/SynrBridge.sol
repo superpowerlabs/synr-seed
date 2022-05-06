@@ -38,7 +38,7 @@ contract SynrBridge is PayloadUtils, WormholeTunnelUpgradeable {
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
     require(_msgSender() == address(uint160(uint256(recipient))), "SynrBridge: only the sender can receive on other chain");
-    pool.stake(_msgSender(), payload, recipientChain);
+    payload = pool.stake(_msgSender(), payload, recipientChain);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 

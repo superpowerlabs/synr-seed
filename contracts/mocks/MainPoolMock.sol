@@ -10,8 +10,8 @@ contract MainPoolMock is MainPool {
     address user,
     uint256 payload,
     uint16 recipientChain
-  ) external override {
-    _stake(user, payload, recipientChain);
+  ) external override returns (uint256) {
+    return _stake(user, payload, recipientChain);
   }
 
   function unstake(
