@@ -150,7 +150,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       lockedFrom: uint32(lockedFrom),
       lockedUntil: uint32(lockedUntil),
       tokenAmountOrID: uint96(tokenAmountOrID),
-      unstakedAt: 0,
+      unlockedAt: 0,
       otherChain: otherChain,
       mainIndex: uint16(mainIndex)
     });
@@ -286,7 +286,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
         uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
       "MainPool: inconsistent deposit"
     );
-    require(deposit.unstakedAt == 0, "MainPool: deposit already unstaked");
+    require(deposit.unlockedAt == 0, "MainPool: deposit already unstaked");
     if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       pass.safeTransferFrom(address(this), user, uint256(tokenAmountOrID));
     } else {
@@ -297,7 +297,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
         penalties += penalty;
       }
     }
-    deposit.unstakedAt = uint32(block.timestamp);
+    deposit.unlockedAt = uint32(block.timestamp);
     emit DepositUnlocked(user, uint16(mainIndex));
   }
 
@@ -380,20 +380,21 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     address user,
     uint256 payload,
     uint16 recipientChain
-  ) internal {
+  ) internal returns (uint256) {
     require(conf.status == 1, "MainPool: not initiated or paused");
     (uint256 tokenType, uint256 lockupTime, uint256 tokenAmountOrID) = deserializeInput(payload);
     require(conf.minimumLockupTime > 0, "MainPool: pool not alive");
     payload = _makeDeposit(user, tokenType, lockupTime, tokenAmountOrID, recipientChain);
     emit DepositSaved(user, uint16(getIndexFromPayload(payload)));
+    return payload;
   }
 
   function stake(
     address user,
     uint256 payload,
     uint16 recipientChain
-  ) external virtual onlyFactory {
-    _stake(user, payload, recipientChain);
+  ) external virtual onlyFactory returns (uint256) {
+    return _stake(user, payload, recipientChain);
   }
 
   function unstake(

@@ -22,7 +22,7 @@ interface ISidePool {
     // SYNR maxTokenSupply is 10 billion * 18 decimals = 1e28
     // which is less type(uint96).max (~79e28)
     uint96 tokenAmountOrID;
-    uint32 unstakedAt;
+    uint32 unlockedAt;
     // @dev mainIndex Since the process is asyncronous, the same deposit can be at a different index
     // on the main net and on the sidechain. This guarantees alignment
     uint16 mainIndex;

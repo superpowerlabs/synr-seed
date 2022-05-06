@@ -248,7 +248,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   function passForBoostAmount(address user) public view override returns (uint256) {
     uint256 passAmount;
     for (uint256 i = 0; i < users[user].deposits.length; i++) {
-      if (users[user].deposits[i].tokenType == SYNR_PASS_STAKE_FOR_BOOST && users[user].deposits[i].unstakedAt == 0) {
+      if (users[user].deposits[i].tokenType == SYNR_PASS_STAKE_FOR_BOOST && users[user].deposits[i].unlockedAt == 0) {
         passAmount++;
       }
     }
@@ -431,7 +431,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       lockedFrom: uint32(lockedFrom),
       lockedUntil: uint32(lockedUntil),
       tokenAmountOrID: uint96(tokenAmountOrID),
-      unstakedAt: 0,
+      unlockedAt: 0,
       mainIndex: uint16(mainIndex),
       tokenAmount: uint128(tokenAmount),
       lastRewardsAt: uint32(lockedFrom),
@@ -472,7 +472,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   function unstakeIfSSynr(uint256 depositIndex) external override {
     Deposit storage deposit = users[_msgSender()].deposits[depositIndex];
     require(deposit.tokenType == S_SYNR_SWAP, "SidePool: not a sSYNR > SEED swap");
-    _collectRewards(_msgSender());
+    //    _collectRewards(_msgSender());
     if (deposit.lockedUntil > block.timestamp) {
       uint256 vestedPercentage = getVestedPercentage(block.timestamp, deposit.lockedFrom, deposit.lockedUntil);
       uint256 unstakedAmount = uint256(deposit.tokenAmount).mul(vestedPercentage).div(10000);
@@ -481,7 +481,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     } else {
       stakedToken.transfer(_msgSender(), uint256(deposit.tokenAmount));
     }
-    deposit.unstakedAt = uint32(block.timestamp);
+    deposit.unlockedAt = uint32(block.timestamp);
   }
 
   //  function
@@ -565,7 +565,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       revert("SidePool: invalid tokenType");
     }
     _updateTvl(tokenType, tokenAmountOrID, false);
-    deposit.unstakedAt = uint32(block.timestamp);
+    deposit.unlockedAt = uint32(block.timestamp);
     emit DepositUnlocked(user_, uint16(index));
   }
 

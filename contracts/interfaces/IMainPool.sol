@@ -20,7 +20,7 @@ interface IMainPool {
     // SYNR maxTokenSupply is 10 billion * 18 decimals = 1e28
     // which is less type(uint96).max (~79e28)
     uint96 tokenAmountOrID;
-    uint32 unstakedAt;
+    uint32 unlockedAt;
     uint16 otherChain;
     // since the process is asyncronous, the same deposit can be at a different mainIndex
     // on the main net and on the sidechain.
@@ -70,7 +70,7 @@ interface IMainPool {
     address user,
     uint256 payload,
     uint16 recipientChain
-  ) external;
+  ) external returns (uint256);
 
   function unstake(
     address user,
