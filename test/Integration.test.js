@@ -635,4 +635,52 @@ describe("#Integration test", function () {
 
     expect(boostWeightAfter).greaterThan(boostWeightBefore);
   });
+
+  it.only("should stake pass for seed multiple times", async function () {
+    // stake SYNR in the SynrBridge
+    let multiple = 30;
+    for (let x = 0; x < multiple; x++) {
+      const payload = await serializeInput(
+        SYNR_PASS_STAKE_FOR_SEEDS,
+        365, // 1 year
+        9
+      );
+      expect(payload).equal("936504");
+      await pass.connect(fundOwner).approve(mainPool.address, 9);
+      await synrBridge.connect(fundOwner).wormholeTransfer(
+        payload,
+        4, // BSC
+        bytes32Address(fundOwner.address),
+        1
+      );
+
+      let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
+      expect(deposit.tokenAmountOrID).equal(9);
+      expect(deposit.tokenType).equal(SYNR_PASS_STAKE_FOR_SEEDS);
+      expect(deposit.otherChain).equal(4);
+
+      const finalPayload = await fromDepositToTransferPayload(deposit);
+      await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
+
+      await increaseBlockTimestampBy(366 * 24 * 3600);
+
+      let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+      expect(seedDeposit.unstakedAt).equal(0);
+      const seedPayload = await fromDepositToTransferPayload(seedDeposit);
+      const ts = await getTimestamp();
+
+      // unstake
+      await seedFactory.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
+      seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+
+      expect(seedDeposit.unstakedAt).greaterThan(ts);
+
+      const passBefore = await pass.balanceOf(fundOwner.address);
+
+      await synrBridge.mockWormholeCompleteTransfer(fundOwner.address, seedPayload);
+      const passAfter = await pass.balanceOf(fundOwner.address);
+      expect(passAfter.sub(passBefore)).equal(1);
+      expect(seedDeposit.tokenType).equal(4);
+    }
+  });
 });
