@@ -25,7 +25,7 @@ describe("#FarmingPool", function () {
   let WeedToken, weed;
   let coupon;
   let FarmingPool, pool;
-  let SynCityCouponsSimplified, blueprint;
+  let SynCityCoupons, blueprint;
   let week = 7 * 24 * 3600;
 
   let user0sSeeds = "250000000";
@@ -38,7 +38,7 @@ describe("#FarmingPool", function () {
     SeedToken = await ethers.getContractFactory("SeedToken");
     WeedToken = await ethers.getContractFactory("WeedToken");
     FarmingPool = await ethers.getContractFactory("FarmingPool");
-    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
+    SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
   });
 
   async function initAndDeploy(initPool) {
@@ -48,7 +48,7 @@ describe("#FarmingPool", function () {
     weed = await WeedToken.deploy();
     await weed.deployed();
 
-    blueprint = await SynCityCouponsSimplified.deploy(8000);
+    blueprint = await SynCityCoupons.deploy(8000);
     await blueprint.deployed();
 
     pool = await upgrades.deployProxy(FarmingPool, [seed.address, weed.address, blueprint.address]);

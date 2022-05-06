@@ -11,6 +11,7 @@ specifiers:
   '@openzeppelin/contracts-upgradeable': ^4.5.2
   '@openzeppelin/hardhat-upgrades': ^1.17.0
   chai: ^4.3.6
+  csv-parse: ^5.0.4
   dotenv: ^16.0.0
   ethereum-waffle: ^3.4.4
   ethereumjs-abi: ^0.6.8
@@ -42,6 +43,7 @@ devDependencies:
   '@openzeppelin/contracts-upgradeable': 4.5.2
   '@openzeppelin/hardhat-upgrades': 1.17.0_c098a2b15f43a1bfbce68b3c88a804e8
   chai: 4.3.6
+  csv-parse: 5.0.4
   dotenv: 16.0.0
   ethereum-waffle: 3.4.4_typescript@4.6.3
   ethereumjs-abi: 0.6.8
@@ -2808,6 +2810,10 @@ packages:
       public-encrypt: 4.0.3
       randombytes: 2.1.0
       randomfill: 1.0.4
+    dev: true
+
+  /csv-parse/5.0.4:
+    resolution: {integrity: sha512-5AIdl8l6n3iYQYxan5djB5eKDa+vBnhfWZtRpJTcrETWfVLYN0WSj3L9RwvgYt+psoO77juUr8TG8qpfGZifVQ==}
     dev: true
 
   /d/1.0.1:

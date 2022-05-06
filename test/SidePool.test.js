@@ -30,7 +30,7 @@ describe("#SidePool", function () {
   let SeedToken, seed;
   let coupon;
   let SidePool, sidePool;
-  let SynCityCouponsSimplified, blueprint;
+  let SynCityCoupons, blueprint;
 
   let deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury;
 
@@ -39,14 +39,14 @@ describe("#SidePool", function () {
     [deployer, fundOwner, superAdmin, operator, validator, user1, user2, marketplace, treasury] = await ethers.getSigners();
     SeedToken = await ethers.getContractFactory("SeedToken");
     SidePool = await ethers.getContractFactory("SidePoolMock");
-    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
+    SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
   });
 
   async function initAndDeploy(initPool) {
     seed = await SeedToken.deploy();
     await seed.deployed();
 
-    blueprint = await SynCityCouponsSimplified.deploy(8000);
+    blueprint = await SynCityCoupons.deploy(8000);
     await blueprint.deployed();
 
     sidePool = await upgrades.deployProxy(SidePool, [seed.address, seed.address, blueprint.address]);

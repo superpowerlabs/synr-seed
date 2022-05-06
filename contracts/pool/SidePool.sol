@@ -13,7 +13,7 @@ import "../token/TokenReceiver.sol";
 import "../utils/PayloadUtils.sol";
 import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
-import "../previously-deployed/SynCityCouponsSimplified.sol";
+import "../previously-deployed/SynCityCoupons.sol";
 
 import "hardhat/console.sol";
 
@@ -28,7 +28,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
 
   SideToken public rewardsToken;
   SideToken public stakedToken;
-  SynCityCouponsSimplified public blueprint;
+  SynCityCoupons public blueprint;
 
   uint256 public penalties;
   uint256 public taxes;
@@ -52,7 +52,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     // in SeedFarm, stakedToken and rewardsToken are same token, SEED
     stakedToken = SideToken(stakedToken_);
     rewardsToken = SideToken(rewardsToken_);
-    blueprint = SynCityCouponsSimplified(blueprint_);
+    blueprint = SynCityCoupons(blueprint_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
@@ -67,7 +67,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     uint16 burnRatio_,
     uint8 coolDownDays_
   ) external override onlyOwner {
-    require(conf.maximumLockupTime == 0, "SidePool: already initiated");
+    require(conf.status == 0, "SidePool: already initiated");
     conf = Conf({
       rewardsFactor: rewardsFactor_,
       decayInterval: decayInterval_,
@@ -213,7 +213,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
    * @return the Amount of untaxed reward
    */
   function calculateUntaxedRewards(Deposit memory deposit, uint256 timestamp) public view override returns (uint256) {
-    if (deposit.tokenAmount == 0) {
+    if (deposit.tokenAmount == 0 || deposit.tokenType == S_SYNR_SWAP) {
       return 0;
     }
     return

@@ -24,12 +24,13 @@ async function main() {
   abi("SynrBridge", "");
 
   abi("SeedToken", "token");
-  abi("SynCityCouponsSimplified", "previously-deployed", "SynCityCoupons");
+  abi("SynCityCoupons", "previously-deployed");
   abi("SeedFactory", "");
 
   abi("WeedToken", "token");
   abi("FarmingPool", "pool");
   abi("MainPool", "pool");
+  abi("SeedPool", "pool");
 
   await fs.writeFile(path.resolve(__dirname, "../export/ABIs.json"), JSON.stringify(ABIs, null, 2));
 }

@@ -28,13 +28,15 @@ async function main() {
   const seed = await SeedToken.attach(seedAddress);
   console.log("Give the pool minting permissions on Seed");
 
-  await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address, {gasLimit: 60000});
+  // await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address, {gasLimit: 60000});
 
   console.log("Deploying SeedFactory");
 
   const seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
   await seedFactory.deployed();
-  await seedPool.setFactory(seedFactory.address);
+  const tx = await seedPool.setFactory(seedFactory.address);
+  // const tx = await seedPool.setFactory(deployed[chainId].SeedFactory);
+  await tx.wait();
 
   console.log("SeedFactory deployed at", seedFactory.address);
   await deployUtils.saveDeployed(chainId, ["SeedFactory"], [seedFactory.address]);

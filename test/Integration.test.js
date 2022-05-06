@@ -33,7 +33,7 @@ describe("#Integration test", function () {
   let SynCityPasses, pass;
   let SeedFactory, seedFactory;
   let SeedPool, seedPool;
-  let SynCityCouponsSimplified, blueprint;
+  let SynCityCoupons, blueprint;
 
   let deployer, fundOwner, superAdmin, operator, validator, user1, user2, user3, treasury;
 
@@ -50,7 +50,7 @@ describe("#Integration test", function () {
     SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
     SynCityPasses = await ethers.getContractFactory("SynCityPassesMock");
-    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
+    SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
   });
 
   async function initAndDeploy() {
@@ -91,7 +91,7 @@ describe("#Integration test", function () {
     seed = await SeedToken.deploy();
     await seed.deployed();
 
-    blueprint = await SynCityCouponsSimplified.deploy(8000);
+    blueprint = await SynCityCoupons.deploy(8000);
     await blueprint.deployed();
     await blueprint.mint(user1.address, 2);
     await blueprint.mint(user3.address, 1);
@@ -338,11 +338,11 @@ describe("#Integration test", function () {
 
     // unstake SEED from sSYNR
 
-    expect(await seed.balanceOf(user2.address)).equal("1294679452054794520547945");
+    expect(await seed.balanceOf(user2.address)).equal("0");
 
     await seedPool.connect(user2).unstake(0);
 
-    expect(await seed.balanceOf(user2.address)).equal("1344679452054794520547945");
+    expect(await seed.balanceOf(user2.address)).equal("50000000000000000000000");
 
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);
