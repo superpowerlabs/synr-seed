@@ -41,17 +41,24 @@ async function main() {
     const SynrBridge = await ethers.getContractFactory("SynrBridge");
     const synrBridge = SynrBridge.attach(deployed[chainId].SynrBridge);
     console.log("Configuring wormhole");
-    await synrBridge.wormholeInit(wormholeContract[0], wormholeContract[1]);
+    let tx = await synrBridge.wormholeInit(wormholeContract[0], wormholeContract[1]);
+    await tx.wait();
     console.log("Configuring the side chain");
-    await synrBridge.wormholeRegisterContract(4, bytes32Address(deployed[otherChain].SeedFactory));
+    tx = await synrBridge.wormholeRegisterContract(4, bytes32Address(deployed[otherChain].SeedFactory));
+    await tx.wait();
   } else {
     const otherChain = chainId === 56 ? 1 : 5;
     const SeedFactory = await ethers.getContractFactory("SeedFactory");
     const seedFactory = SeedFactory.attach(deployed[chainId].SeedFactory);
     console.log("Configuring wormhole");
-    await seedFactory.wormholeInit(wormholeContract[0], wormholeContract[1]);
+    let tx = await seedFactory.wormholeInit(wormholeContract[0], wormholeContract[1]);
+    await tx.wait();
     console.log("Configuring the main chain");
-    await seedFactory.wormholeRegisterContract(chainId === 56 ? 2 : 10001, bytes32Address(deployed[otherChain].SynrBridge));
+    tx = await seedFactory.wormholeRegisterContract(
+      chainId === 56 ? 2 : 10001,
+      bytes32Address(deployed[otherChain].SynrBridge)
+    );
+    await tx.wait();
   }
 }
 

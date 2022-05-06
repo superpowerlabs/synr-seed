@@ -27,8 +27,18 @@ async function main() {
   console.log("SeedPool deployed at", seedPool.address);
   await deployUtils.saveDeployed(chainId, ["SeedPool"], [seedPool.address]);
 
+  console.log(
+    await deployUtils.verifyCodeInstructions(
+      "SeedPool",
+      chainId,
+      ["address", "address", "address"],
+      [seedAddress, seedAddress, blueprintAddress],
+      "SeedPool"
+    )
+  );
+
   console.log("#initPool");
-  let tx = await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10, {gasLimit: 85000});
+  let tx = await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10); //, {gasLimit: 85000});
   await tx.wait();
   console.log("#updateNftConf");
   tx = await seedPool.updateNftConf(100000, 100000, 1000000, 150, 1000, {gasLimit: 60000});
@@ -41,16 +51,6 @@ async function main() {
   await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address, {
     gasLimit: 66340,
   });
-
-  console.log(
-    await deployUtils.verifyCodeInstructions(
-      "SeedPool",
-      chainId,
-      ["address", "address", "address"],
-      [seedAddress, seedAddress, blueprintAddress],
-      "SeedPool"
-    )
-  );
 }
 
 main()

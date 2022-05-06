@@ -1,6 +1,14 @@
 const fs = require("fs-extra");
 const path = require("path");
 const {expect, assert} = require("chai");
+const {parse} = require("csv-parse/sync");
+
+function getJSONFromCSV(input) {
+  return parse(input, {
+    columns: true,
+    delimiter: "\t",
+  });
+}
 
 const {fromDepositToTransferPayload, serializeInput} = require("../scripts/lib/PayloadUtils");
 
@@ -65,7 +73,8 @@ describe("#Params Calculator", function () {
     sPBoostFactor = 1500,
     sPBoostLimit = 500000,
     bPBoostFactor = 75,
-    bPBoostLimit = 25000
+    bPBoostLimit = 25000,
+    ratioFactor = 1000
   ) {
     const maxTotalSupply = 10000000000; // 10 billions
     synr = await SyndicateERC20.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
@@ -118,7 +127,7 @@ describe("#Params Calculator", function () {
 
     seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await seedPool.deployed();
-    await seedPool.initPool(1000, 7 * 24 * 3600, 9800, swapFactor, stakeFactor, 800, 3000, 10);
+    await seedPool.initPool(1000, 7 * 24 * 3600, 9800, swapFactor, stakeFactor, 800, 3000, 14);
     await seedPool.updateNftConf(synrEquivalent, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit);
 
     seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
@@ -138,17 +147,18 @@ describe("#Params Calculator", function () {
     await seedFactory.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
   }
 
-  it("should verify balance between stakeFactor and swapFactor", async function () {
+  it.only("should verify balance between stakeFactor and swapFactor", async function () {
     const params = [
-      [650, 50000],
-      [550, 45000],
-      [3600, 300000],
-      [680, 48000],
-      [750, 60000],
-      [700, 50000],
-      [720, 49000],
+      // [650, 50000],
+      // [550, 45000],
+      // [3600, 300000],
+      // [680, 48000],
+      // [750, 60000],
+      // [700, 50000],
+      // [720, 49000],
+
       // best choice
-      [100, 8300],
+      [100, 220000],
     ];
 
     let report = [
@@ -160,7 +170,7 @@ describe("#Params Calculator", function () {
         "SEED after swapping sSYNR",
         "Final SEED for SYNR",
         "Final SEED for sSYNR",
-        "Ratio",
+        "sSYNR/SYNR",
       ],
     ];
 
@@ -227,7 +237,7 @@ describe("#Params Calculator", function () {
         .toString()
         .split(".")[0];
       row.push(seedFromSSYNR);
-      row.push(parseInt(seedFromSYNR) / parseInt(seedFromSSYNR));
+      row.push(parseInt(seedFromSSYNR) / parseInt(seedFromSYNR));
 
       report.push(row);
 
@@ -243,12 +253,12 @@ describe("#Params Calculator", function () {
     });
     report = report.map((e) => e.join("\t")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report.csv"), report);
-    console.info(report);
+    console.info(getJSONFromCSV(report));
 
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it("should verify balance between synrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+  it.skip("should verify balance between synrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
     // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
 
     const params = [
@@ -273,10 +283,12 @@ describe("#Params Calculator", function () {
         "SEED after staking SYNR",
         "SEED for Boost",
         "Ratio",
+        "Percentage boosted/unboosted",
+        "APY",
       ],
     ];
 
-    for (let k = 92; k < 380; k += 92) {
+    for (let k = 365; k < 380; k += 92) {
       if (k > 365) {
         k = 365;
       }
@@ -329,6 +341,8 @@ describe("#Params Calculator", function () {
         finalPayload = await fromDepositToTransferPayload(deposit);
         await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
 
+        let tokenAmount0 = (await mainPool.getDepositByIndex(user1.address, 0)).tokenAmountOrID;
+
         //approve and transfer pass for user 1
         payloadPass = await serializeInput(
           SYNR_PASS_STAKE_FOR_SEEDS,
@@ -346,11 +360,20 @@ describe("#Params Calculator", function () {
         finalPayload = await fromDepositToTransferPayload(deposit);
         await seedFactory.mockWormholeCompleteTransfer(user1.address, finalPayload);
 
+        let tokenAmount1 = (await mainPool.getDepositByIndex(user1.address, 0)).tokenAmountOrID;
+
+        let tRatio = tokenAmount0.div(tokenAmount1).toNumber();
+
+        // console.log(tRatio)
+        // process.exit()
+
         await increaseBlockTimestampBy(366 * 24 * 3600);
 
         // unstake SEED and SYNR
         let seedDeposit = await seedPool.getDepositByIndex(user1.address, 0);
         let seedPayload = await fromDepositToTransferPayload(seedDeposit);
+
+        let seedAfterStake = (await seedPool.getDepositByIndex(user2.address, 0)).tokenAmount;
 
         await seedFactory.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
 
@@ -390,6 +413,20 @@ describe("#Params Calculator", function () {
           .join(".");
 
         row.push(ratio);
+        row.push(
+          (balanceAfterBoost / noBoostNoExtra)
+            .toString()
+            .split(".")
+            .map((e) => e.substring(0, 3))
+            .join(".")
+        );
+        row.push(
+          (noBoostNoExtra / seedAfterStake)
+            .toString()
+            .split(".")
+            .map((e) => e.substring(0, 3))
+            .join(".")
+        );
 
         report.push(row);
       }
@@ -402,7 +439,7 @@ describe("#Params Calculator", function () {
     // });
     report = report.map((e) => e.join("\t")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report2.csv"), report);
-    console.info(report);
+    console.info(getJSONFromCSV(report));
 
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report2.csv"));
   });
@@ -415,8 +452,14 @@ describe("#Params Calculator", function () {
         Math.floor(100000 / 20), //bPBoostFactor
         1000000, //bPBoostLimit
       ],
-      [500000, 200000, Math.floor(500000 / 20), 200000],
-      [200000, 500000, Math.floor(200000 / 20), 500000],
+      [
+        100000, //sPBoostFactor
+        1000000, //sPBoostLimit
+        Math.floor(100000 / 10), //bPBoostFactor
+        50000, //bPBoostLimit
+      ],
+      // [500000, 200000, Math.floor(500000 / 20), 200000],
+      // [200000, 500000, Math.floor(200000 / 20), 500000],
     ];
 
     let report = [
@@ -537,11 +580,11 @@ describe("#Params Calculator", function () {
       }
     }
     await fs.ensureDir(path.resolve(__dirname, "../tmp"));
-    report.sort((a, b) => {
-      a = a[7];
-      b = b[7];
-      return a > b ? 1 : a < b ? -1 : 0;
-    });
+    // report.sort((a, b) => {
+    //   a = a[7];
+    //   b = b[7];
+    //   return a > b ? 1 : a < b ? -1 : 0;
+    // });
     report = report.map((e) => e.join("\t")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report3.csv"), report);
     console.info(report);
