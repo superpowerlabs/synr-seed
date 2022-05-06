@@ -636,9 +636,9 @@ describe("#Integration test", function () {
     expect(boostWeightAfter).greaterThan(boostWeightBefore);
   });
 
-  it.only("should stake pass for seed multiple times", async function () {
+  it("should stake pass for seed multiple times", async function () {
     // stake SYNR in the SynrBridge
-    let multiple = 30;
+    let multiple = 100;
     for (let x = 0; x < multiple; x++) {
       const amount = ethers.utils.parseEther("1000");
       const payload = await serializeInput(
