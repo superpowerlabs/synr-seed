@@ -63,6 +63,15 @@ class DeployUtils {
     return new Contract(address, await this.getABI(name, folder), this.getProviders()[chainId]);
   }
 
+  async Tx(promise, msg) {
+    if (msg) {
+      console.debug(msg);
+    }
+    let tx = await promise;
+    console.log(tx.hash);
+    await tx.wait();
+  }
+
   async currentChainId() {
     return (await this.ethers.provider.getNetwork()).chainId;
   }

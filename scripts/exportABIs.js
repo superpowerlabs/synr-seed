@@ -22,10 +22,12 @@ async function main() {
   abi("SyndicateERC20", "previously-deployed");
   abi("SynCityPasses", "previously-deployed");
   abi("SynrBridge", "");
+  abi("MainTesseract", "");
 
   abi("SeedToken", "token");
   abi("SynCityCoupons", "previously-deployed");
   abi("SeedFactory", "");
+  abi("SideTesseract", "");
 
   abi("WeedToken", "token");
   abi("FarmingPool", "pool");

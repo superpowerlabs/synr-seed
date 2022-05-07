@@ -4,6 +4,7 @@
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 require("dotenv").config();
+const {expect} = require("chai");
 const hre = require("hardhat");
 const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
@@ -39,20 +40,20 @@ async function main() {
 
   if (chainId < 6) {
     const otherChain = chainId === 1 ? 56 : 97;
-    const SynrBridge = await ethers.getContractFactory("SynrBridge");
-    const synrBridge = SynrBridge.attach(deployed[chainId].SynrBridge);
-    await Tx(synrBridge.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
+    const MainTesseract = await ethers.getContractFactory("MainTesseract");
+    const mainTesseract = MainTesseract.attach(deployed[chainId].MainTesseract);
+    await Tx(mainTesseract.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
     await Tx(
-      synrBridge.wormholeRegisterContract(4, bytes32Address(deployed[otherChain].SeedFactory)),
+      mainTesseract.wormholeRegisterContract(4, bytes32Address(deployed[otherChain].SideTesseract)),
       "Configuring the side chain"
     );
   } else {
     const otherChain = chainId === 56 ? 1 : 5;
-    const SeedFactory = await ethers.getContractFactory("SeedFactory");
-    const seedFactory = SeedFactory.attach(deployed[chainId].SeedFactory);
-    await Tx(seedFactory.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
+    const SideTesseract = await ethers.getContractFactory("SideTesseract");
+    const sideTesseract = SideTesseract.attach(deployed[chainId].SideTesseract);
+    await Tx(sideTesseract.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
     await Tx(
-      seedFactory.wormholeRegisterContract(2, bytes32Address(deployed[otherChain].SynrBridge)),
+      sideTesseract.wormholeRegisterContract(2, bytes32Address(deployed[otherChain].MainTesseract)),
       "Configuring the main chain"
     );
   }
