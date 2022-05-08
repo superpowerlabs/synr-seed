@@ -635,4 +635,27 @@ describe("#Integration test", function () {
 
     expect(boostWeightAfter).greaterThan(boostWeightBefore);
   });
+
+  it("should stake pass for seed multiple times", async function () {
+    // stake SYNR in the SynrBridge
+    let multiple = 100;
+    for (let x = 0; x < multiple; x++) {
+      const amount = ethers.utils.parseEther("1000");
+      const payload = await serializeInput(
+        SYNR_STAKE, // SYNR
+        365, // 1 year
+        amount
+      );
+      await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("1000"));
+      await synrBridge.connect(fundOwner).wormholeTransfer(
+        payload,
+        4, // BSC
+        bytes32Address(fundOwner.address),
+        1
+      );
+      let deposit = await mainPool.getDepositByIndex(fundOwner.address, x);
+      const finalPayload = await fromDepositToTransferPayload(deposit);
+      await seedFactory.connect(fundOwner).mockWormholeCompleteTransfer(fundOwner.address, finalPayload);
+    }
+  });
 });
