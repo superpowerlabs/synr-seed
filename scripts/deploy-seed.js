@@ -7,17 +7,13 @@ let deployUtils;
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
+  const {deploy, network} = deployUtils;
   const chainId = await deployUtils.currentChainId();
 
-  console.log("Deploying SEED...");
-  const SeedToken = await ethers.getContractFactory("SeedToken");
-  const seed = await SeedToken.deploy();
-  await seed.deployed();
+  const seed = await deploy("SeedToken", "Deploying SEED...");
 
   console.log("SeedToken deployed at", seed.address);
   await deployUtils.saveDeployed(chainId, ["SeedToken"], [seed.address]);
-
-  const network = chainId === 56 ? "bsc" : chainId === 97 ? "bsc_testnet" : "localhost";
 
   console.log(`
 To verify SeedToken source code:
@@ -25,7 +21,7 @@ To verify SeedToken source code:
   npx hardhat verify \\
       --contract contracts/token/SeedToken.sol:SeedToken \\
       --show-stack-traces \\
-      --network ${network} \\
+      --network ${network(chainId)} \\
       ${seed.address}
       
 `);

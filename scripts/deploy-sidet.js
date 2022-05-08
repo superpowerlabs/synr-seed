@@ -16,11 +16,11 @@ async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
-  const blueprintAddress = deployed[chainId].SynCityCoupons;
+  // const blueprintAddress = deployed[chainId].SynCityCoupons;
   const seedFarmingAddress = deployed[chainId].SeedPool;
 
   const SeedPool = await ethers.getContractFactory("SeedPool");
-  const SeedFactory = await ethers.getContractFactory("SeedFactory");
+  const SideTesseract = await ethers.getContractFactory("SideTesseract");
 
   const seedPool = SeedPool.attach(seedFarmingAddress);
 
@@ -30,16 +30,29 @@ async function main() {
 
   // await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address, {gasLimit: 60000});
 
-  console.log("Deploying SeedFactory");
+  console.log("Deploying SideTesseract");
 
-  const seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
-  await seedFactory.deployed();
-  await deployUtils.Tx(seedPool.setFactory(seedFactory.address), "Set as factory for SeedPool");
+  const tesseract = await SideTesseract.deploy(seedFarmingAddress);
+  await tesseract.deployed();
 
-  console.log("SeedFactory deployed at", seedFactory.address);
-  await deployUtils.saveDeployed(chainId, ["SeedFactory"], [seedFactory.address]);
+  console.log("SideTesseract deployed at", tesseract.address);
+  await deployUtils.saveDeployed(chainId, ["SideTesseract"], [tesseract.address]);
 
-  console.log(await deployUtils.verifyCodeInstructions("SeedFactory", chainId, ["address"], [seedPool.address], "SeedFactory"));
+  const network = chainId === 56 ? "bsc" : chainId === 97 ? "bsc_testnet" : "localhost";
+
+  console.log(`
+To verify SideTesseract source code:
+    
+  npx hardhat verify \\
+      --contract contracts/SideTesseract.sol:SideTesseract \\
+      --show-stack-traces \\
+      --network ${network} \\
+      ${tesseract.address} \\
+      ${seedFarmingAddress}
+      
+`);
+
+  await deployUtils.Tx(seedPool.setFactory(tesseract.address), "Set SideTesseract as SeedPool factory");
 }
 
 main()

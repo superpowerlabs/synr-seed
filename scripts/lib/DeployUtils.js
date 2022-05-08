@@ -10,6 +10,17 @@ const oZChainName = {
   56: "bsc",
 };
 
+const chainName = {
+  1: "mainnet",
+  3: "ropsten",
+  5: "goerli",
+  56: "bsc",
+  97: "bsc_testnet",
+  42: "kovan",
+  1337: "localhost",
+  31337: "hardhat",
+};
+
 const scanner = {
   1337: "localhost",
   1: "etherscan.io",
@@ -61,6 +72,29 @@ class DeployUtils {
 
   async getContract(name, folder, address, chainId) {
     return new Contract(address, await this.getABI(name, folder), this.getProviders()[chainId]);
+  }
+
+  async Tx(promise, msg) {
+    if (msg) {
+      console.debug(msg);
+    }
+    let tx = await promise;
+    console.log(tx.hash);
+    await tx.wait();
+  }
+
+  async deploy(contractName, msg, ...args) {
+    if (msg) {
+      console.debug(msg);
+    }
+    const contract = await ethers.getContractFactory(contractName);
+    const deployed = await contract.deploy(...args);
+    await deployed.deployed();
+    return deployed;
+  }
+
+  network(chainId) {
+    return chainName[chainId];
   }
 
   async currentChainId() {

@@ -37,7 +37,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   TVL public tvl;
 
   modifier onlyFactory() {
-    require(factory != address(0) && _msgSender() == factory, "SeedPool: forbidden");
+    require(factory != address(0) && _msgSender() == factory, "MainPool: forbidden");
     _;
   }
 

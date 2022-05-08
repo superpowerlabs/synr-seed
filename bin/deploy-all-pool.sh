@@ -5,7 +5,7 @@ MAIN_NETWORK=localhost
 SIDE_NETWORK=localhost
 
 if [[ "$1" == "testnet" ]]; then
-MAIN_NETWORK=ropsten
+MAIN_NETWORK=goerli
 SIDE_NETWORK=bsc_testnet
 fi
 
@@ -17,11 +17,11 @@ fi
 echo "Deploying pools to $MAIN_NETWORK and $SIDE_NETWORK..."
 
 npx hardhat run scripts/deploy-mainpool.js --network $MAIN_NETWORK
-npx hardhat run scripts/deploy-bridge.js --network $MAIN_NETWORK
+npx hardhat run scripts/deploy-maint.js --network $MAIN_NETWORK
 
 npx hardhat run scripts/deploy-seedpool.js --network $SIDE_NETWORK
-npx hardhat run scripts/deploy-factory.js --network $SIDE_NETWORK
+npx hardhat run scripts/deploy-sidet.js --network $SIDE_NETWORK
 
-npx hardhat run scripts/deploy-wormhole.js --network $MAIN_NETWORK
-npx hardhat run scripts/deploy-wormhole.js --network $SIDE_NETWORK
+npx hardhat run scripts/deploy-wormhole2.js --network $MAIN_NETWORK
+npx hardhat run scripts/deploy-wormhole2.js --network $SIDE_NETWORK
 
