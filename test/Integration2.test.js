@@ -22,7 +22,7 @@ function normalize(val, n = 18) {
   return "" + val + "0".repeat(n);
 }
 
-describe.only("#Integration test", function () {
+describe("#Integration test", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
@@ -323,7 +323,7 @@ describe.only("#Integration test", function () {
 
     await increaseBlockTimestampBy(330 * 24 * 3600);
 
-    expect(seedDeposit.unstakedAt).equal(0);
+    expect(seedDeposit.unlockedAt).equal(0);
     expect(seedDeposit.tokenAmount).equal(ethers.utils.parseEther("10000"));
     const seedPayload = await fromDepositToTransferPayload(seedDeposit);
 
@@ -344,7 +344,7 @@ describe.only("#Integration test", function () {
 
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);
-    expect(seedDeposit.unstakedAt).equal(ts + 1);
+    expect(seedDeposit.unlockedAt).equal(ts + 1);
     const synrBalanceBefore = await synr.balanceOf(fundOwner.address);
 
     expect(await mainTesseract.mockWormholeCompleteTransfer(fundOwner.address, seedPayload))
@@ -401,7 +401,7 @@ describe.only("#Integration test", function () {
     expect(await seedPool.canUnstakeWithoutTax(user1.address, 0)).equal(false);
 
     let seedDeposit = await seedPool.getDepositByIndex(user1.address, 0);
-    expect(seedDeposit.unstakedAt).equal(0);
+    expect(seedDeposit.unlockedAt).equal(0);
     const seedPayload = await fromDepositToTransferPayload(seedDeposit);
 
     const synrBalanceBefore = await synr.balanceOf(user1.address);
@@ -477,7 +477,7 @@ describe.only("#Integration test", function () {
 
     let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 1);
 
-    expect(seedDeposit.unstakedAt).equal(0);
+    expect(seedDeposit.unlockedAt).equal(0);
     const seedPayload = await fromDepositToTransferPayload(seedDeposit);
     const ts = await getTimestamp();
 
@@ -485,7 +485,7 @@ describe.only("#Integration test", function () {
     await sideTesseract.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 1);
 
-    expect(seedDeposit.unstakedAt).greaterThan(ts);
+    expect(seedDeposit.unlockedAt).greaterThan(ts);
 
     const passBefore = await pass.balanceOf(fundOwner.address);
 
@@ -523,7 +523,7 @@ describe.only("#Integration test", function () {
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
     let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
-    expect(seedDeposit.unstakedAt).equal(0);
+    expect(seedDeposit.unlockedAt).equal(0);
     const seedPayload = await fromDepositToTransferPayload(seedDeposit);
     const ts = await getTimestamp();
 
@@ -531,7 +531,7 @@ describe.only("#Integration test", function () {
     await sideTesseract.connect(fundOwner).wormholeTransfer(seedPayload, 2, bytes32Address(fundOwner.address), 1);
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
 
-    expect(seedDeposit.unstakedAt).greaterThan(ts);
+    expect(seedDeposit.unlockedAt).greaterThan(ts);
 
     const passBefore = await pass.balanceOf(fundOwner.address);
 
