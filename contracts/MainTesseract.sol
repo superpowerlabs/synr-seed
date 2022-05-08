@@ -17,6 +17,9 @@ contract MainTesseract is PayloadUtils0, WormholeTunnel {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
+  event PayloadSent(address to, uint16 chainId, uint256 payload);
+  event PayloadReceived(address to, uint256 payload);
+
   MainPool public pool;
 
   constructor(address pool_) {
@@ -32,13 +35,15 @@ contract MainTesseract is PayloadUtils0, WormholeTunnel {
     uint32 nonce
   ) public payable override whenNotPaused returns (uint64 sequence) {
     require(_msgSender() == address(uint160(uint256(recipient))), "SynrBridge: only the sender can receive on other chain");
-    pool.stake(_msgSender(), payload, recipientChain);
+    payload = pool.stake(_msgSender(), payload, recipientChain);
+    emit PayloadSent(_msgSender(), recipientChain, payload);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
   // STAKE/BURN starts on the side chain and completes on the main chain
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
+    emit PayloadReceived(to, payload);
     _onWormholeCompleteTransfer(to, payload);
   }
 

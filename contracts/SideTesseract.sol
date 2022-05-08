@@ -16,6 +16,9 @@ contract SideTesseract is PayloadUtils0, WormholeTunnel {
   using Address for address;
   using SafeMath for uint256;
 
+  event PayloadSent(address to, uint16 chainId, uint256 payload);
+  event PayloadReceived(address to, uint256 payload);
+
   SeedPool public pool;
 
   constructor(address pool_) {
@@ -42,17 +45,18 @@ contract SideTesseract is PayloadUtils0, WormholeTunnel {
     require(tokenType != S_SYNR_SWAP, "SeedFarm: sSYNR swaps cannot be bridged back");
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: blueprints' unstake does not require bridge");
     pool.unstakeViaFactory(_msgSender(), tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    emit PayloadSent(_msgSender(), recipientChain, payload);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
   // STAKE starts on the main chain and completes on the side chain
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
+    emit PayloadReceived(to, payload);
     _onWormholeCompleteTransfer(to, payload);
   }
 
   function _onWormholeCompleteTransfer(address to, uint256 payload) internal {
-    //    console.log(payload);
     (
       uint256 tokenType,
       uint256 lockedFrom,
