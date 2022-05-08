@@ -17,8 +17,8 @@ contract MainTesseract is PayloadUtils0, WormholeTunnel {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
-  event PayloadSent(address to, uint16 chainId, uint256 payload);
-  event PayloadReceived(address to, uint256 payload);
+  event PayloadSent(address indexed to, uint16 indexed chainId, uint256 indexed payload);
+  event PayloadReceived(address indexed to, uint256 indexed payload);
 
   MainPool public pool;
 

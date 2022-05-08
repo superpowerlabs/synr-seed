@@ -5,11 +5,11 @@ pragma solidity 0.8.11;
 // (c) 2022+ SuperPower Labs Inc.
 
 interface ISidePool {
-  event DepositSaved(address user, uint16 mainIndex);
+  event DepositSaved(address indexed user, uint16 indexed mainIndex);
 
-  event DepositUnlocked(address user, uint16 mainIndex);
+  event DepositUnlocked(address indexed user, uint16 indexed mainIndex);
 
-  event RewardsCollected(address user, uint256 rewards);
+  event RewardsCollected(address indexed user, uint256 indexed rewards);
 
   struct Deposit {
     // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
