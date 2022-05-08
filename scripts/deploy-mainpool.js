@@ -47,7 +47,8 @@ async function main() {
       chainId,
       ["address", "address", "address"],
       [synrAddress, sSynrAddress, synrPassAddress],
-      "MainPool"
+      "MainPool",
+      "pool"
     )
   );
 }

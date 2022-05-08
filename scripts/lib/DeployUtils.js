@@ -138,7 +138,7 @@ class DeployUtils {
     return abi.rawEncode(parameterTypes, parameterValues).toString("hex");
   }
 
-  async verifyCodeInstructions(name, chainId, types, values, contract) {
+  async verifyCodeInstructions(name, chainId, types, values, contract, folder) {
     let chainName = oZChainName[chainId] || "unknown-" + chainId;
     const oz = JSON.parse(await fs.readFile(path.resolve(__dirname, "../../.openzeppelin", chainName + ".json")));
     let address;
@@ -152,9 +152,15 @@ class DeployUtils {
       }
     }
 
-    let response = `To verify ${name} source code, flatten the source code, get the implementation address in .openzeppelin, remove the licenses, except the first one, and verify manually at 
+    let response = `To verify ${name} source code, flatten the source code using 
+
+  bin/flatten.sh ${contract} ${folder || ""}    
+     
+and verify manually at 
     
-https://${scanner[chainId]}/address/${address}    
+https://${scanner[chainId]}/address/${address}
+
+as a single file, without constructor's parameters    
 
 `;
     const logDir = path.resolve(__dirname, "../../log");

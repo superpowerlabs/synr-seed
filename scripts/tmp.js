@@ -14,7 +14,8 @@ async function main() {
       1337,
       ["string", "string"],
       ["Mobland SEED Token", "SEED"],
-      "SideToken"
+      "SideToken",
+      "token"
     )
   );
 }

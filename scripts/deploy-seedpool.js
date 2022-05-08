@@ -34,7 +34,8 @@ async function main() {
       chainId,
       ["address", "address", "address"],
       [seedAddress, seedAddress, blueprintAddress],
-      "SeedPool"
+      "SeedPool",
+      "pool"
     )
   );
 
