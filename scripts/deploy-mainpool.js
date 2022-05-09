@@ -41,16 +41,7 @@ async function main() {
 
   await deployUtils.saveDeployed(chainId, ["MainPool"], [mainPool.address]);
 
-  console.log(
-    await deployUtils.verifyCodeInstructions(
-      "MainPool",
-      chainId,
-      ["address", "address", "address"],
-      [synrAddress, sSynrAddress, synrPassAddress],
-      "MainPool",
-      "pool"
-    )
-  );
+  console.log(await deployUtils.verifyCodeInstructions("MainPool", chainId, "MainPool", "pool"));
 }
 
 main()

@@ -20,18 +20,7 @@ async function main() {
   const {Tx} = deployUtils;
   const chainId = await deployUtils.currentChainId();
 
-  const network =
-    chainId === 1
-      ? "ethereum"
-      : chainId === 5
-      ? "goerli"
-      : chainId === 56
-      ? "bsc"
-      : chainId === 97
-      ? "bsc_testnet"
-      : "localhost";
-
-  if (network === "localhost") {
+  if (/1337$/.test(chainId.toString())) {
     console.error("Network not supported");
     process.exit(1);
   }
@@ -39,21 +28,23 @@ async function main() {
   const wormholeContract = wormholeConfig.byChainId[chainId];
 
   if (chainId < 6) {
-    const otherChain = chainId === 1 ? 56 : 97;
+    const otherChain = chainId === 1 ? 56 : chainId === 5 ? 97 : 80001;
+    const recipientChain = chainId === 1 || chainId === 5 ? 4 : 80001;
     const MainTesseract = await ethers.getContractFactory("MainTesseract");
     const mainTesseract = MainTesseract.attach(deployed[chainId].MainTesseract);
     await Tx(mainTesseract.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
     await Tx(
-      mainTesseract.wormholeRegisterContract(4, bytes32Address(deployed[otherChain].SideTesseract)),
+      mainTesseract.wormholeRegisterContract(recipientChain, bytes32Address(deployed[otherChain].SideTesseract)),
       "Configuring the side chain"
     );
   } else {
-    const otherChain = chainId === 56 ? 1 : 5;
+    const otherChain = chainId === 56 ? 1 : chainId === 97 ? 5 : 3;
+    const recipientChain = chainId === 56 || chainId === 97 ? 2 : 10001;
     const SideTesseract = await ethers.getContractFactory("SideTesseract");
     const sideTesseract = SideTesseract.attach(deployed[chainId].SideTesseract);
     await Tx(sideTesseract.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
     await Tx(
-      sideTesseract.wormholeRegisterContract(2, bytes32Address(deployed[otherChain].MainTesseract)),
+      sideTesseract.wormholeRegisterContract(recipientChain, bytes32Address(deployed[otherChain].MainTesseract)),
       "Configuring the main chain"
     );
   }

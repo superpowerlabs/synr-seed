@@ -14,33 +14,9 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  // console.log("chainId", chainId);
-
-  const [owner] = await ethers.getSigners();
 
   const mainPoolAddress = deployed[chainId].MainPool;
-
-  console.log("Deploying MainTesseract");
-  const MainTesseract = await ethers.getContractFactory("MainTesseract");
-
-  const tesseract = await MainTesseract.deploy(mainPoolAddress);
-  await tesseract.deployed();
-
-  console.log("MainTesseract deployed at", tesseract.address);
-  await deployUtils.saveDeployed(chainId, ["MainTesseract"], [tesseract.address]);
-
-  const network = chainId === 1 ? "mainnet" : chainId === 5 ? "goerli" : "localhost";
-
-  console.log(`
-To verify MainTesseract source code:
-    
-  npx hardhat verify \\
-      --contract contracts/MainTesseract.sol:MainTesseract \\
-      --show-stack-traces \\
-      --network ${network} \\
-      ${tesseract.address} \\
-      ${mainPoolAddress}
-`);
+  const tesseract = await deployUtils.deploy("MainTesseract", mainPoolAddress);
 
   // const MainTesseract = await ethers.getContractFactory("MainTesseract");
   // const tesseract = await MainTesseract.attach("0xF5C2D1cda9Bb2EA793B7F2069b385F7eB3ebf052");

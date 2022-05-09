@@ -28,16 +28,7 @@ async function main() {
   console.log("SeedPool deployed at", seedPool.address);
   await deployUtils.saveDeployed(chainId, ["SeedPool"], [seedPool.address]);
 
-  console.log(
-    await deployUtils.verifyCodeInstructions(
-      "SeedPool",
-      chainId,
-      ["address", "address", "address"],
-      [seedAddress, seedAddress, blueprintAddress],
-      "SeedPool",
-      "pool"
-    )
-  );
+  console.log(await deployUtils.verifyCodeInstructions("SeedPool", chainId, "SeedPool", "pool"));
 
   await Tx(seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10), "Init pool"); //, {gasLimit: 85000});
   await Tx(seedPool.updateNftConf(100000, 100000, 1000000, 150, 1000, {gasLimit: 60000}), "updateNftConf");

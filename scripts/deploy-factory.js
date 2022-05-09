@@ -39,7 +39,7 @@ async function main() {
   console.log("SeedFactory deployed at", seedFactory.address);
   await deployUtils.saveDeployed(chainId, ["SeedFactory"], [seedFactory.address]);
 
-  console.log(await deployUtils.verifyCodeInstructions("SeedFactory", chainId, ["address"], [seedPool.address], "SeedFactory"));
+  console.log(await deployUtils.verifyCodeInstructions("SeedFactory", chainId, "SeedFactory"));
 }
 
 main()
