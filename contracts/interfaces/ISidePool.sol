@@ -56,7 +56,7 @@ interface ISidePool {
     uint32 stakeFactor;
     uint16 taxPoints; // ex 250 = 2.5%
     uint16 burnRatio;
-    uint16 priceRatio;
+    uint32 priceRatio;
     uint8 coolDownDays; // cool down period for
     uint8 status;
   }
@@ -95,7 +95,7 @@ interface ISidePool {
     uint8 coolDownDays_
   ) external;
 
-  function updatePriceRatio(uint16 priceRatio_) external;
+  function updatePriceRatio(uint32 priceRatio_) external;
 
   function updateOracle(address oracle_) external;
 

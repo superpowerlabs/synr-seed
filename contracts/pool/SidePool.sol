@@ -120,7 +120,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   }
 
   // put to zero any parameter that remains the same
-  function updatePriceRatio(uint16 priceRatio_) external override {
+  function updatePriceRatio(uint32 priceRatio_) external override {
     require(conf.status == 1, "SidePool: not active");
     require(oracle != address(0) && _msgSender() == oracle, "SidePool: not the oracle");
     if (priceRatio_ > 0) {
