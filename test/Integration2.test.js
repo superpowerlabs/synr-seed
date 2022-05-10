@@ -22,7 +22,7 @@ function normalize(val, n = 18) {
   return "" + val + "0".repeat(n);
 }
 
-describe("#Integration test", function () {
+describe("#Integration2 test", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;

@@ -85,6 +85,7 @@ class DeployUtils {
     let tx = await promise;
     console.log("Tx:", tx.hash);
     await tx.wait();
+    console.log("Mined.");
   }
 
   async deploy(contractName, ...args) {
@@ -104,6 +105,12 @@ class DeployUtils {
       
 `);
     return deployed;
+  }
+
+  async attach(contractName) {
+    const chainId = await this.currentChainId();
+    const contract = await ethers.getContractFactory(contractName);
+    return contract.attach(deployedJson[chainId][contractName]);
   }
 
   async deployProxy(contractName, ...args) {
