@@ -14,12 +14,10 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  const seedFarmingAddress = deployed[chainId].SeedPool;
-
-  const SeedPool = await ethers.getContractFactory("SeedPool");
-  const seedPool = SeedPool.attach(seedFarmingAddress);
-
-  const tesseract = await deployUtils.deploy("SideTesseract", seedFarmingAddress);
+  const seedPool = await deployUtils.attach("SeedPool");
+  const tesseract =
+    // await deployUtils.attach("SideTesseract")
+    await deployUtils.deploy("SideTesseract", deployed[chainId].SeedPool);
 
   await deployUtils.Tx(seedPool.setFactory(tesseract.address), "Set SideTesseract as SeedPool factory");
 }

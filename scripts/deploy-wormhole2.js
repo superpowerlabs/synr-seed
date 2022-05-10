@@ -29,10 +29,10 @@ async function main() {
 
   if (chainId < 6) {
     const otherChain = chainId === 1 ? 56 : chainId === 5 ? 97 : 80001;
-    const recipientChain = chainId === 1 || chainId === 5 ? 4 : 80001;
+    const recipientChain = chainId === 1 || chainId === 5 ? 4 : 5;
     const MainTesseract = await ethers.getContractFactory("MainTesseract");
     const mainTesseract = MainTesseract.attach(deployed[chainId].MainTesseract);
-    await Tx(mainTesseract.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
+    await Tx(mainTesseract.wormholeInit(wormholeContract[0], wormholeContract[1], {gasLimit: 200000}), "Configuring wormhole");
     await Tx(
       mainTesseract.wormholeRegisterContract(recipientChain, bytes32Address(deployed[otherChain].SideTesseract)),
       "Configuring the side chain"
@@ -42,7 +42,7 @@ async function main() {
     const recipientChain = chainId === 56 || chainId === 97 ? 2 : 10001;
     const SideTesseract = await ethers.getContractFactory("SideTesseract");
     const sideTesseract = SideTesseract.attach(deployed[chainId].SideTesseract);
-    await Tx(sideTesseract.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
+    await Tx(sideTesseract.wormholeInit(wormholeContract[0], wormholeContract[1], {gasLimit: 200000}), "Configuring wormhole");
     await Tx(
       sideTesseract.wormholeRegisterContract(recipientChain, bytes32Address(deployed[otherChain].MainTesseract)),
       "Configuring the main chain"

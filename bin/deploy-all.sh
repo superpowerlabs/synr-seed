@@ -15,17 +15,20 @@ MAIN_NETWORK=ethereum
 SIDE_NETWORK=bsc
 fi
 
+
 echo "Deploying pools to $MAIN_NETWORK and $SIDE_NETWORK..."
 
-#npx hardhat run scripts/deploy-mainpool.js --network $MAIN_NETWORK
-#npx hardhat run scripts/deploy-maint.js --network $MAIN_NETWORK
+npx hardhat run scripts/deploy-mainpool.js --network $MAIN_NETWORK
+npx hardhat run scripts/deploy-maint.js --network $MAIN_NETWORK
 
-npx hardhat run scripts/deploy-coupons.js --network $SIDE_NETWORK
-npx hardhat run scripts/deploy-seed.js --network $SIDE_NETWORK
+if [[ "$2" == "tokens" ]]; then
+  npx hardhat run scripts/deploy-coupons.js --network $SIDE_NETWORK
+  npx hardhat run scripts/deploy-seed.js --network $SIDE_NETWORK
+fi
 
 npx hardhat run scripts/deploy-seedpool.js --network $SIDE_NETWORK
 npx hardhat run scripts/deploy-sidet.js --network $SIDE_NETWORK
 
-#npx hardhat run scripts/deploy-wormhole2.js --network $MAIN_NETWORK
-#npx hardhat run scripts/deploy-wormhole2.js --network $SIDE_NETWORK
+npx hardhat run scripts/deploy-wormhole2.js --network $MAIN_NETWORK
+npx hardhat run scripts/deploy-wormhole2.js --network $SIDE_NETWORK
 
