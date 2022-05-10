@@ -22,6 +22,9 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
+  event PoolInitiated(uint16 minimumLockupTime, uint16 earlyUnstakePenalty);
+  event PoolPaused(bool isPaused);
+
   // users and deposits
   mapping(address => User) public users;
   Conf public conf;
@@ -95,6 +98,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
       earlyUnstakePenalty: earlyUnstakePenalty_,
       status: 1
     });
+    emit PoolInitiated(minimumLockupTime_, earlyUnstakePenalty_);
   }
 
   function version() external pure virtual override returns (uint256) {
@@ -103,6 +107,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
 
   function pausePool(bool paused) external onlyOwner {
     conf.status = paused ? 2 : 1;
+    emit PoolPaused(paused);
   }
 
   /**
@@ -363,6 +368,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
    */
   function withdrawPenalties(uint256 amount, address beneficiary) external override onlyOwner {
     require(penalties > 0 && amount <= penalties, "MainPool: amount not available");
+    require(beneficiary != address(0), "MainPool: beneficiary cannot be zero address");
     if (amount == 0) {
       amount = penalties;
     }
