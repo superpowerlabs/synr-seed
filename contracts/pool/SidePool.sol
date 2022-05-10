@@ -21,6 +21,27 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
 
+  event PoolInitiatedOrUpdated(
+    uint32 rewardsFactor,
+    uint32 decayInterval,
+    uint16 decayFactor,
+    uint32 swapFactor,
+    uint32 stakeFactor,
+    uint16 taxPoints,
+    uint16 burnRatio,
+    uint8 coolDownDays
+  );
+
+  event PriceRatioUpdated(uint32 priceRatio);
+  event NftConfUpdated(
+    uint32 synrEquivalent,
+    uint32 sPBoostFactor,
+    uint32 sPBoostLimit,
+    uint32 bPBoostFactor,
+    uint32 bPBoostLimit
+  );
+  event PoolPaused(bool isPaused);
+
   // users and deposits
   mapping(address => User) public users;
   Conf public conf;
@@ -83,6 +104,16 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
       coolDownDays: coolDownDays_,
       status: 1
     });
+    emit PoolInitiatedOrUpdated(
+      rewardsFactor_,
+      decayInterval_,
+      decayFactor_,
+      swapFactor_,
+      stakeFactor_,
+      taxPoints_,
+      burnRatio_,
+      coolDownDays_
+    );
   }
 
   // put to zero any parameter that remains the same
@@ -117,6 +148,16 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     if (coolDownDays_ > 0) {
       conf.coolDownDays = coolDownDays_;
     }
+    emit PoolInitiatedOrUpdated(
+      0,
+      decayInterval_,
+      decayFactor_,
+      swapFactor_,
+      stakeFactor_,
+      taxPoints_,
+      burnRatio_,
+      coolDownDays_
+    );
   }
 
   // put to zero any parameter that remains the same
@@ -126,6 +167,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     if (priceRatio_ > 0) {
       conf.priceRatio = priceRatio_;
     }
+    emit PriceRatioUpdated(priceRatio_);
   }
 
   // put to zero any parameter that remains the same
@@ -158,10 +200,12 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
     if (bPBoostLimit_ > 0) {
       nftConf.bPBoostLimit = bPBoostLimit_;
     }
+    emit NftConfUpdated(synrEquivalent_, sPBoostFactor_, sPBoostLimit_, bPBoostFactor_, bPBoostLimit_);
   }
 
   function pausePool(bool paused) external onlyOwner {
     conf.status = paused ? 2 : 1;
+    emit PoolPaused(paused);
   }
 
   function version() external pure virtual override returns (uint256) {
@@ -582,6 +626,7 @@ contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, Owna
   ) external virtual override onlyOwner {
     uint256 available = what == 1 ? penalties : taxes;
     require(amount <= available, "SidePool: amount not available");
+    require(beneficiary != address(0), "SidePool: beneficiary cannot be zero address");
     if (amount == 0) {
       amount = available;
     }
