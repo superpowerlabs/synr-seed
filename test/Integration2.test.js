@@ -149,7 +149,6 @@ describe("#Integration test", function () {
       amount3
     );
     expect(payload3).equal("500000000000000000000000001");
-
     await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("35000"));
 
     expect(
