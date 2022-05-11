@@ -11,6 +11,16 @@ contract TesseractV2Mock is Tesseract {
     return 2;
   }
 
+  function supportedBridgeById(uint256 id) external view virtual override returns (string memory) {
+    if (id == 1) {
+      return "Wormhole";
+    } else if (id == 2) {
+      return "SomeOther";
+    } else {
+      revert("Tesseract: unsupported bridge");
+    }
+  }
+
   function crossChainTransfer(
     uint8 bridgeType,
     uint256 payload,

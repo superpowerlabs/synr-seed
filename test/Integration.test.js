@@ -439,6 +439,9 @@ describe("#Integration test", function () {
   it("should start the process, upgrade the contract and complete the flow", async function () {
     const amount = ethers.utils.parseEther("10000");
 
+    expect(await mainTesseract.supportedBridgeById(1)).equal("Wormhole");
+    expect(mainTesseract.supportedBridgeById(2)).revertedWith("Tesseract: unsupported bridge");
+
     // stake SYNR in the Tesseract
     const payload = await serializeInput(
       SYNR_STAKE, // SYNR
@@ -478,6 +481,8 @@ describe("#Integration test", function () {
     mainTesseract = await upgrades.upgradeProxy(mainTesseract.address, TesseractV2);
 
     expect(await mainTesseract.version()).equal(2);
+    expect(await mainTesseract.supportedBridgeById(1)).equal("Wormhole");
+    expect(await mainTesseract.supportedBridgeById(2)).equal("SomeOther");
 
     let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.unlockedAt).equal(0);

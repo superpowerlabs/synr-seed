@@ -7,6 +7,8 @@ pragma solidity 0.8.11;
 interface ITesseract {
   function setBridge(uint16 bridgeType, address bridge_) external;
 
+  function supportedBridgeById(uint256 id) external view returns (string memory);
+
   function crossChainTransfer(
     uint8 bridgeType,
     uint256 payload,

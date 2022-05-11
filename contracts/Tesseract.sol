@@ -19,11 +19,7 @@ contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, Ownabl
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
-  event PayloadSent(address indexed to, uint16 indexed chainId, uint256 indexed payload);
-  event PayloadReceived(address indexed to, uint256 indexed payload);
-
   mapping(uint16 => address) public bridges;
-  mapping(uint16 => bool) public supportedBridges;
 
   // bridges[1] is WormholeBridge
 
@@ -40,6 +36,14 @@ contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, Ownabl
   function setBridge(uint16 bridgeType, address bridge_) external override onlyOwner {
     require(bridge_.isContract(), "Tesseract: bridge_ not a contract");
     bridges[bridgeType] = bridge_;
+  }
+
+  function supportedBridgeById(uint256 id) external view virtual override returns (string memory) {
+    if (id == 1) {
+      return "Wormhole";
+    } else {
+      revert("Tesseract: unsupported bridge");
+    }
   }
 
   function crossChainTransfer(
