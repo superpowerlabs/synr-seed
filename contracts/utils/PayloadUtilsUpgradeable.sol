@@ -4,15 +4,15 @@ pragma solidity 0.8.11;
 // Author: Francesco Sullo <francesco@sullo.co>
 // (c) 2022+ SuperPower Labs Inc.
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 import "../interfaces/IPayloadUtils.sol";
 import "./Constants.sol";
 
 import "hardhat/console.sol";
 
-contract PayloadUtils0 is IPayloadUtils, Constants {
-  using SafeMath for uint256;
+contract PayloadUtilsUpgradeable is IPayloadUtils, Constants {
+  using SafeMathUpgradeable for uint256;
 
   function version() external pure virtual override returns (uint256) {
     return 1;
@@ -23,15 +23,15 @@ contract PayloadUtils0 is IPayloadUtils, Constants {
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) public pure override returns (bool) {
-    require(tokenType < 100, "PayloadUtils: invalid token type");
+    require(tokenType < 100, "PayloadUtilsUpgradeable: invalid token type");
     if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      require(tokenAmountOrID < 889, "PayloadUtils: Not a Mobland SYNR Pass token ID");
+      require(tokenAmountOrID < 889, "PayloadUtilsUpgradeable: Not a Mobland SYNR Pass token ID");
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
-      require(tokenAmountOrID < 8001, "PayloadUtils: Not a Blueprint token ID");
+      require(tokenAmountOrID < 8001, "PayloadUtilsUpgradeable: Not a Blueprint token ID");
     } else {
-      require(tokenAmountOrID < 1e28, "PayloadUtils: tokenAmountOrID out of range");
+      require(tokenAmountOrID < 1e28, "PayloadUtilsUpgradeable: tokenAmountOrID out of range");
     }
-    require(lockupTime < 1e3, "PayloadUtils: lockedTime out of range");
+    require(lockupTime < 1e3, "PayloadUtilsUpgradeable: lockedTime out of range");
     return true;
   }
 

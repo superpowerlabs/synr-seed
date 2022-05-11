@@ -9,10 +9,10 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./pool/SeedPool.sol";
-import "./utils/PayloadUtils.sol";
+import "./utils/PayloadUtilsUpgradeable.sol";
 import "hardhat/console.sol";
 
-contract SeedFactory is PayloadUtils, WormholeTunnelUpgradeable {
+contract SeedFactory is PayloadUtilsUpgradeable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -47,7 +47,7 @@ contract SeedFactory is PayloadUtils, WormholeTunnelUpgradeable {
     ) = deserializeDeposit(payload);
     require(tokenType != S_SYNR_SWAP, "SeedFarm: sSYNR swaps cannot be bridged back");
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: blueprints' unstake does not require bridge");
-    pool.unstakeViaFactory(_msgSender(), tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    pool.unstakeViaBridge(_msgSender(), tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     return _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
   }
 
@@ -67,7 +67,7 @@ contract SeedFactory is PayloadUtils, WormholeTunnelUpgradeable {
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: no blueprint allowed here");
-    pool.stakeViaFactory(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    pool.stakeViaBridge(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
   uint256[50] private __gap;

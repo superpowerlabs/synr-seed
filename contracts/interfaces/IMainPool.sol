@@ -6,8 +6,11 @@ pragma solidity 0.8.11;
 
 interface IMainPool {
   event DepositSaved(address indexed user, uint16 indexed mainIndex);
-
   event DepositUnlocked(address indexed user, uint16 indexed mainIndex);
+  event PoolInitiated(uint16 minimumLockupTime, uint16 earlyUnstakePenalty);
+  event PoolPaused(bool isPaused);
+  event BridgeSet(address bridge);
+  event BridgeRemoved(address bridge);
 
   struct Deposit {
     // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass...
@@ -47,6 +50,8 @@ interface IMainPool {
     uint16 passAmount;
     uint96 synrAmount;
   }
+
+  function setBridge(address bridge_, bool active) external;
 
   function getDepositByIndex(address user, uint256 index) external view returns (Deposit memory);
 

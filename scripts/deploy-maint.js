@@ -24,7 +24,7 @@ async function main() {
   const MainPool = await ethers.getContractFactory("MainPool");
   const pool = await MainPool.attach(mainPoolAddress);
 
-  await deployUtils.Tx(pool.setFactory(tesseract.address, {gasLimit: 60000}), "Set MainTesseract as a MainPool factory");
+  await deployUtils.Tx(pool.setBridge(tesseract.address, {gasLimit: 60000}), "Set MainTesseract as a MainPool factory");
 }
 
 main()

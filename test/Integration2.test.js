@@ -84,7 +84,7 @@ describe("#Integration2 test", function () {
     await mainTesseract.deployed();
 
     await sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
-    await mainPool.setFactory(mainTesseract.address);
+    await mainPool.setBridge(mainTesseract.address);
 
     seed = await SeedToken.deploy();
     await seed.deployed();
@@ -103,7 +103,7 @@ describe("#Integration2 test", function () {
     sideTesseract = await SideTesseract.deploy(seedPool.address);
     await sideTesseract.deployed();
 
-    await seedPool.setFactory(sideTesseract.address);
+    await seedPool.setBridge(sideTesseract.address);
     await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address);
 
     wormhole = await WormholeMock.deploy();

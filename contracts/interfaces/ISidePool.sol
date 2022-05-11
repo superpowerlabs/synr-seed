@@ -11,6 +11,29 @@ interface ISidePool {
 
   event RewardsCollected(address indexed user, uint256 indexed rewards);
 
+  event PoolInitiatedOrUpdated(
+    uint32 rewardsFactor,
+    uint32 decayInterval,
+    uint16 decayFactor,
+    uint32 swapFactor,
+    uint32 stakeFactor,
+    uint16 taxPoints,
+    uint16 burnRatio,
+    uint8 coolDownDays
+  );
+
+  event PriceRatioUpdated(uint32 priceRatio);
+  event NftConfUpdated(
+    uint32 synrEquivalent,
+    uint32 sPBoostFactor,
+    uint32 sPBoostLimit,
+    uint32 bPBoostFactor,
+    uint32 bPBoostLimit
+  );
+  event PoolPaused(bool isPaused);
+  event BridgeSet(address bridge);
+  event BridgeRemoved(address bridge);
+
   struct Deposit {
     // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
     uint8 tokenType;

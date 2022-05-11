@@ -9,11 +9,11 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 
 import "./pool/MainPool.sol";
-import "./utils/PayloadUtils.sol";
+import "./utils/PayloadUtilsUpgradeable.sol";
 
 import "hardhat/console.sol";
 
-contract SynrBridge is PayloadUtils, WormholeTunnelUpgradeable {
+contract SynrBridge is PayloadUtilsUpgradeable, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 

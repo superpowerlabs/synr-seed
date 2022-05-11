@@ -10,37 +10,16 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "../token/TokenReceiver.sol";
-import "../utils/PayloadUtils.sol";
+import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
 import "../previously-deployed/SynCityCoupons.sol";
 
 import "hardhat/console.sol";
 
-contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
-
-  event PoolInitiatedOrUpdated(
-    uint32 rewardsFactor,
-    uint32 decayInterval,
-    uint16 decayFactor,
-    uint32 swapFactor,
-    uint32 stakeFactor,
-    uint16 taxPoints,
-    uint16 burnRatio,
-    uint8 coolDownDays
-  );
-
-  event PriceRatioUpdated(uint32 priceRatio);
-  event NftConfUpdated(
-    uint32 synrEquivalent,
-    uint32 sPBoostFactor,
-    uint32 sPBoostLimit,
-    uint32 bPBoostFactor,
-    uint32 bPBoostLimit
-  );
-  event PoolPaused(bool isPaused);
 
   // users and deposits
   mapping(address => User) public users;

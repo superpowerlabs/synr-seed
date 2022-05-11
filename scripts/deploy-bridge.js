@@ -26,7 +26,7 @@ async function main() {
   const MainPool = await ethers.getContractFactory("MainPool");
   const pool = await MainPool.attach(mainPoolAddress);
 
-  await deployUtils.Tx(pool.setFactory(synrBridge.address, {gasLimit: 60000}), "Set SynrBridge as a MainPool factory");
+  await deployUtils.Tx(pool.setBridge(synrBridge.address, {gasLimit: 60000}), "Set SynrBridge as a MainPool factory");
 }
 
 main()

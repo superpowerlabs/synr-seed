@@ -34,7 +34,7 @@ async function main() {
 
   const seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
   await seedFactory.deployed();
-  await deployUtils.Tx(seedPool.setFactory(seedFactory.address), "Set as factory for SeedPool");
+  await deployUtils.Tx(seedPool.setBridge(seedFactory.address), "Set as factory for SeedPool");
 
   console.log("SeedFactory deployed at", seedFactory.address);
   await deployUtils.saveDeployed(chainId, ["SeedFactory"], [seedFactory.address]);

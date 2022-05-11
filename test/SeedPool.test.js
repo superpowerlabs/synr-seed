@@ -219,7 +219,7 @@ describe("#SeedPool", function () {
     });
   });
 
-  describe("#stakeViaFactory", async function () {
+  describe("#stakeViaBridge", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
@@ -231,18 +231,18 @@ describe("#SeedPool", function () {
       const lockedFrom = await getTimestamp();
 
       expect(
-        pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
+        pool.connect(user0).stakeViaBridge(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
       ).revertedWith("SeedPool: forbidden");
 
-      await pool.setFactory(factory.address);
+      await pool.setBridge(factory.address);
 
       expect(
-        pool.connect(user0).stakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
+        pool.connect(user0).stakeViaBridge(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
       ).revertedWith("SeedPool: unsupported token");
     });
   });
 
-  describe("#unstakeViaFactory", async function () {
+  describe("#unstakeViaBridge", async function () {
     beforeEach(async function () {
       await initAndDeploy(true);
     });
@@ -256,7 +256,7 @@ describe("#SeedPool", function () {
         .withArgs(user0.address, 0);
       const lockedFrom = await getTimestamp();
       expect(
-        pool.connect(user0).unstakeViaFactory(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
+        pool.connect(user0).unstakeViaBridge(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
       ).revertedWith("SeedPool: forbidden");
     });
   });
