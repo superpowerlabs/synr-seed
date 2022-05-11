@@ -27,7 +27,7 @@ contract SeedPool is SidePool {
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
-  function setBridge(address bridge_, bool active) external onlyOwner {
+  function setBridge(address bridge_, bool active) external virtual onlyOwner {
     require(bridge_.isContract(), "SeedPool: bridge_ not a contract");
     if (active) {
       bridges[bridge_] = true;

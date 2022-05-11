@@ -30,11 +30,11 @@ describe("#SeedPool", function () {
   let user0sSeeds = "250000000";
   let user0sBlueprint = "25";
 
-  let deployer, user0, user1, user2, factory;
+  let deployer, user0, user1, user2, bridge;
 
   before(async function () {
     initEthers(ethers);
-    [deployer, user0, user1, user2, factory] = await ethers.getSigners();
+    [deployer, user0, user1, user2, bridge] = await ethers.getSigners();
     SeedToken = await ethers.getContractFactory("SeedToken");
     WeedToken = await ethers.getContractFactory("WeedToken");
     SeedPool = await ethers.getContractFactory("SeedPoolMock");
@@ -224,7 +224,7 @@ describe("#SeedPool", function () {
       await initAndDeploy(true);
     });
 
-    it("should not stake blueprint via factory", async function () {
+    it("should not stake blueprint via bridge", async function () {
       const amount = ethers.utils.parseEther("1500000");
       await blueprint.connect(user0).approve(pool.address, 4);
 
@@ -234,7 +234,7 @@ describe("#SeedPool", function () {
         pool.connect(user0).stakeViaBridge(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
       ).revertedWith("SeedPool: forbidden");
 
-      await pool.setBridge(factory.address);
+      await pool.setBridge(bridge.address, true);
 
       expect(
         pool.connect(user0).stakeViaBridge(user0.address, BLUEPRINT_STAKE_FOR_BOOST, lockedFrom, 0, 0, amount)
@@ -247,7 +247,7 @@ describe("#SeedPool", function () {
       await initAndDeploy(true);
     });
 
-    it("should unstake blueprint via factory", async function () {
+    it("should unstake blueprint via bridge", async function () {
       const amount = ethers.utils.parseEther("1500000");
       await blueprint.connect(user0).approve(pool.address, 4);
 
