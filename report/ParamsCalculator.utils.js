@@ -18,6 +18,7 @@ const {
   getTimestamp,
   increaseBlockTimestampBy,
   bytes32Address,
+  getEncodedVm,
   S_SYNR_SWAP,
   SYNR_STAKE,
   SYNR_PASS_STAKE_FOR_BOOST,
@@ -36,12 +37,13 @@ describe("#Params Calculator", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
-  let SynrBridge, synrBridge;
+  let Tesseract, mainTesseract, sideTesseract;
+  let MainWormholeBridge, mainBridge;
+  let SideWormholeBridge, sideBridge;
   let MainPool, mainPool;
-  let SynrBridgeV2;
+  let TesseractV2;
   let SeedToken, seed;
   let SynCityPasses, pass;
-  let SeedFactory, seedFactory;
   let SeedPool, seedPool;
   let SynCityCouponsSimplified, blueprint;
   let tokenId1, tokenId3;
@@ -54,15 +56,16 @@ describe("#Params Calculator", function () {
       await ethers.getSigners();
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
-    SynrBridge = await ethers.getContractFactory("SynrBridgeMock");
-    SynrBridgeV2 = await ethers.getContractFactory("SynrBridgeV2Mock");
-    SeedFactory = await ethers.getContractFactory("SeedFactoryMock");
+    Tesseract = await ethers.getContractFactory("Tesseract");
+    TesseractV2 = await ethers.getContractFactory("TesseractV2Mock");
+    MainWormholeBridge = await ethers.getContractFactory("MainWormholeBridgeMock");
+    SideWormholeBridge = await ethers.getContractFactory("SideWormholeBridgeMock");
     SeedPool = await ethers.getContractFactory("SeedPool");
     MainPool = await ethers.getContractFactory("MainPool");
     SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
     SynCityPasses = await ethers.getContractFactory("SynCityPassesMock");
-    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCouponsSimplified");
+    SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCoupons");
   });
 
   async function initAndDeploy(
@@ -109,11 +112,17 @@ describe("#Params Calculator", function () {
     mainPool = await upgrades.deployProxy(MainPool, [synr.address, sSynr.address, pass.address]);
     await mainPool.deployed();
 
-    synrBridge = await upgrades.deployProxy(SynrBridge, [mainPool.address]);
-    await synrBridge.deployed();
+    mainTesseract = await upgrades.deployProxy(Tesseract, []);
+    await mainTesseract.deployed();
+
+    mainBridge = await MainWormholeBridge.deploy(mainTesseract.address, mainPool.address);
+    await mainBridge.deployed();
 
     await sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
-    await mainPool.setBridge(synrBridge.address);
+    await mainPool.setBridge(mainBridge.address, true);
+    await mainPool.initPool(7, 4000);
+
+    await mainTesseract.setBridge(1, mainBridge.address);
 
     seed = await SeedToken.deploy();
     await seed.deployed();
@@ -130,24 +139,28 @@ describe("#Params Calculator", function () {
     await seedPool.initPool(1000, 7 * 24 * 3600, 9800, swapFactor, stakeFactor, 800, 3000, 14);
     await seedPool.updateNftConf(synrEquivalent, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit);
 
-    seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
-    await seedFactory.deployed();
+    sideTesseract = await upgrades.deployProxy(Tesseract);
+    await sideTesseract.deployed();
 
-    await seedPool.setBridge(seedFactory.address);
+    sideBridge = await SideWormholeBridge.deploy(sideTesseract.address, seedPool.address);
+    await sideBridge.deployed();
+
+    await seedPool.setBridge(sideBridge.address, true);
+    await sideTesseract.setBridge(1, sideBridge.address);
+
     await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address);
 
     wormhole = await WormholeMock.deploy();
-    await synrBridge.wormholeInit(2, wormhole.address);
+    await mainBridge.wormholeInit(2, wormhole.address);
     await wormhole.deployed();
 
-    await synrBridge.wormholeRegisterContract(4, bytes32Address(seedFactory.address));
-    await mainPool.initPool(7, 4000);
+    await mainBridge.wormholeRegisterContract(4, bytes32Address(sideBridge.address));
 
-    await seedFactory.wormholeInit(4, wormhole.address);
-    await seedFactory.wormholeRegisterContract(2, bytes32Address(synrBridge.address));
+    await sideBridge.wormholeInit(4, wormhole.address);
+    await sideBridge.wormholeRegisterContract(2, bytes32Address(mainBridge.address));
   }
 
-  it.only("should verify balance between stakeFactor and swapFactor", async function () {
+  it("should verify balance between stakeFactor and swapFactor", async function () {
     const params = [
       // [650, 50000],
       // [550, 45000],
@@ -189,22 +202,22 @@ describe("#Params Calculator", function () {
       // console.log(amount.toString());
 
       let payload = await serializeInput(SYNR_STAKE, 365, amount);
-      await synrBridge.connect(user1).wormholeTransfer(payload, 4, bytes32Address(user1.address), 1);
+      await mainTesseract.connect(user1).crossChainTransfer(1, payload, 4, 1);
 
       // approve sSYNR spend
       await sSynr.connect(user2).approve(mainPool.address, amount);
       let payload2 = await serializeInput(S_SYNR_SWAP, 0, amount);
-      await synrBridge.connect(user2).wormholeTransfer(payload2, 4, bytes32Address(user2.address), 1);
+      await mainTesseract.connect(user2).crossChainTransfer(1, payload2, 4, 1);
 
       let deposit = await mainPool.getDepositByIndex(user1.address, 0);
       let finalPayload = await fromDepositToTransferPayload(deposit);
 
-      await seedFactory.mockWormholeCompleteTransfer(user1.address, finalPayload);
+      await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user1.address, finalPayload));
 
       deposit = await mainPool.getDepositByIndex(user2.address, 0);
       finalPayload = await fromDepositToTransferPayload(deposit);
 
-      await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload);
+      await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user2.address, finalPayload));
 
       await increaseBlockTimestampBy(366 * 24 * 3600);
 
@@ -220,7 +233,7 @@ describe("#Params Calculator", function () {
       let stakedSeedFromSSYNR = ethers.utils.formatEther(seedDeposit2.tokenAmount.toString()).toString().split(".")[0];
       row.push(stakedSeedFromSSYNR);
 
-      await seedFactory.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
+      await sideTesseract.connect(user1).crossChainTransfer(1, seedPayload, 2, 1);
 
       let seedFromSYNR = ethers.utils
         .formatEther((await seed.balanceOf(user1.address)).toString())
@@ -258,7 +271,7 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it.skip("should verify balance between synrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+  it("should verify balance between synrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
     // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
 
     const params = [
@@ -304,26 +317,26 @@ describe("#Params Calculator", function () {
         await synr.connect(user1).approve(mainPool.address, amount);
         // console.log(amount.toString());
         let payload = await serializeInput(SYNR_STAKE, k, amount);
-        await synrBridge.connect(user1).wormholeTransfer(payload, 4, bytes32Address(user1.address), 1);
+        await mainTesseract.connect(user1).crossChainTransfer(1, payload, 4, 1);
         let deposit = await mainPool.getDepositByIndex(user1.address, 0);
         let finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user1.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user1.address, finalPayload));
 
         //approve and transfer SYNR for user2
         await synr.connect(user2).approve(mainPool.address, amount);
         payload = await serializeInput(SYNR_STAKE, k, amount);
-        await synrBridge.connect(user2).wormholeTransfer(payload, 4, bytes32Address(user2.address), 1);
+        await mainTesseract.connect(user2).crossChainTransfer(1, payload, 4, 1);
         deposit = await mainPool.getDepositByIndex(user2.address, 0);
         finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user2.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user2.address, finalPayload));
 
         //approve and transfer SYNR and boost for user3
         await synr.connect(user3).approve(mainPool.address, amount);
         payload = await serializeInput(SYNR_STAKE, k, amount);
-        await synrBridge.connect(user3).wormholeTransfer(payload, 4, bytes32Address(user3.address), 1);
+        await mainTesseract.connect(user3).crossChainTransfer(1, payload, 4, 1);
         deposit = await mainPool.getDepositByIndex(user3.address, 0);
         finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user3.address, finalPayload));
 
         let payloadPass = await serializeInput(
           SYNR_PASS_STAKE_FOR_BOOST,
@@ -331,15 +344,11 @@ describe("#Params Calculator", function () {
           tokenId3
         );
         await pass.connect(user3).approve(mainPool.address, tokenId3);
-        await synrBridge.connect(user3).wormholeTransfer(
-          payloadPass,
-          4, // BSC
-          bytes32Address(user3.address),
-          1
-        );
+        await mainTesseract.connect(user3).crossChainTransfer(1, payloadPass, 4, 1);
+
         deposit = await mainPool.getDepositByIndex(user3.address, 1);
         finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user3.address, finalPayload));
 
         let tokenAmount0 = (await mainPool.getDepositByIndex(user1.address, 0)).tokenAmountOrID;
 
@@ -350,15 +359,11 @@ describe("#Params Calculator", function () {
           tokenId1
         );
         await pass.connect(user1).approve(mainPool.address, tokenId1);
-        await synrBridge.connect(user1).wormholeTransfer(
-          payloadPass,
-          4, // BSC
-          bytes32Address(user1.address),
-          1
-        );
+        await mainTesseract.connect(user1).crossChainTransfer(1, payloadPass, 4, 1);
+
         deposit = await mainPool.getDepositByIndex(user1.address, 1);
         finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user1.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user1.address, finalPayload));
 
         let tokenAmount1 = (await mainPool.getDepositByIndex(user1.address, 0)).tokenAmountOrID;
 
@@ -375,7 +380,7 @@ describe("#Params Calculator", function () {
 
         let seedAfterStake = (await seedPool.getDepositByIndex(user2.address, 0)).tokenAmount;
 
-        await seedFactory.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
+        await sideTesseract.connect(user1).crossChainTransfer(1, seedPayload, 2, 1);
 
         let seedFromSYNR = ethers.utils
           .formatEther((await seed.balanceOf(user1.address)).toString())
@@ -385,8 +390,8 @@ describe("#Params Calculator", function () {
         // unstake for user2 (no boost)
         seedDeposit = await seedPool.getDepositByIndex(user2.address, 0);
         seedPayload = await fromDepositToTransferPayload(seedDeposit);
-        await seedFactory.connect(user2).wormholeTransfer(seedPayload, 2, bytes32Address(user2.address), 1);
-        await synrBridge.mockWormholeCompleteTransfer(user2.address, seedPayload);
+        await sideTesseract.connect(user2).crossChainTransfer(1, seedPayload, 2, 1);
+        await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(user2.address, seedPayload));
 
         let noBoostNoExtra = ethers.utils
           .formatEther((await seed.balanceOf(user2.address)).toString())
@@ -396,8 +401,8 @@ describe("#Params Calculator", function () {
         //unstake from user3
         seedDeposit = await seedPool.getDepositByIndex(user3.address, 0);
         seedPayload = await fromDepositToTransferPayload(seedDeposit);
-        await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
-        await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
+        await sideTesseract.connect(user3).crossChainTransfer(1, seedPayload, 2, 1);
+        await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(user3.address, seedPayload));
 
         let balanceAfterBoost = ethers.utils
           .formatEther((await seed.balanceOf(user3.address)).toString())
@@ -492,41 +497,41 @@ describe("#Params Calculator", function () {
         await synr.connect(user1).approve(mainPool.address, amount);
         // console.log(amount.toString());
         let payload = await serializeInput(SYNR_STAKE, k, amount);
-        await synrBridge.connect(user1).wormholeTransfer(payload, 4, bytes32Address(user1.address), 1);
+        await mainTesseract.connect(user1).crossChainTransfer(1, payload, 4, 1);
+
         let deposit = await mainPool.getDepositByIndex(user1.address, 0);
         let finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user1.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user1.address, finalPayload));
 
         //approve and transfer SYNR and boost for user3
         await synr.connect(user3).approve(mainPool.address, amount);
         payload = await serializeInput(SYNR_STAKE, k, amount);
-        await synrBridge.connect(user3).wormholeTransfer(payload, 4, bytes32Address(user3.address), 1);
+        await mainTesseract.connect(user3).crossChainTransfer(1, payload, 4, 1);
+
         deposit = await mainPool.getDepositByIndex(user3.address, 0);
         finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user3.address, finalPayload));
+
         let payloadPass = await serializeInput(
           SYNR_PASS_STAKE_FOR_BOOST,
           k, // 1 year
           tokenId3
         );
         await pass.connect(user3).approve(mainPool.address, tokenId3);
-        await synrBridge.connect(user3).wormholeTransfer(
-          payloadPass,
-          4, // BSC
-          bytes32Address(user3.address),
-          1
-        );
+        await mainTesseract.connect(user3).crossChainTransfer(1, payloadPass, 4, 1);
+
         deposit = await mainPool.getDepositByIndex(user3.address, 1);
         finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user3.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user3.address, finalPayload));
 
         //approve and transfer blueprint on bsc for user 4
         await synr.connect(user4).approve(mainPool.address, amount);
         payload = await serializeInput(SYNR_STAKE, k, amount);
-        await synrBridge.connect(user4).wormholeTransfer(payload, 4, bytes32Address(user4.address), 1);
+        await mainTesseract.connect(user4).crossChainTransfer(1, payload, 4, 1);
+
         deposit = await mainPool.getDepositByIndex(user4.address, 0);
         finalPayload = await fromDepositToTransferPayload(deposit);
-        await seedFactory.mockWormholeCompleteTransfer(user4.address, finalPayload);
+        await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user4.address, finalPayload));
 
         await blueprint.connect(user4).approve(seedPool.address, 5);
         await seedPool.connect(user4).stake(BLUEPRINT_STAKE_FOR_BOOST, k, 5);
@@ -537,7 +542,7 @@ describe("#Params Calculator", function () {
         let seedDeposit = await seedPool.getDepositByIndex(user1.address, 0);
         let seedPayload = await fromDepositToTransferPayload(seedDeposit);
 
-        await seedFactory.connect(user1).wormholeTransfer(seedPayload, 2, bytes32Address(user1.address), 1);
+        await sideTesseract.connect(user1).crossChainTransfer(1, seedPayload, 2, 1);
 
         let seedFromSYNR = ethers.utils
           .formatEther((await seed.balanceOf(user1.address)).toString())
@@ -547,14 +552,14 @@ describe("#Params Calculator", function () {
         //unstake from user3
         seedDeposit = await seedPool.getDepositByIndex(user3.address, 0);
         seedPayload = await fromDepositToTransferPayload(seedDeposit);
-        await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
-        await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
+        await sideTesseract.connect(user3).crossChainTransfer(1, seedPayload, 2, 1);
+        await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(user3.address, seedPayload));
 
         seedDeposit = await seedPool.getDepositByIndex(user3.address, 1);
         seedPayload = await fromDepositToTransferPayload(seedDeposit);
 
-        await seedFactory.connect(user3).wormholeTransfer(seedPayload, 2, bytes32Address(user3.address), 1);
-        await synrBridge.mockWormholeCompleteTransfer(user3.address, seedPayload);
+        await sideTesseract.connect(user3).crossChainTransfer(1, seedPayload, 2, 1);
+        await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(user3.address, seedPayload));
 
         let balanceAfterBoostPass = ethers.utils
           .formatEther((await seed.balanceOf(user3.address)).toString())
@@ -565,8 +570,8 @@ describe("#Params Calculator", function () {
         // unstake from user4
         seedDeposit = await seedPool.getDepositByIndex(user4.address, 0);
         seedPayload = await fromDepositToTransferPayload(seedDeposit);
-        await seedFactory.connect(user4).wormholeTransfer(seedPayload, 2, bytes32Address(user4.address), 1);
-        await synrBridge.mockWormholeCompleteTransfer(user4.address, seedPayload);
+        await sideTesseract.connect(user4).crossChainTransfer(1, seedPayload, 2, 1);
+        await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(user4.address, seedPayload));
 
         let balanceAfterBoostBlueprint = ethers.utils
           .formatEther((await seed.balanceOf(user4.address)).toString())
