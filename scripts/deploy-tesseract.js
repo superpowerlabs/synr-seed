@@ -20,6 +20,7 @@ async function main() {
   const chainId = await deployUtils.currentChainId();
 
   let pool;
+
   if (chainId < 6) {
     const sSynr = await deployUtils.attach("SyntheticSyndicateERC20");
     pool = await deployUtils.deployProxy(
