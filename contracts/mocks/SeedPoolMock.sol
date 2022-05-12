@@ -5,8 +5,11 @@ import "../pool/SeedPool.sol";
 import "hardhat/console.sol";
 
 contract SeedPoolMock is SeedPool {
-  function setFactory(address factory_) external override onlyOwner {
-    //    require(factory_.isContract(), "SeedPool: factory_ not a contract");
-    factory = factory_;
+  function setBridge(address bridge_, bool active) external virtual override onlyOwner {
+    if (active) {
+      bridges[bridge_] = true;
+    } else {
+      delete bridges[bridge_];
+    }
   }
 }

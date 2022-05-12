@@ -19,7 +19,7 @@ async function main() {
     // await deployUtils.attach("SideTesseract")
     await deployUtils.deploy("SideTesseract", deployed[chainId].SeedPool);
 
-  await deployUtils.Tx(seedPool.setFactory(tesseract.address), "Set SideTesseract as SeedPool factory");
+  await deployUtils.Tx(seedPool.setBridge(tesseract.address), "Set SideTesseract as SeedPool factory");
 }
 
 main()

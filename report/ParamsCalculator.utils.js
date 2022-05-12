@@ -113,7 +113,7 @@ describe("#Params Calculator", function () {
     await synrBridge.deployed();
 
     await sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
-    await mainPool.setFactory(synrBridge.address);
+    await mainPool.setBridge(synrBridge.address);
 
     seed = await SeedToken.deploy();
     await seed.deployed();
@@ -133,7 +133,7 @@ describe("#Params Calculator", function () {
     seedFactory = await upgrades.deployProxy(SeedFactory, [seedPool.address]);
     await seedFactory.deployed();
 
-    await seedPool.setFactory(seedFactory.address);
+    await seedPool.setBridge(seedFactory.address);
     await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address);
 
     wormhole = await WormholeMock.deploy();

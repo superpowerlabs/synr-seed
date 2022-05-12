@@ -11,10 +11,10 @@ contract SeedPool is SidePool {
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
 
-  address public factory;
+  mapping(address => bool) public bridges;
 
-  modifier onlyFactory() {
-    require(factory != address(0) && _msgSender() == factory, "SeedPool: forbidden");
+  modifier onlyBridge() {
+    require(bridges[_msgSender()], "SeedPool: forbidden");
     _;
   }
 
@@ -27,9 +27,13 @@ contract SeedPool is SidePool {
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
-  function setFactory(address factory_) external virtual onlyOwner {
-    require(factory_.isContract(), "SeedPool: factory_ not a contract");
-    factory = factory_;
+  function setBridge(address bridge_, bool active) external virtual onlyOwner {
+    require(bridge_.isContract(), "SeedPool: bridge_ not a contract");
+    if (active) {
+      bridges[bridge_] = true;
+    } else {
+      delete bridges[bridge_];
+    }
   }
 
   function stake(
@@ -55,26 +59,26 @@ contract SeedPool is SidePool {
     _unstakeDeposit(deposit);
   }
 
-  function stakeViaFactory(
+  function stakeViaBridge(
     address user_,
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
     uint256 mainIndex,
     uint256 tokenAmountOrID
-  ) external onlyFactory {
+  ) external onlyBridge {
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
     _stake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
-  function unstakeViaFactory(
+  function unstakeViaBridge(
     address user_,
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
     uint256 mainIndex,
     uint256 tokenAmountOrID
-  ) external onlyFactory {
+  ) external onlyBridge {
     _unstake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 

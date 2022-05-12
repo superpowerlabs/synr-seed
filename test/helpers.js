@@ -36,6 +36,19 @@ const Helpers = {
   bytes32Address(address) {
     return hexZeroPad(address, 32);
   },
+
+  getEncodedVm(addr, payload) {
+    addr = addr.substring(2);
+    payload = hexZeroPad(this.ethers.BigNumber.from(payload).toHexString(), 32).substring(2);
+    let vaaBytes = [];
+    for (let k = 0; k < addr.length; k += 2) {
+      vaaBytes.push(parseInt(addr.substring(k, k + 2), 16));
+    }
+    for (let k = 0; k < payload.length; k += 2) {
+      vaaBytes.push(parseInt(payload.substring(k, k + 2), 16));
+    }
+    return new Int32Array(vaaBytes);
+  },
 };
 
 Helpers.S_SYNR_SWAP = 1;

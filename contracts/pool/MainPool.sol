@@ -8,9 +8,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "../token/TokenReceiver.sol";
-import "../utils/PayloadUtils.sol";
+import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/IMainPool.sol";
 import "../previously-deployed/SyndicateERC20.sol";
 import "../previously-deployed/SyntheticSyndicateERC20.sol";
@@ -18,12 +19,9 @@ import "../previously-deployed/SynCityPasses.sol";
 
 import "hardhat/console.sol";
 
-contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
-
-  event PoolInitiated(uint16 minimumLockupTime, uint16 earlyUnstakePenalty);
-  event PoolPaused(bool isPaused);
 
   // users and deposits
   mapping(address => User) public users;
@@ -35,12 +33,12 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
 
   uint256 public penalties;
 
-  address public factory;
+  mapping(address => bool) public bridges;
 
   TVL public tvl;
 
-  modifier onlyFactory() {
-    require(factory != address(0) && _msgSender() == factory, "MainPool: forbidden");
+  modifier onlyBridge() {
+    require(bridges[_msgSender()], "MainPool: forbidden");
     _;
   }
 
@@ -84,9 +82,15 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
-  function setFactory(address factory_) external onlyOwner {
-    require(factory_.isContract(), "SeedPool: factory_ not a contract");
-    factory = factory_;
+  function setBridge(address bridge_, bool active) external override onlyOwner {
+    require(bridge_.isContract(), "SeedPool: bridge_ not a contract");
+    if (active) {
+      bridges[bridge_] = true;
+      emit BridgeSet(bridge_);
+    } else {
+      delete bridges[bridge_];
+      emit BridgeRemoved(bridge_);
+    }
   }
 
   function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external override onlyOwner {
@@ -399,7 +403,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     address user,
     uint256 payload,
     uint16 recipientChain
-  ) external virtual onlyFactory returns (uint256) {
+  ) external virtual onlyBridge returns (uint256) {
     return _stake(user, payload, recipientChain);
   }
 
@@ -410,7 +414,7 @@ contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, Owna
     uint256 lockedUntil,
     uint256 mainIndex,
     uint256 tokenAmountOrID
-  ) external virtual onlyFactory {
+  ) external virtual onlyBridge {
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
