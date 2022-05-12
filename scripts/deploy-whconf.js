@@ -4,6 +4,7 @@
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 require("dotenv").config();
+const {expect} = require("chai");
 const hre = require("hardhat");
 const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
@@ -19,43 +20,29 @@ async function main() {
   const {Tx} = deployUtils;
   const chainId = await deployUtils.currentChainId();
 
-  const network =
-    chainId === 1
-      ? "ethereum"
-      : chainId === 5
-      ? "goerli"
-      : chainId === 56
-      ? "bsc"
-      : chainId === 97
-      ? "bsc_testnet"
-      : "localhost";
-
-  if (network === "localhost") {
+  if (/1337$/.test(chainId.toString())) {
     console.error("Network not supported");
     process.exit(1);
   }
 
   const wormholeContract = wormholeConfig.byChainId[chainId];
-
+  let otherChain, recipientChain, bridge, otherContract;
   if (chainId < 6) {
-    const otherChain = chainId === 1 ? 56 : 97;
-    const SynrBridge = await ethers.getContractFactory("SynrBridge");
-    const synrBridge = SynrBridge.attach(deployed[chainId].SynrBridge);
-    await Tx(synrBridge.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
-    await Tx(
-      synrBridge.wormholeRegisterContract(4, bytes32Address(deployed[otherChain].SeedFactory)),
-      "Configuring the side chain"
-    );
+    otherChain = chainId === 1 ? 56 : chainId === 5 ? 97 : 80001;
+    recipientChain = chainId === 1 || chainId === 5 ? 4 : 5;
+    bridge = await deployUtils.attach("MainWormholeBridge");
+    otherContract = "SideWormholeBridge";
   } else {
-    const otherChain = chainId === 56 ? 1 : 5;
-    const SeedFactory = await ethers.getContractFactory("SeedFactory");
-    const seedFactory = SeedFactory.attach(deployed[chainId].SeedFactory);
-    await Tx(seedFactory.wormholeInit(wormholeContract[0], wormholeContract[1]), "Configuring wormhole");
-    await Tx(
-      seedFactory.wormholeRegisterContract(2, bytes32Address(deployed[otherChain].SynrBridge)),
-      "Configuring the main chain"
-    );
+    otherChain = chainId === 56 ? 1 : chainId === 97 ? 5 : 3;
+    recipientChain = chainId === 56 || chainId === 97 ? 2 : 10001;
+    bridge = await deployUtils.attach("SideWormholeBridge");
+    otherContract = "MainWormholeBridge";
   }
+  await Tx(bridge.wormholeInit(wormholeContract[0], wormholeContract[1], {gasLimit: 200000}), "Configuring wormhole");
+  await Tx(
+    bridge.wormholeRegisterContract(recipientChain, bytes32Address(deployed[otherChain][otherContract])),
+    "Configuring the side chain"
+  );
 }
 
 main()
