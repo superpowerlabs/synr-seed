@@ -37,7 +37,7 @@ const Helpers = {
     return hexZeroPad(address, 32);
   },
 
-  getEncodedVm(addr, payload) {
+  mockEncodedVm(addr, payload) {
     addr = addr.substring(2);
     payload = hexZeroPad(this.ethers.BigNumber.from(payload).toHexString(), 32).substring(2);
     let vaaBytes = [];
