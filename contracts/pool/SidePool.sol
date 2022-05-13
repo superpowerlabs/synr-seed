@@ -653,7 +653,10 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     uint256 tokenAmountOrID
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
-    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == BLUEPRINT_STAKE_FOR_SEEDS, "SidePool: not a blueprint");
+    require(
+      tokenType == BLUEPRINT_STAKE_FOR_BOOST || (tokenType == BLUEPRINT_STAKE_FOR_SEEDS && nftConf.bPSynrEquivalent != 0),
+      "SidePool: stake not allowed"
+    );
     _stake(_msgSender(), tokenType, block.timestamp, 0, type(uint16).max, tokenAmountOrID);
   }
 

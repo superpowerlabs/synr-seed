@@ -329,7 +329,7 @@ describe("#SidePool", function () {
       await blueprint.mint(user1.address, 5);
       await blueprint.connect(user1).approve(sidePool.address, id);
 
-      await assertThrowsMessage(sidePool.connect(user1).stake(SYNR_STAKE, 0, id), "SidePool: not a blueprint");
+      await assertThrowsMessage(sidePool.connect(user1).stake(SYNR_STAKE, 0, id), "SidePool: stake not allowed");
     });
   });
 
