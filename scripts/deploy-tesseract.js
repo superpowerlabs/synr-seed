@@ -38,7 +38,7 @@ async function main() {
       pool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10, {gasLimit: 90000}),
       "Init SeedPool"
     );
-    await deployUtils.Tx(pool.updateNftConf(100000, 1500, 500000, 150, 1000, {gasLimit: 60000}), "Init NFT Conf");
+    await deployUtils.Tx(pool.updateNftConf(100000, 1500, 500000, 3000, 150, 1000, {gasLimit: 60000}), "Init NFT Conf");
     await deployUtils.Tx(
       seed.grantRole(await seed.MINTER_ROLE(), pool.address),
       "Granting the pool minting role for SeedToken"

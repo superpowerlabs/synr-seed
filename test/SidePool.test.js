@@ -54,7 +54,7 @@ describe("#SidePool", function () {
 
     if (initPool) {
       await sidePool.initPool(1000, WEEK, 9800, 1000, 100, 800, 3000, 10);
-      await sidePool.updateNftConf(100000, 1500, 120000, 150, 1000);
+      await sidePool.updateNftConf(100000, 1500, 120000, 3000, 150, 1000);
     }
   }
 
@@ -164,14 +164,15 @@ describe("#SidePool", function () {
       await initAndDeploy(true);
     });
     it("should update the NFT conf", async function () {
-      await sidePool.updateNftConf(11, 22, 33, 44, 55);
+      await sidePool.updateNftConf(11, 22, 33, 41, 44, 55);
       const updated = await sidePool.nftConf();
       //console.log(updated)
       expect(updated[0]).equal(11);
       expect(updated[1]).equal(22);
       expect(updated[2]).equal(33);
-      expect(updated[3]).equal(44);
-      expect(updated[4]).equal(55);
+      expect(updated[3]).equal(41);
+      expect(updated[4]).equal(44);
+      expect(updated[5]).equal(55);
     });
   });
 

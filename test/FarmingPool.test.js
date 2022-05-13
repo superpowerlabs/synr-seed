@@ -60,6 +60,7 @@ describe("#FarmingPool", function () {
         0,
         0,
         0, // << those are ignored
+        3000,
         150,
         1000
       );

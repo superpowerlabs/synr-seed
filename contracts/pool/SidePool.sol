@@ -13,7 +13,7 @@ import "../token/TokenReceiver.sol";
 import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
-import "../interfaces/ISynCityCoupons.sol";
+import "../interfaces/IERC721Minimal.sol";
 
 import "hardhat/console.sol";
 
@@ -28,7 +28,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
 
   SideToken public rewardsToken;
   SideToken public stakedToken;
-  ISynCityCoupons public blueprint;
+  IERC721Minimal public blueprint;
 
   uint256 public penalties;
   uint256 public taxes;
@@ -52,7 +52,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     // in SeedFarm, stakedToken and rewardsToken are same token, SEED
     stakedToken = SideToken(stakedToken_);
     rewardsToken = SideToken(rewardsToken_);
-    blueprint = ISynCityCoupons(blueprint_);
+    blueprint = IERC721Minimal(blueprint_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
@@ -157,29 +157,33 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
 
   // put to zero any parameter that remains the same
   function updateNftConf(
-    uint32 synrEquivalent_,
+    uint32 sPSynrEquivalent_,
     uint32 sPBoostFactor_,
     uint32 sPBoostLimit_,
+    uint32 bPSynrEquivalent_,
     uint32 bPBoostFactor_,
     uint32 bPBoostLimit_
   ) external override onlyOwner {
     require(conf.status == 1, "SidePool: not active");
-    if (synrEquivalent_ > 0) {
-      nftConf.synrEquivalent = synrEquivalent_;
+    if (sPSynrEquivalent_ > 0) {
+      nftConf.sPSynrEquivalent = sPSynrEquivalent_;
     }
     if (sPBoostFactor_ > 0) {
       nftConf.sPBoostFactor = sPBoostFactor_;
     }
-    if (bPBoostFactor_ > 0) {
-      nftConf.bPBoostFactor = bPBoostFactor_;
-    }
     if (sPBoostLimit_ > 0) {
       nftConf.sPBoostLimit = sPBoostLimit_;
+    }
+    if (bPSynrEquivalent_ > 0) {
+      nftConf.bPSynrEquivalent = bPSynrEquivalent_;
+    }
+    if (bPBoostFactor_ > 0) {
+      nftConf.bPBoostFactor = bPBoostFactor_;
     }
     if (bPBoostLimit_ > 0) {
       nftConf.bPBoostLimit = bPBoostLimit_;
     }
-    emit NftConfUpdated(synrEquivalent_, sPBoostFactor_, sPBoostLimit_, bPBoostFactor_, bPBoostLimit_);
+    emit NftConfUpdated(sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_, bPSynrEquivalent_, bPBoostFactor_, bPBoostLimit_);
   }
 
   function pausePool(bool paused) external onlyOwner {
@@ -278,6 +282,16 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     return passAmount;
   }
 
+  function blueprintForBoostAmount(address user) public view override returns (uint256) {
+    uint256 blueprintAmount;
+    for (uint256 i = 0; i < users[user].deposits.length; i++) {
+      if (users[user].deposits[i].tokenType == BLUEPRINT_STAKE_FOR_BOOST && users[user].deposits[i].unlockedAt == 0) {
+        blueprintAmount++;
+      }
+    }
+    return blueprintAmount;
+  }
+
   /**
    * @param user_ address of the owner of the token being boosted
    * @return the amount being boost
@@ -292,6 +306,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     uint256 boostedAmount = baseAmount;
     uint256 limit;
     uint256 passAmount = passForBoostAmount(user_);
+    uint256 blueprintAmount = blueprintForBoostAmount(user_);
     if (passAmount > 0) {
       // if a SYNR Pass can boost 15000 SYNR (i.e., nftConf.sPBoostLimit)
       // there is a potential limit that depends on how many pass you staked
@@ -302,8 +317,8 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
       boostedAmount += baseAmount.mul(nftConf.sPBoostFactor).div(10000);
       baseAmount = uint256(user.tokenAmount).sub(baseAmount);
     }
-    if (user.blueprintsAmount > 0) {
-      limit = uint256(user.blueprintsAmount).mul(nftConf.bPBoostLimit).mul(1e18);
+    if (blueprintAmount > 0) {
+      limit = uint256(blueprintAmount).mul(nftConf.bPBoostLimit).mul(1e18);
       if (limit < boostedAmount) {
         baseAmount = limit;
       }
@@ -373,25 +388,27 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     return users[user].deposits.length;
   }
 
-  function _updateTvl(
-    uint256 tokenType,
-    uint256 tokenAmount,
-    bool increase
-  ) internal {
-    if (increase) {
-      if (
-        tokenType == SEED_SWAP || tokenType == S_SYNR_SWAP || tokenType == SYNR_STAKE || tokenType == SYNR_PASS_STAKE_FOR_SEEDS
-      ) {
-        tvl.stakedTokenAmount += uint96(tokenAmount);
-      } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
-        tvl.blueprintAmount++;
-      }
-    } else {
-      if (tokenType == SEED_SWAP) {
-        tvl.stakedTokenAmount = uint96(uint256(tvl.stakedTokenAmount).sub(tokenAmount));
-      } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
-        tvl.blueprintAmount--;
-      }
+  function _increaseTvl(uint256 tokenType, uint256 tokenAmount) internal {
+    if (
+      tokenType == SEED_SWAP ||
+      tokenType == S_SYNR_SWAP ||
+      tokenType == SYNR_STAKE ||
+      tokenType == SYNR_PASS_STAKE_FOR_SEEDS ||
+      tokenType == BLUEPRINT_STAKE_FOR_SEEDS
+    ) {
+      tvl.stakedTokenAmount += uint96(tokenAmount);
+    }
+    if (tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+      tvl.blueprintAmount++;
+    }
+  }
+
+  function _decreaseTvl(Deposit memory deposit) internal {
+    if (deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST || deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+      tvl.blueprintAmount--;
+    }
+    if (deposit.tokenType != BLUEPRINT_STAKE_FOR_BOOST) {
+      tvl.stakedTokenAmount = uint96(uint256(tvl.stakedTokenAmount).sub(deposit.tokenAmount));
     }
   }
 
@@ -427,12 +444,17 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
       users[user_].passAmount++;
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      tokenAmount = uint256(nftConf.synrEquivalent).mul(1e18).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
+      users[user_].passAmount++;
+      tokenAmount = uint256(nftConf.sPSynrEquivalent).mul(1e18).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
       stakedToken.mint(address(this), tokenAmount);
-    } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
-      users[user_].blueprintsAmount++;
+    } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+      users[user_].blueprintAmount++;
       // SidePool must be approve to spend blueprints
       blueprint.safeTransferFrom(user_, address(this), tokenAmountOrID);
+      if (tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+        tokenAmount = uint256(nftConf.bPSynrEquivalent).mul(1e18).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
+        stakedToken.mint(address(this), tokenAmount);
+      }
     } else if (tokenType == SEED_SWAP) {
       tokenAmount = tokenAmountOrID;
       // SidePool must be approve to spend SEED
@@ -443,7 +465,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
       revert("SidePool: invalid tokenType");
     }
     users[user_].tokenAmount = uint128(uint256(users[user_].tokenAmount).add(tokenAmount));
-    _updateTvl(tokenType, tokenAmount, true);
+    _increaseTvl(tokenType, tokenAmount);
     // add deposit
     if (tokenType == S_SYNR_SWAP || tokenType == SEED_SWAP) {
       lockedUntil = lockedFrom + uint256(conf.coolDownDays).mul(1 days);
@@ -549,8 +571,8 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal virtual {
-    if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      require(lockedUntil < block.timestamp, "SidePool: SYNR Pass used as SYNR cannot be early unstaked");
+    if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+      require(lockedUntil < block.timestamp, "SidePool: SYNR Pass and Blueprint used to get SYNR cannot be early unstaked");
     }
     _collectRewards(user_);
     (uint256 index, bool exists) = getDepositIndexByMainIndex(user_, mainIndex);
@@ -579,15 +601,19 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
       stakedToken.transfer(user_, unstakedAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       stakedToken.transfer(user_, deposit.tokenAmount);
+      users[user_].passAmount--;
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
       users[user_].passAmount--;
-    } else if (deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST) {
-      users[user_].blueprintsAmount--;
+    } else if (deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST || deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+      users[user_].blueprintAmount--;
       blueprint.safeTransferFrom(address(this), user_, uint256(deposit.tokenAmountOrID));
+      if (deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+        stakedToken.transfer(user_, deposit.tokenAmount);
+      }
     } else {
       revert("SidePool: invalid tokenType");
     }
-    _updateTvl(tokenType, tokenAmountOrID, false);
+    _decreaseTvl(deposit);
     deposit.unlockedAt = uint32(block.timestamp);
     emit DepositUnlocked(user_, uint16(index));
   }
@@ -627,7 +653,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     uint256 tokenAmountOrID
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
-    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SidePool: not a blueprint");
+    require(tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == BLUEPRINT_STAKE_FOR_SEEDS, "SidePool: not a blueprint");
     _stake(_msgSender(), tokenType, block.timestamp, 0, type(uint16).max, tokenAmountOrID);
   }
 
@@ -646,7 +672,10 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
   // Must be overridden in FarmingPool
   function unstake(uint256 depositIndex) external virtual override {
     Deposit storage deposit = users[_msgSender()].deposits[depositIndex];
-    require(deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SidePool: not a blueprint");
+    require(
+      deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST || deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS,
+      "SidePool: not a blueprint"
+    );
     _unstakeDeposit(deposit);
   }
 

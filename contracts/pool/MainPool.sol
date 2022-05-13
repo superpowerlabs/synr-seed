@@ -15,7 +15,7 @@ import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/IMainPool.sol";
 import "../interfaces/ISyndicateERC20.sol";
 import "../interfaces/ISyntheticSyndicateERC20.sol";
-import "../interfaces/ISynCityPasses.sol";
+import "../interfaces/IERC721Minimal.sol";
 
 import "hardhat/console.sol";
 
@@ -29,7 +29,7 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
 
   ISyndicateERC20 public synr;
   ISyntheticSyndicateERC20 public sSynr;
-  ISynCityPasses public pass;
+  IERC721Minimal public pass;
 
   uint256 public penalties;
 
@@ -57,7 +57,7 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     require(pass_.isContract(), "pass_ not a contract");
     synr = ISyndicateERC20(synr_);
     sSynr = ISyntheticSyndicateERC20(sSynr_);
-    pass = ISynCityPasses(pass_);
+    pass = IERC721Minimal(pass_);
   }
 
   function _updateTvl(
@@ -201,6 +201,7 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     uint256 tokenAmountOrID,
     uint16 otherChain
   ) internal returns (uint256) {
+    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "MainPool: invalid tokenType");
     validateInput(tokenType, lockupTime, tokenAmountOrID);
     if (tokenType == S_SYNR_SWAP || tokenType == SYNR_STAKE) {
       require(tokenAmountOrID >= 1e18, "MainPool: must stake at least one unity");
@@ -220,7 +221,6 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
       // MainPool must be approved to spend the SYNR
       synr.safeTransferFrom(user, address(this), tokenAmountOrID, "");
     } else {
-      // tokenType 2 and 3
       // SYNR Pass
       // MainPool must be approved to make the transfer
       pass.safeTransferFrom(user, address(this), tokenAmountOrID);

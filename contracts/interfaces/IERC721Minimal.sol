@@ -4,7 +4,7 @@ pragma solidity 0.8.11;
 // Author: Francesco Sullo <francesco@superpower.io>
 // Superpower Labs / Syn City
 
-interface ISynCityCoupons {
+interface IERC721Minimal {
   function safeTransferFrom(
     address to,
     address receiver,

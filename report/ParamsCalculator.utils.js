@@ -72,9 +72,10 @@ describe("#Params Calculator", function () {
     //[100, 8300] best choice
     stakeFactor = 100,
     swapFactor = 8300,
-    synrEquivalent = 100000,
+    sPSynrEquivalent = 100000,
     sPBoostFactor = 1500,
     sPBoostLimit = 500000,
+    bPSynrEquivalent = 3000,
     bPBoostFactor = 75,
     bPBoostLimit = 25000,
     ratioFactor = 1000
@@ -137,7 +138,7 @@ describe("#Params Calculator", function () {
     seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await seedPool.deployed();
     await seedPool.initPool(1000, 7 * 24 * 3600, 9800, swapFactor, stakeFactor, 800, 3000, 14);
-    await seedPool.updateNftConf(synrEquivalent, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit);
+    await seedPool.updateNftConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit);
 
     sideTesseract = await upgrades.deployProxy(Tesseract);
     await sideTesseract.deployed();
@@ -271,12 +272,12 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it("should verify balance between synrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+  it("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
     // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
 
     const params = [
       [
-        100000, // synrEquivalent
+        100000, // sPSynrEquivalent
         100000, //sPBoostFactor
         1000000, //sPBoostLimit
       ],
@@ -288,7 +289,7 @@ describe("#Params Calculator", function () {
       [
         "stakedAmount",
         "lockupTime",
-        "synrEquivalent",
+        "sPSynrEquivalent",
         "sPBoostFactor",
         "sPBoostLimit",
         "SYNR amount",
@@ -307,11 +308,11 @@ describe("#Params Calculator", function () {
       }
 
       for (let i = 0; i < params.length; i++) {
-        let [synrEquivalent, sPBoostFactor, sPBoostLimit] = params[i];
+        let [sPSynrEquivalent, sPBoostFactor, sPBoostLimit] = params[i];
         const tokenAmount = sPBoostLimit.toString();
         const amount = ethers.utils.parseEther(tokenAmount);
-        const row = [tokenAmount, k, synrEquivalent, sPBoostFactor, sPBoostLimit, tokenAmount];
-        await initAndDeploy(100, 8300, synrEquivalent, sPBoostFactor, sPBoostLimit);
+        const row = [tokenAmount, k, sPSynrEquivalent, sPBoostFactor, sPBoostLimit, tokenAmount];
+        await initAndDeploy(100, 8300, sPSynrEquivalent, sPBoostFactor, sPBoostLimit);
 
         // approve SYNR spend
         await synr.connect(user1).approve(mainPool.address, amount);
@@ -491,7 +492,7 @@ describe("#Params Calculator", function () {
         const amount = ethers.utils.parseEther(tokenAmount);
         let [sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit] = params[i];
         const row = [tokenAmount, k, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit];
-        await initAndDeploy(100, 8300, 100000, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit);
+        await initAndDeploy(100, 8300, 100000, sPBoostFactor, sPBoostLimit, undefined, bPBoostFactor, bPBoostLimit);
 
         // approve SYNR spend no boost
         await synr.connect(user1).approve(mainPool.address, amount);

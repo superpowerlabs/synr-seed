@@ -109,7 +109,7 @@ describe("#Integration test", function () {
     seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await seedPool.deployed();
     await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10);
-    await seedPool.updateNftConf(100000, 1500, 500000, 150, 1000);
+    await seedPool.updateNftConf(100000, 1500, 500000, 3000, 150, 1000);
 
     // process.exit()
 
