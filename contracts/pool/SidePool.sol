@@ -36,6 +36,11 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
 
   TVL public tvl;
 
+  modifier onlyOwnerOrOracle() {
+    require(_msgSender() == owner() || (oracle != address(0) && _msgSender() == oracle), "SidePool: not owner or oracle");
+    _;
+  }
+
   //  /// @custom:oz-upgrades-unsafe-allow constructor
   //  constructor() initializer {}
 
@@ -104,7 +109,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     uint16 taxPoints_,
     uint16 burnRatio_,
     uint8 coolDownDays_
-  ) external override onlyOwner {
+  ) external override onlyOwnerOrOracle {
     require(conf.status == 1, "SidePool: not active");
     if (decayInterval_ > 0) {
       conf.decayInterval = decayInterval_;
@@ -140,9 +145,8 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
   }
 
   // put to zero any parameter that remains the same
-  function updatePriceRatio(uint32 priceRatio_) external override {
+  function updatePriceRatio(uint32 priceRatio_) external override onlyOwnerOrOracle {
     require(conf.status == 1, "SidePool: not active");
-    require(oracle != address(0) && _msgSender() == oracle, "SidePool: not the oracle");
     if (priceRatio_ > 0) {
       conf.priceRatio = priceRatio_;
     }
