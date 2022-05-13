@@ -3,7 +3,7 @@ pragma solidity 0.8.11;
 
 import "./utils/AddressUtils.sol";
 import "./utils/AccessControl.sol";
-import "./interfaces/IERC20Receiver.sol";
+import "../../interfaces/IERC20Receiver.sol";
 
 /**
  * @title Syndicate (SYNR) ERC20 token

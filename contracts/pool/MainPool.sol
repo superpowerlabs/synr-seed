@@ -13,9 +13,9 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "../token/TokenReceiver.sol";
 import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/IMainPool.sol";
-import "../mocks/previously-deployed/SyndicateERC20.sol";
-import "../mocks/previously-deployed/SyntheticSyndicateERC20.sol";
-import "../mocks/previously-deployed/SynCityPasses.sol";
+import "../interfaces/ISyndicateERC20.sol";
+import "../interfaces/ISyntheticSyndicateERC20.sol";
+import "../interfaces/ISynCityPasses.sol";
 
 import "hardhat/console.sol";
 
@@ -27,9 +27,9 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
   mapping(address => User) public users;
   Conf public conf;
 
-  SyndicateERC20 public synr;
-  SyntheticSyndicateERC20 public sSynr;
-  SynCityPasses public pass;
+  ISyndicateERC20 public synr;
+  ISyntheticSyndicateERC20 public sSynr;
+  ISynCityPasses public pass;
 
   uint256 public penalties;
 
@@ -55,9 +55,9 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     require(synr_.isContract(), "synr_ not a contract");
     require(sSynr_.isContract(), "sSynr_ not a contract");
     require(pass_.isContract(), "pass_ not a contract");
-    synr = SyndicateERC20(synr_);
-    sSynr = SyntheticSyndicateERC20(sSynr_);
-    pass = SynCityPasses(pass_);
+    synr = ISyndicateERC20(synr_);
+    sSynr = ISyntheticSyndicateERC20(sSynr_);
+    pass = ISynCityPasses(pass_);
   }
 
   function _updateTvl(

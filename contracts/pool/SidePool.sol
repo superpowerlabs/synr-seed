@@ -13,7 +13,7 @@ import "../token/TokenReceiver.sol";
 import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
-import "../mocks/previously-deployed/SynCityCoupons.sol";
+import "../interfaces/ISynCityCoupons.sol";
 
 import "hardhat/console.sol";
 
@@ -28,7 +28,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
 
   SideToken public rewardsToken;
   SideToken public stakedToken;
-  SynCityCoupons public blueprint;
+  ISynCityCoupons public blueprint;
 
   uint256 public penalties;
   uint256 public taxes;
@@ -52,7 +52,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     // in SeedFarm, stakedToken and rewardsToken are same token, SEED
     stakedToken = SideToken(stakedToken_);
     rewardsToken = SideToken(rewardsToken_);
-    blueprint = SynCityCoupons(blueprint_);
+    blueprint = ISynCityCoupons(blueprint_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
