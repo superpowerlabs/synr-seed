@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.11;
 
-import "../previously-deployed/SynCityPasses.sol";
+import "../mocks/previously-deployed/SynCityPasses.sol";
 
 //import "hardhat/console.sol";
 

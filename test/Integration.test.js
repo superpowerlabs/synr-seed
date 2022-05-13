@@ -8,7 +8,7 @@ const {
   getTimestamp,
   increaseBlockTimestampBy,
   bytes32Address,
-  getEncodedVm,
+  mockEncodedVm,
   S_SYNR_SWAP,
   SYNR_STAKE,
   SYNR_PASS_STAKE_FOR_BOOST,
@@ -110,6 +110,8 @@ describe("#Integration test", function () {
     await seedPool.deployed();
     await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10);
     await seedPool.updateNftConf(100000, 1500, 500000, 150, 1000);
+
+    // process.exit()
 
     sideTesseract = await upgrades.deployProxy(Tesseract);
     await sideTesseract.deployed();
@@ -234,7 +236,7 @@ describe("#Integration test", function () {
 
     expect((await mainPool.users(fundOwner.address)).synrAmount).equal("30000000000000000000000");
 
-    expect(await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayload)))
+    expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload)))
       .emit(sideTesseract, "DepositSaved")
       .withArgs(fundOwner.address, 0);
 
@@ -245,7 +247,7 @@ describe("#Integration test", function () {
 
     expect(await seed.balanceOf(fundOwner.address)).equal(0);
 
-    expect(await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayload2)))
+    expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload2)))
       .emit(sideTesseract, "DepositSaved")
       .withArgs(fundOwner.address, 1);
 
@@ -259,7 +261,7 @@ describe("#Integration test", function () {
 
     expect(await seed.allowance(fundOwner.address, operator.address)).equal(ethers.utils.parseEther("10"));
 
-    expect(await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(user2.address, finalPayload3)))
+    expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(user2.address, finalPayload3)))
       .emit(sideTesseract, "DepositSaved")
       .withArgs(user2.address, 0);
 
@@ -315,7 +317,7 @@ describe("#Integration test", function () {
     let deposit4 = await mainPool.getDepositByIndex(fundOwner.address, 2);
     const finalPayload4 = await fromDepositToTransferPayload(deposit4);
 
-    expect(await sideTesseract.completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayload4)))
+    expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload4)))
       .emit(sideTesseract, "DepositSaved")
       .withArgs(fundOwner.address, 2);
 
@@ -357,7 +359,7 @@ describe("#Integration test", function () {
     expect(seedDeposit.unlockedAt).equal(ts + 1);
     const synrBalanceBefore = await synr.balanceOf(fundOwner.address);
 
-    expect(await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, seedPayload)))
+    expect(await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, seedPayload)))
       .emit(mainTesseract, "DepositUnlocked")
       .withArgs(fundOwner.address, 0);
 
@@ -405,7 +407,7 @@ describe("#Integration test", function () {
 
     expect(await synr.balanceOf(mainPool.address)).equal(amount);
 
-    await sideTesseract.connect(user1).completeCrossChainTransfer(1, getEncodedVm(user1.address, finalPayload));
+    await sideTesseract.connect(user1).completeCrossChainTransfer(1, mockEncodedVm(user1.address, finalPayload));
 
     await increaseBlockTimestampBy(150 * 24 * 3600);
 
@@ -424,7 +426,7 @@ describe("#Integration test", function () {
     const tax = await mainPool.calculatePenaltyForEarlyUnstake(ts, await mainPool.getDepositByIndex(user1.address, 0));
     expect(amount.sub(tax)).equal("8000000000000000000000");
 
-    await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(user1.address, seedPayload));
+    await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(user1.address, seedPayload));
 
     const synrBalanceAfter = await synr.balanceOf(user1.address);
     expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount.sub(tax));
@@ -470,7 +472,7 @@ describe("#Integration test", function () {
 
     expect(await synr.balanceOf(mainPool.address)).equal(amount);
 
-    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayload));
+    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload));
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
@@ -497,7 +499,7 @@ describe("#Integration test", function () {
 
     const synrBalanceBefore = await synr.balanceOf(fundOwner.address);
 
-    await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, seedPayload));
+    await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, seedPayload));
     const synrBalanceAfter = await synr.balanceOf(fundOwner.address);
     expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount);
   });
@@ -520,7 +522,7 @@ describe("#Integration test", function () {
     );
     let depositSYNR = await mainPool.getDepositByIndex(fundOwner.address, 0);
     const finalPayloadSynr = await fromDepositToTransferPayload(depositSYNR);
-    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayloadSynr));
+    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayloadSynr));
 
     //STAKE PASS
     let boostWeightBefore = Number((await seedPool.boostWeight(fundOwner.address)).toString());
@@ -546,7 +548,7 @@ describe("#Integration test", function () {
     expect(deposit.otherChain).equal(4);
 
     const finalPayload = await fromDepositToTransferPayload(deposit);
-    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayload));
+    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload));
 
     boostWeightAfter = Number((await seedPool.boostWeight(fundOwner.address)).toString());
     // console.log(boostWeightAfter);
@@ -568,7 +570,7 @@ describe("#Integration test", function () {
 
     const passBefore = await pass.balanceOf(fundOwner.address);
 
-    await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, seedPayload));
+    await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, seedPayload));
 
     const passAfter = await pass.balanceOf(fundOwner.address);
 
@@ -598,7 +600,7 @@ describe("#Integration test", function () {
     expect(deposit.otherChain).equal(4);
 
     const finalPayload = await fromDepositToTransferPayload(deposit);
-    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayload));
+    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload));
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
@@ -615,7 +617,7 @@ describe("#Integration test", function () {
 
     const passBefore = await pass.balanceOf(fundOwner.address);
 
-    await mainTesseract.completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, seedPayload));
+    await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, seedPayload));
     const passAfter = await pass.balanceOf(fundOwner.address);
     expect(passAfter.sub(passBefore)).equal(1);
     expect(seedDeposit.tokenType).equal(4);
@@ -640,7 +642,7 @@ describe("#Integration test", function () {
     );
     let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
     const finalPayload = await fromDepositToTransferPayload(deposit);
-    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayload));
+    await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload));
     //console.log(await seedPool.getDepositByIndex(fundOwner.address, 0));
     //stake blueprints for boost
 
@@ -675,7 +677,7 @@ describe("#Integration test", function () {
       );
       let deposit = await mainPool.getDepositByIndex(fundOwner.address, x);
       const finalPayload = await fromDepositToTransferPayload(deposit);
-      await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, getEncodedVm(fundOwner.address, finalPayload));
+      await sideTesseract.connect(fundOwner).completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload));
     }
   });
 });

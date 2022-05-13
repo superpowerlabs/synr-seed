@@ -13,7 +13,7 @@ import "../token/TokenReceiver.sol";
 import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
-import "../previously-deployed/SynCityCoupons.sol";
+import "../mocks/previously-deployed/SynCityCoupons.sol";
 
 import "hardhat/console.sol";
 

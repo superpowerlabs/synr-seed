@@ -13,9 +13,9 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "../token/TokenReceiver.sol";
 import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/IMainPool.sol";
-import "../previously-deployed/SyndicateERC20.sol";
-import "../previously-deployed/SyntheticSyndicateERC20.sol";
-import "../previously-deployed/SynCityPasses.sol";
+import "../mocks/previously-deployed/SyndicateERC20.sol";
+import "../mocks/previously-deployed/SyntheticSyndicateERC20.sol";
+import "../mocks/previously-deployed/SynCityPasses.sol";
 
 import "hardhat/console.sol";
 
