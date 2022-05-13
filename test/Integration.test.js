@@ -253,11 +253,9 @@ describe("#Integration test", function () {
 
     expect(await seed.balanceOf(fundOwner.address)).equal("2917300862506341958");
 
-    await seed.connect(fundOwner).approve(operator.address, ethers.utils.parseEther("10"));
-    // seed token is locked
-    expect(await seed.allowance(fundOwner.address, operator.address)).equal(0);
-
     await seed.unpauseAllowance();
+
+    await seed.connect(fundOwner).approve(operator.address, ethers.utils.parseEther("10"));
 
     expect(await seed.allowance(fundOwner.address, operator.address)).equal(ethers.utils.parseEther("10"));
 
