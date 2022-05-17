@@ -4,7 +4,13 @@ const {Contract} = require("@ethersproject/contracts");
 const abi = require("ethereumjs-abi");
 const {deployProxyImpl} = require("@openzeppelin/hardhat-upgrades/dist/utils");
 const requireOrMock = require("require-or-mock");
-const deployedJson = requireOrMock("export/deployed.json");
+let deployedJson;
+
+if (process.env.NODE_ENV === "test") {
+  deployedJson = requireOrMock("export/deployedForTest.json");
+} else {
+  deployedJson = requireOrMock("export/deployed.json");
+}
 
 const oZChainName = {
   1: "mainnet",
@@ -150,7 +156,10 @@ class DeployUtils {
     if (names.length !== addresses.length) {
       throw new Error("Inconsistent arrays");
     }
-    const deployedJson = path.resolve(__dirname, "../../export/deployed.json");
+
+    const deployedFilename = process.env.NODE_ENV === "test" ? "deployedForTest" : "deployed";
+
+    const deployedJson = path.resolve(__dirname, `../../export/${deployedFilename}.json`);
     if (!(await fs.pathExists(deployedJson))) {
       await fs.ensureDir(path.dirname(deployedJson));
       await fs.writeFile(deployedJson, "{}");
