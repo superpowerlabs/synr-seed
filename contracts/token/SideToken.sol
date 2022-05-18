@@ -27,10 +27,18 @@ contract SideToken is ERC20, ERC20Burnable, AccessControl {
     allowancePaused = false;
   }
 
-  function allowance(address owner, address spender) public view override returns (uint256) {
-    if (allowancePaused) {
-      return 0;
-    }
-    return super.allowance(owner, spender);
+  function approve(address spender, uint256 amount) public virtual override returns (bool) {
+    require(!allowancePaused, "SideToken: allowance not active");
+    return super.approve(spender, amount);
+  }
+
+  function increaseAllowance(address spender, uint256 addedValue) public virtual override returns (bool) {
+    require(!allowancePaused, "SideToken: allowance not active");
+    return super.increaseAllowance(spender, addedValue);
+  }
+
+  function decreaseAllowance(address spender, uint256 subtractedValue) public virtual override returns (bool) {
+    require(!allowancePaused, "SideToken: allowance not active");
+    return super.decreaseAllowance(spender, subtractedValue);
   }
 }

@@ -212,6 +212,7 @@ describe("#SeedPool", function () {
 
     it("should revert unsupported token", async function () {
       const amount = ethers.utils.parseEther("1500000");
+      await seed.unpauseAllowance();
       await seed.connect(user0).approve(pool.address, amount);
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
