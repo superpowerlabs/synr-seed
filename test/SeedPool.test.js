@@ -142,6 +142,7 @@ describe("#SeedPool", function () {
   });
 
   describe("#calculateUntaxedRewards", async function () {
+    let user;
     beforeEach(async function () {
       await initAndDeploy(true);
       const amount = ethers.utils.parseEther("9650");
@@ -158,11 +159,18 @@ describe("#SeedPool", function () {
         lastRewardsAt: lockedFrom,
         rewardsFactor: 1000,
       };
+      user = {
+        lastRewardsAt: lockedFrom,
+        deposits: [deposit],
+        passAmount: 0,
+        blueprintsAmount: 0,
+        tokenAmount: 0,
+      };
     });
 
     it("should calculate the rewards", async function () {
       await increaseBlockTimestampBy(21 * 24 * 3600);
-      expect(await pool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("82897730136986301369863013");
+      expect(await pool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("82897730136986301369863013");
     });
   });
 

@@ -229,16 +229,32 @@ describe("#SidePool", function () {
 
     it("should calculate the rewards", async function () {
       await increaseBlockTimestampBy(21 * DAY);
-      expect(await sidePool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("111041095890410958904109589");
+      let user = {
+        lastRewardsAt: deposit.lockedFrom,
+        deposits: [deposit],
+        passAmount: 0,
+        blueprintsAmount: 0,
+        tokenAmount: 0,
+      };
+
+      expect(await sidePool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("111041095890410958904109589");
     });
 
     it("should verify that collecting rewards by week or at the end sums to same amount", async function () {
       let count = ethers.BigNumber.from("0");
+      let user = {
+        lastRewardsAt: deposit.lockedFrom,
+        deposits: [deposit],
+        passAmount: 0,
+        blueprintsAmount: 0,
+        tokenAmount: 0,
+      };
+
       for (let i = 0; i < 54; i++) {
         await increaseBlockTimestampBy(7 * DAY);
         let ts = await getTimestamp();
-        count = count.add(await sidePool.calculateUntaxedRewards(deposit, ts));
-        deposit.lastRewardsAt = ts;
+        count = count.add(await sidePool.calculateUntaxedRewardsByUser(user, 0, ts));
+        user.lastRewardsAt = ts;
       }
       await initAndDeploy(true);
       const amount = ethers.utils.parseEther("9650");
@@ -255,8 +271,15 @@ describe("#SidePool", function () {
         lastRewardsAt: lockedFrom,
         rewardsFactor: 1000,
       };
+      user = {
+        lastRewardsAt: deposit.lockedFrom,
+        deposits: [deposit],
+        passAmount: 0,
+        blueprintsAmount: 0,
+        tokenAmount: 0,
+      };
       await increaseBlockTimestampBy(YEAR + DAY);
-      let total = await sidePool.calculateUntaxedRewards(deposit, await getTimestamp());
+      let total = await sidePool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp());
 
       expect(total.sub(count).toNumber()).lessThan(5);
     });

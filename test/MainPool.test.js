@@ -195,7 +195,7 @@ describe("#MainPool", function () {
       expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
         .withArgs(user1.address, 0);
-      console.log(await mainPool.getDepositsLength(user1.address));
+      // console.log(await mainPool.getDepositsLength(user1.address));
       const deposit = await mainPool.getDepositByIndex(user1.address, 0);
       expect(parseInt(deposit)).equal(SYNR_STAKE, deposit.lockedFrom, deposit.lockedUntil, 0, amount);
     });
