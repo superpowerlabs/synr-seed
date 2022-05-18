@@ -9,6 +9,8 @@ const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const deployed = requireOrMock("export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
+const {serializeInput, fromDepositToTransferPayload} = require("../scripts/lib/PayloadUtils");
+const {bytes32Address, mockEncodedVm} = require("../test/helpers");
 
 let deployUtils;
 
@@ -45,20 +47,87 @@ async function main() {
   const pass = await deployUtils.deploy("SynCityPasses", validator);
   await deployUtils.Tx(pass.setOperators(operators));
 
-  let pool;
-
-  pool = await deployUtils.deployProxy("MainPool", synr.address, sSynr.address, deployed[chainId].SynCityPasses);
-  await deployUtils.Tx(sSynr.updateRole(pool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER()), "Whitelisting the pool");
-  await deployUtils.Tx(pool.initPool(7, 4000, {gasLimit: 70000}), "Init main pool");
+  let mainPool = await deployUtils.deployProxy("MainPool", synr.address, sSynr.address, pass.address);
+  await deployUtils.Tx(sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER()), "Whitelisting the pool");
+  await deployUtils.Tx(mainPool.initPool(7, 4000, {gasLimit: 70000}), "Init main pool");
 
   const seed = await deployUtils.deploy("SeedToken");
+  const coupons = await deployUtils.deploy("SynCityCoupons", 8000);
+  await coupons.deployed();
+  await coupons.mint(tokenOwner, 1);
 
-  pool = await deployUtils.deployProxy("SeedPool", deployed[chainId].SeedToken, deployed[chainId].SynCityCoupons);
-  await deployUtils.Tx(pool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10, {gasLimit: 90000}), "Init SeedPool");
-  await deployUtils.Tx(pool.updateNftConf(100000, 1500, 500000, 150, 1000, {gasLimit: 60000}), "Init NFT Conf");
-  await deployUtils.Tx(seed.grantRole(await seed.MINTER_ROLE(), pool.address), "Granting the pool minting role for SeedToken");
+  let sidePool = await deployUtils.deployProxy("SeedPool", seed.address, coupons.address);
+  await deployUtils.Tx(
+    sidePool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10, {gasLimit: 90000}),
+    "Init SeedPool"
+  );
+  await deployUtils.Tx(sidePool.updateNftConf(100000, 1500, 500000, 150, 1000, {gasLimit: 60000}), "Init NFT Conf");
+  await deployUtils.Tx(
+    seed.grantRole(await seed.MINTER_ROLE(), sidePool.address),
+    "Granting the pool minting role for SeedToken"
+  );
 
   // test cases
+
+  let mainTesseract = await deployUtils.deployProxy("Tesseract");
+  await mainTesseract.deployed();
+  let mainBridge = await deployUtils.deploy("MainWormholeBridge", mainTesseract.address, mainPool.address);
+  await mainBridge.deployed();
+  await mainTesseract.setBridge(1, mainBridge.address);
+  await mainPool.setBridge(mainBridge.address, true);
+
+  let sideTesseract = await deployUtils.deployProxy("Tesseract");
+  await sideTesseract.deployed();
+  let sideBridge = await deployUtils.deploy("SideWormholeBridge", sideTesseract.address, sidePool.address);
+  await sideBridge.deployed();
+  await sideTesseract.setBridge(1, sideBridge.address);
+  await sidePool.setBridge(sideBridge.address, true);
+
+  let wormhole = await deployUtils.deployProxy("WormholeMock");
+  await wormhole.deployed();
+
+  await mainBridge.wormholeInit(2, wormhole.address);
+  await mainBridge.wormholeRegisterContract(4, bytes32Address(sideBridge.address));
+
+  await sideBridge.wormholeInit(4, wormhole.address);
+  await sideBridge.wormholeRegisterContract(2, bytes32Address(mainBridge.address));
+
+  const amount = ethers.utils.parseEther("10000");
+
+  let payload = await serializeInput(
+    2, // SYNR
+    365, // 1 year
+    amount
+  );
+
+  await synr.connect(localTokenOwner).approve(mainPool.address, amount);
+
+  await mainTesseract.connect(localTokenOwner).crossChainTransfer(
+    1,
+    payload,
+    4, // BSC
+    1
+  );
+
+  const amount2 = ethers.utils.parseEther("50000");
+  payload = await serializeInput(
+    2, // SYNR
+    365, // 1 year
+    amount2
+  );
+  await synr.connect(localTokenOwner).approve(mainPool.address, amount2);
+  await mainTesseract.connect(localTokenOwner).crossChainTransfer(
+    1,
+    payload,
+    4, // BSC
+    1
+  );
+
+  await coupons.connect(localTokenOwner).approve(sidePool.address, 1);
+  await sidePool.connect(localTokenOwner).stake(5, 0, 1);
+
+  // console.log(await mainPool.getDepositsLength(tokenOwner));
+  // console.log(await sidePool.getDepositsLength(tokenOwner));
 }
 
 main()
