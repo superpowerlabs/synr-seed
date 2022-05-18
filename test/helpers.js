@@ -1,8 +1,10 @@
 const {assert} = require("chai");
+const ethers = require("ethers");
 const {hexZeroPad} = require("@ethersproject/bytes");
+
 const Helpers = {
-  initEthers(ethers) {
-    this.ethers = ethers;
+  initEthers(ethers0) {
+    this.ethers = ethers0;
   },
 
   async assertThrowsMessage(promise, message) {
@@ -48,6 +50,10 @@ const Helpers = {
       vaaBytes.push(parseInt(payload.substring(k, k + 2), 16));
     }
     return new Int32Array(vaaBytes);
+  },
+
+  BN(num) {
+    return ethers.BigNumber.from((num || 0).toString());
   },
 };
 

@@ -9,6 +9,7 @@ const {
   SEED_SWAP,
   BLUEPRINT_STAKE_FOR_BOOST,
   SYNR_PASS_STAKE_FOR_SEEDS,
+  BN,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -55,7 +56,7 @@ describe("#FarmingPool", function () {
     await pool.deployed();
 
     if (initPool) {
-      await pool.initPool(1000, week, 9800, 1000, 100, 800, 3000, 10);
+      await pool.initPool(20, week, 9800, 1000, 100, 800, 3000, 10);
       await pool.updateNftConf(
         0,
         0,
@@ -143,6 +144,7 @@ describe("#FarmingPool", function () {
   });
 
   describe("#calculateUntaxedRewards", async function () {
+    let user;
     beforeEach(async function () {
       await initAndDeploy(true);
       const amount = ethers.utils.parseEther("9650");
@@ -156,14 +158,20 @@ describe("#FarmingPool", function () {
         unlockedAt: 0,
         mainIndex: 0,
         tokenAmount: amount.mul(100),
-        lastRewardsAt: lockedFrom,
         rewardsFactor: 1000,
+      };
+      user = {
+        lastRewardsAt: lockedFrom,
+        deposits: [deposit],
+        passAmount: 0,
+        blueprintsAmount: 0,
+        tokenAmount: 0,
       };
     });
 
     it("should calculate the rewards", async function () {
       await increaseBlockTimestampBy(21 * 24 * 3600);
-      expect(await pool.calculateUntaxedRewards(deposit, await getTimestamp())).equal("82897730136986301369863013");
+      expect(await pool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("82897730136986301369863013");
     });
   });
 
@@ -176,7 +184,7 @@ describe("#FarmingPool", function () {
       await increaseBlockTimestampBy(23 * 24 * 3600);
       await pool.updateRatio();
       const conf = await pool.conf();
-      expect(conf.rewardsFactor).equal(940);
+      expect(conf.rewardsFactor).equal(17);
       expect(conf.lastRatioUpdateAt).equal(await getTimestamp());
       expect(await pool.shouldUpdateRatio()).equal(false);
     });
@@ -185,10 +193,10 @@ describe("#FarmingPool", function () {
       await increaseBlockTimestampBy(13 * 24 * 3600);
       await pool.updateRatio();
       let conf = await pool.conf();
-      expect(conf.rewardsFactor).equal(980);
+      expect(conf.rewardsFactor).equal(19);
       await pool.updateRatio();
       conf = await pool.conf();
-      expect(conf.rewardsFactor).equal(980);
+      expect(conf.rewardsFactor).equal(19);
     });
   });
 
@@ -239,9 +247,9 @@ describe("#FarmingPool", function () {
         .withArgs(user0.address, 0);
 
       await increaseBlockTimestampBy(50 * 24 * 3600);
-
       await pool.connect(user0).collectRewards();
-      expect(await weed.balanceOf(user0.address)).equal("38840383561643835616438356");
+
+      expect(await weed.balanceOf(user0.address)).equal("776807671232876712328767");
     });
 
     it("should stake some blueprints", async function () {
