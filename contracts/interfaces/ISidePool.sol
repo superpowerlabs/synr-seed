@@ -51,8 +51,6 @@ interface ISidePool {
     uint16 mainIndex;
     // @dev pool token amount staked
     uint128 tokenAmount; //
-    // @dev when claimed rewards last time
-    uint32 lastRewardsAt;
     // @dev rewards ratio when staked
     uint32 rewardsFactor;
   }
@@ -65,6 +63,8 @@ interface ISidePool {
     uint16 blueprintsAmount;
     // @dev Total staked amount
     uint128 tokenAmount;
+    // @dev when claimed rewards last time
+    uint32 lastRewardsAt;
     Deposit[] deposits;
   }
 
@@ -143,11 +143,15 @@ interface ISidePool {
 
   function updateRatio() external;
 
-  function calculateUntaxedRewards(Deposit memory deposit, uint256 timestamp) external view returns (uint256);
+  function calculateUntaxedRewards(
+    address user_,
+    uint256 depositIndex,
+    uint256 timestamp
+  ) external view returns (uint256);
 
-  function multiplyByRewardablePeriod(
-    uint256 input,
-    Deposit memory deposit,
+  function calculateUntaxedRewardsByUser(
+    User memory user,
+    uint256 depositIndex,
     uint256 timestamp
   ) external view returns (uint256);
 
