@@ -28,6 +28,10 @@ async function main() {
   // await hre.run('compile');
 
   const chainId = await currentChainId();
+  if (chainId === 56) {
+    console.error("This script is for test and development only");
+    process.exit();
+  }
   const isLocalNode = /1337$/.test(chainId);
   const [deployer] = await ethers.getSigners();
 

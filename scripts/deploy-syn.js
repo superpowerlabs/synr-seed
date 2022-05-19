@@ -8,6 +8,10 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
+  if (chainId === 1) {
+    console.error("This script is for test and development only");
+    process.exit();
+  }
   let [, localTokenOwner, localSuperAdmin] = await ethers.getSigners();
   // let tx;
 

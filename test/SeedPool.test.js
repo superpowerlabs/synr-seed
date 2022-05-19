@@ -171,7 +171,7 @@ describe("#SeedPool", function () {
 
     it("should calculate the rewards", async function () {
       await increaseBlockTimestampBy(21 * 24 * 3600);
-      expect(await pool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("82897730136986301369863013");
+      expect(await pool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("8289773013698630136986");
     });
   });
 

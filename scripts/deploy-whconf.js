@@ -41,7 +41,7 @@ async function main() {
   await Tx(bridge.wormholeInit(wormholeContract[0], wormholeContract[1], {gasLimit: 200000}), "Configuring wormhole");
   await Tx(
     bridge.wormholeRegisterContract(recipientChain, bytes32Address(deployed[otherChain][otherContract])),
-    "Configuring the side chain"
+    "Configuring the recipient chain"
   );
 }
 

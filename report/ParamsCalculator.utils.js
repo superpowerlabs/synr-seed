@@ -34,7 +34,6 @@ function normalize(val, n = 18) {
 }
 
 describe("#Params Calculator", function () {
-  let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
   let Tesseract, mainTesseract, sideTesseract;
@@ -78,7 +77,7 @@ describe("#Params Calculator", function () {
     bPSynrEquivalent = 3000,
     bPBoostFactor = 75,
     bPBoostLimit = 25000,
-    ratioFactor = 1000
+    rewardsFactor = 1000
   ) {
     const maxTotalSupply = 10000000000; // 10 billions
     synr = await SyndicateERC20.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
@@ -137,8 +136,8 @@ describe("#Params Calculator", function () {
 
     seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await seedPool.deployed();
-    await seedPool.initPool(1000, 7 * 24 * 3600, 9800, swapFactor, stakeFactor, 800, 3000, 14);
-    await seedPool.updateNftConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit);
+    await seedPool.initPool(rewardsFactor, 7 * 24 * 3600, 9800, swapFactor, stakeFactor, 800, 3000, 14);
+    await seedPool.updateNftConf(synrEquivalent, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit);
 
     sideTesseract = await upgrades.deployProxy(Tesseract);
     await sideTesseract.deployed();
@@ -163,20 +162,19 @@ describe("#Params Calculator", function () {
 
   it("should verify balance between stakeFactor and swapFactor", async function () {
     const params = [
-      // [650, 50000],
-      // [550, 45000],
-      // [3600, 300000],
-      // [680, 48000],
-      // [750, 60000],
-      // [700, 50000],
-      // [720, 49000],
-
       // best choice
-      [100, 220000],
+      // [100, 50000, 20000],
+      // [100, 2000, 800],
+      // this give a ratio SYNR>SEED of 1>20
+      // [5, 2000, 18000],
+      // [30, 2000, 3000],
+      // [2, 2000, 23000],
+      [400, 2000, 17000],
     ];
 
     let report = [
       [
+        "rewardsFactor",
         "stakeFactor",
         "swapFactor",
         "SYNR/sSYNR amount",
@@ -185,17 +183,18 @@ describe("#Params Calculator", function () {
         "Final SEED for SYNR",
         "Final SEED for sSYNR",
         "sSYNR/SYNR",
+        "APY",
       ],
     ];
 
     for (let i = 0; i < params.length; i++) {
       const tokenAmount = "100000";
       const amount = ethers.utils.parseEther(tokenAmount);
-      let [stakeFactor, swapFactor] = params[i];
+      let [stakeFactor, swapFactor, rewardsFactor] = params[i];
 
-      const row = [stakeFactor, swapFactor, tokenAmount];
+      const row = [rewardsFactor, stakeFactor, swapFactor, tokenAmount];
 
-      await initAndDeploy(stakeFactor, swapFactor);
+      await initAndDeploy(stakeFactor, swapFactor, undefined, undefined, undefined, undefined, undefined, rewardsFactor);
 
       // approve SYNR spend
       await synr.connect(user1).approve(mainPool.address, amount);
@@ -252,19 +251,23 @@ describe("#Params Calculator", function () {
         .split(".")[0];
       row.push(seedFromSSYNR);
       row.push(parseInt(seedFromSSYNR) / parseInt(seedFromSYNR));
+      row.push((100 * parseInt(seedFromSYNR)) / parseInt(stakedSeedFromSYNR)); // APY
 
       report.push(row);
-
-      if (!i) {
-        console.info("APY:", parseInt(seedFromSYNR) / parseInt(stakedSeedFromSYNR));
-      }
     }
     await fs.ensureDir(path.resolve(__dirname, "../tmp"));
-    report.sort((a, b) => {
-      a = a[7];
-      b = b[7];
-      return a > b ? 1 : a < b ? -1 : 0;
-    });
+    // report.sort((a, b) => {
+    //   a = a[7];
+    //   b = b[7];
+    //   if (/\d/.test(a) && !/\d/.test(b)) {
+    //     a = 1;
+    //     b = 0;
+    //   } else if (!/\d/.test(a) && /\d/.test(b)) {
+    //     a = 0;
+    //     b = 1;
+    //   }
+    //   return a > b ? 1 : a < b ? -1 : 0;
+    // });
     report = report.map((e) => e.join("\t")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report.csv"), report);
     console.info(getJSONFromCSV(report));
@@ -272,8 +275,13 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+  it("should verify balance between synrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
     // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
+
+    // best from previous it:
+    const stakeFactor = 400;
+    const swapFactor = 2000;
+    const rewardsFactor = 17000;
 
     const params = [
       [
@@ -311,8 +319,17 @@ describe("#Params Calculator", function () {
         let [sPSynrEquivalent, sPBoostFactor, sPBoostLimit] = params[i];
         const tokenAmount = sPBoostLimit.toString();
         const amount = ethers.utils.parseEther(tokenAmount);
-        const row = [tokenAmount, k, sPSynrEquivalent, sPBoostFactor, sPBoostLimit, tokenAmount];
-        await initAndDeploy(100, 8300, sPSynrEquivalent, sPBoostFactor, sPBoostLimit);
+        const row = [tokenAmount, k, synrEquivalent, sPBoostFactor, sPBoostLimit, tokenAmount];
+        await initAndDeploy(
+          stakeFactor,
+          swapFactor,
+          synrEquivalent,
+          sPBoostFactor,
+          sPBoostLimit,
+          undefined,
+          undefined,
+          rewardsFactor
+        );
 
         // approve SYNR spend
         await synr.connect(user1).approve(mainPool.address, amount);

@@ -26,9 +26,7 @@ const YEAR = 365 * DAY;
 // test unit coming soon
 
 describe("#SidePool", function () {
-  let WormholeMock, wormhole;
   let SeedToken, seed;
-  let coupon;
   let SidePool, sidePool;
   let SynCityCoupons, blueprint;
 
@@ -238,7 +236,7 @@ describe("#SidePool", function () {
         tokenAmount: 0,
       };
 
-      expect(await sidePool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("111041095890410958904109589");
+      expect(await sidePool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("11104109589041095890410");
     });
 
     it("should verify that collecting rewards by week or at the end sums to same amount", async function () {
@@ -282,7 +280,7 @@ describe("#SidePool", function () {
       await increaseBlockTimestampBy(YEAR + DAY);
       let total = await sidePool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp());
 
-      expect(total.sub(count).toNumber()).lessThan(5);
+      expect(total.sub(count).toNumber()).lessThan(100);
     });
   });
 

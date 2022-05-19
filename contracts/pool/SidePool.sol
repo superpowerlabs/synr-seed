@@ -283,6 +283,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     return
       uint256(deposit.tokenAmount)
         .mul(deposit.rewardsFactor)
+        .div(10000)
         .mul(yieldWeight(deposit))
         .div(10000)
         .mul(when.sub(user.lastRewardsAt))
@@ -370,6 +371,19 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
       emit RewardsCollected(user_, rewards.sub(tax));
       users[user_].lastRewardsAt = uint32(block.timestamp);
     }
+  }
+
+  /**
+   * @notice It returns the total amount of pending claimable rewards
+   * @param user_ The user collecting the reward
+   */
+  function pendingRewards(address user_) public view override returns (uint256) {
+    uint256 rewards = untaxedPendingRewards(user_, block.timestamp);
+    if (rewards > 0) {
+      uint256 tax = calculateTaxOnRewards(rewards);
+      rewards = rewards.sub(tax);
+    }
+    return rewards;
   }
 
   /**
