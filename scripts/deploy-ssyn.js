@@ -8,7 +8,11 @@ let deployUtils;
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const chainId = await deployUtils.currentChainId();
-  let [, , localSuperAdmin] = await ethers.getSigners();
+  if (chainId === 1) {
+    console.error("This script is for test and development only");
+    process.exit();
+  }
+  let [owner, minter, localSuperAdmin] = await ethers.getSigners();
 
   const network = chainId === 1 ? "ethereum" : chainId === 3 ? "ropsten" : "localhost";
 
@@ -18,6 +22,8 @@ async function main() {
   const SSYN = await ethers.getContractFactory("SyntheticSyndicateERC20");
   const ssyn = await SSYN.deploy(superAdmin);
   await ssyn.deployed();
+
+  await ssyn.mint(owner.address, ethers.utils.parseEther("1000000000"));
 
   console.log(`
 To verify SyntheticSyndicateERC20 source code:

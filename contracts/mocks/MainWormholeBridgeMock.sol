@@ -13,8 +13,6 @@ contract MainWormholeBridgeMock is MainWormholeBridge {
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {
     address to = BytesLib.toAddress(encodedVm, 0);
     uint256 payload = BytesLib.toUint256(encodedVm, 20);
-    //    (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
-    emit PayloadReceived(to, payload);
     _onWormholeCompleteTransfer(to, payload);
   }
 }

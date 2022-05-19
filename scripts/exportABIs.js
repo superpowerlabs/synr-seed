@@ -18,10 +18,10 @@ async function main() {
     ABIs.contracts[rename || name] = json.abi;
   }
 
-  abi("SyntheticSyndicateERC20", "previously-deployed");
-  abi("SyndicateERC20", "previously-deployed");
-  abi("SynCityPasses", "previously-deployed");
-  abi("SynCityCoupons", "previously-deployed");
+  abi("SyntheticSyndicateERC20", "mocks/previously-deployed");
+  abi("SyndicateERC20", "mocks/previously-deployed");
+  abi("SynCityPasses", "mocks/previously-deployed");
+  abi("SynCityCoupons", "mocks/previously-deployed");
 
   abi("Tesseract", "");
 
