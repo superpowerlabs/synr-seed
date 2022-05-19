@@ -13,8 +13,8 @@ import "../utils/PayloadUtils.sol";
 contract MainWormholeBridge is PayloadUtils, WormholeTunnel {
   using Address for address;
 
-  event PayloadSent(address indexed to, uint16 indexed chainId, uint256 indexed payload, uint64 sequence);
-  event PayloadReceived(address indexed to, uint256 indexed payload);
+  //  event PayloadSent(address indexed to, uint16 indexed chainId, uint256 indexed payload, uint64 sequence);
+  //  event PayloadReceived(address indexed to, uint256 indexed payload);
 
   Tesseract public tesseract;
   MainPool public pool;
@@ -41,14 +41,14 @@ contract MainWormholeBridge is PayloadUtils, WormholeTunnel {
     address sender = address(uint160(uint256(recipient)));
     payload = pool.stake(sender, payload, recipientChain);
     uint64 sequence = _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
-    emit PayloadSent(sender, recipientChain, payload, sequence);
+    //    emit PayloadSent(sender, recipientChain, payload, sequence);
     return sequence;
   }
 
   // STAKE/BURN starts on the side chain and completes on the main chain
   function wormholeCompleteTransfer(bytes memory encodedVm) public virtual override {
     (address to, uint256 payload) = _wormholeCompleteTransfer(encodedVm);
-    emit PayloadReceived(to, payload);
+    //    emit PayloadReceived(to, payload);
     _onWormholeCompleteTransfer(to, payload);
   }
 

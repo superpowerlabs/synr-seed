@@ -61,6 +61,7 @@ describe("#FarmingPool", function () {
         0,
         0,
         0, // << those are ignored
+        3000,
         150,
         1000
       );
@@ -207,20 +208,16 @@ describe("#FarmingPool", function () {
 
     it("should revert if staking seed when allowance is paused", async function () {
       const amount = ethers.utils.parseEther("1500000");
-      await seed.connect(user0).approve(pool.address, amount);
-      const balanceBefore = await seed.balanceOf(user0.address);
-      expect(balanceBefore).equal(normalize(user0sSeeds));
-
-      expect(pool.connect(user0).stake(SEED_SWAP, 0, amount)).revertedWith("ERC20: insufficient allowance");
+      expect(seed.connect(user0).approve(pool.address, amount)).revertedWith("SideToken: allowance not active");
     });
 
     it("should stake some seed", async function () {
       const amount = ethers.utils.parseEther("1500000");
+      await seed.unpauseAllowance();
+
       await seed.connect(user0).approve(pool.address, amount);
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
-
-      await seed.unpauseAllowance();
 
       const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
       expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
@@ -235,11 +232,10 @@ describe("#FarmingPool", function () {
 
     it("should stake some seed and collect rewards", async function () {
       const amount = ethers.utils.parseEther("1500000");
+      await seed.unpauseAllowance();
       await seed.connect(user0).approve(pool.address, amount);
       const balanceBefore = await seed.balanceOf(user0.address);
       expect(balanceBefore).equal(normalize(user0sSeeds));
-
-      await seed.unpauseAllowance();
 
       const lockedUntil = (await getTimestamp()) + 1 + 24 * 3600 * 10;
       expect(await pool.connect(user0).stake(SEED_SWAP, 0, amount))
@@ -294,8 +290,8 @@ describe("#FarmingPool", function () {
 
     it("should revert if unstake is not blueprint", async function () {
       const amount = ethers.utils.parseEther("1500000");
-      await seed.connect(user0).approve(pool.address, amount);
       await seed.unpauseAllowance();
+      await seed.connect(user0).approve(pool.address, amount);
       await pool.connect(user0).stake(SEED_SWAP, 0, amount);
       await assertThrowsMessage(pool.connect(user0).unstake(0), "FarmingPool: only blueprints can be unstaked");
     });

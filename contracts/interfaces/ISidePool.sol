@@ -24,9 +24,10 @@ interface ISidePool {
 
   event PriceRatioUpdated(uint32 priceRatio);
   event NftConfUpdated(
-    uint32 synrEquivalent,
+    uint32 sPSynrEquivalent,
     uint32 sPBoostFactor,
     uint32 sPBoostLimit,
+    uint32 bPSynrEquivalent,
     uint32 bPBoostFactor,
     uint32 bPBoostLimit
   );
@@ -57,10 +58,10 @@ interface ISidePool {
 
   /// @dev Data structure representing token holder using a pool
   struct User {
-    // @dev Total passes staked for boost
+    // @dev Total passes staked
     uint16 passAmount;
-    // @dev Total blueprints staked for boost
-    uint16 blueprintsAmount;
+    // @dev Total blueprints staked
+    uint16 blueprintAmount;
     // @dev Total staked amount
     uint128 tokenAmount;
     // @dev when claimed rewards last time
@@ -90,9 +91,10 @@ interface ISidePool {
   }
 
   struct NftConf {
-    uint32 synrEquivalent; // 100,000
+    uint32 sPSynrEquivalent; // 100,000
     uint32 sPBoostFactor; // 12500 > 112.5% > +12.5% of boost
     uint32 sPBoostLimit;
+    uint32 bPSynrEquivalent;
     uint32 bPBoostFactor;
     uint32 bPBoostLimit;
   }
@@ -128,9 +130,10 @@ interface ISidePool {
   // CompilerError: Stack too deep when compiling inline assembly:
   // Variable value0 is 1 slot(s) too deep inside the stack.
   function updateNftConf(
-    uint32 synrEquivalent_,
+    uint32 sPSynrEquivalent_,
     uint32 sPBoostFactor_,
     uint32 sPBoostLimit_,
+    uint32 bPSynrEquivalent_,
     uint32 bPBoostFactor_,
     uint32 bPBoostLimit_
   ) external;
@@ -158,6 +161,8 @@ interface ISidePool {
   function calculateTaxOnRewards(uint256 rewards) external view returns (uint256);
 
   function passForBoostAmount(address user) external view returns (uint256);
+
+  function blueprintForBoostAmount(address user) external view returns (uint256);
 
   function boostWeight(address user_) external view returns (uint256);
 
