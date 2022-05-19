@@ -55,7 +55,12 @@ contract SeedPool is SidePool {
 
   function unstake(uint256 depositIndex) external override {
     Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
-    require(deposit.tokenType == S_SYNR_SWAP || deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: invalid tokenType");
+    require(
+      deposit.tokenType == S_SYNR_SWAP ||
+        deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST ||
+        deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS,
+      "SeedPool: invalid tokenType"
+    );
     _unstakeDeposit(deposit);
   }
 

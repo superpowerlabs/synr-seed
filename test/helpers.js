@@ -62,6 +62,7 @@ Helpers.SYNR_STAKE = 2;
 Helpers.SYNR_PASS_STAKE_FOR_BOOST = 3;
 Helpers.SYNR_PASS_STAKE_FOR_SEEDS = 4;
 Helpers.BLUEPRINT_STAKE_FOR_BOOST = 5;
-Helpers.SEED_SWAP = 6;
+Helpers.BLUEPRINT_STAKE_FOR_SEEDS = 6;
+Helpers.SEED_SWAP = 7;
 
 module.exports = Helpers;
