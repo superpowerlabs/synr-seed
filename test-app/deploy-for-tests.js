@@ -8,11 +8,30 @@ const hre = require("hardhat");
 const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const deployed = requireOrMock("export/deployed.json");
-const DeployUtils = require("./lib/DeployUtils");
+const DeployUtils = require("../scripts/lib/DeployUtils");
 const {serializeInput, fromDepositToTransferPayload} = require("../scripts/lib/PayloadUtils");
 const {bytes32Address, mockEncodedVm} = require("../test/helpers");
 
 let deployUtils;
+
+const {
+  rewardsFactor,
+  decayInterval,
+  decayFactor,
+  swapFactor,
+  stakeFactor,
+  taxPoints,
+  burnRatio,
+  coolDownDays,
+  minimumLockupTime,
+  earlyUnstakePenalty,
+  sPSynrEquivalent,
+  sPBoostFactor,
+  sPBoostLimit,
+  bPSynrEquivalent,
+  bPBoostFactor,
+  bPBoostLimit,
+} = require("../scripts/parameters");
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
@@ -49,7 +68,7 @@ async function main() {
 
   let mainPool = await deployUtils.deployProxy("MainPool", synr.address, sSynr.address, pass.address);
   await deployUtils.Tx(sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER()), "Whitelisting the pool");
-  await deployUtils.Tx(mainPool.initPool(7, 4000, {gasLimit: 70000}), "Init main pool");
+  await deployUtils.Tx(mainPool.initPool(minimumLockupTime, earlyUnstakePenalty, {gasLimit: 70000}), "Init main pool");
 
   const seed = await deployUtils.deploy("SeedToken");
   const coupons = await deployUtils.deploy("SynCityCoupons", 8000);
@@ -57,11 +76,20 @@ async function main() {
   await coupons.mint(tokenOwner, 1);
 
   let sidePool = await deployUtils.deployProxy("SeedPool", seed.address, coupons.address);
+
   await deployUtils.Tx(
-    sidePool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10, {gasLimit: 90000}),
+    sidePool.initPool(rewardsFactor, decayInterval, decayFactor, swapFactor, stakeFactor, taxPoints, burnRatio, coolDownDays, {
+      gasLimit: 90000,
+    }),
     "Init SeedPool"
   );
-  await deployUtils.Tx(sidePool.updateNftConf(100000, 1500, 500000, 150, 1000, {gasLimit: 60000}), "Init NFT Conf");
+  await deployUtils.Tx(
+    sidePool.updateNftConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit, {
+      gasLimit: 60000,
+    }),
+    "Init NFT Conf"
+  );
+
   await deployUtils.Tx(
     seed.grantRole(await seed.MINTER_ROLE(), sidePool.address),
     "Granting the pool minting role for SeedToken"
