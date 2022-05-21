@@ -37,7 +37,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
   TVL public tvl;
 
   modifier onlyOwnerOrOracle() {
-    require(_msgSender() == owner() || (oracle != address(0) && _msgSender() == oracle), "SidePool: not owner or oracle");
+    require(_msgSender() == owner() || (oracle != address(0) && _msgSender() == oracle), "SidePool: not owner nor oracle");
     _;
   }
 
@@ -249,34 +249,12 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     uint256 depositIndex,
     uint256 timestamp
   ) public view override returns (uint256) {
-    return _calculateUntaxedRewards(users[user_], depositIndex, timestamp);
-  }
-
-  /**
-   * @param user The user
-   * @param depositIndex The index of the deposit
-   * @param timestamp Current time of the stake
-   * @return the Amount of untaxed reward
-   */
-  function calculateUntaxedRewardsByUser(
-    User memory user,
-    uint256 depositIndex,
-    uint256 timestamp
-  ) external view override returns (uint256) {
-    return _calculateUntaxedRewards(user, depositIndex, timestamp);
-  }
-
-  function _calculateUntaxedRewards(
-    User memory user,
-    uint256 depositIndex,
-    uint256 timestamp
-  ) internal view returns (uint256) {
-    Deposit memory deposit = user.deposits[depositIndex];
-    if (deposit.tokenAmount == 0 || deposit.tokenType == S_SYNR_SWAP) {
+    Deposit storage deposit = users[user_].deposits[depositIndex];
+    if (deposit.tokenAmount == 0 || deposit.tokenType == S_SYNR_SWAP || deposit.unlockedAt != 0) {
       return 0;
     }
     uint256 lockedUntil = uint256(deposit.lockedUntil);
-    if (uint256(user.lastRewardsAt) > lockedUntil) {
+    if (uint256(users[user_].lastRewardsAt) > lockedUntil) {
       return 0;
     }
     uint256 when = lockedUntil > timestamp ? timestamp : lockedUntil;
@@ -286,7 +264,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
         .div(10000)
         .mul(yieldWeight(deposit))
         .div(10000)
-        .mul(when.sub(user.lastRewardsAt))
+        .mul(when.sub(users[user_].lastRewardsAt))
         .div(365 days);
   }
 
@@ -324,11 +302,11 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
    */
   function boostWeight(address user_) public view override returns (uint256) {
     User storage user = users[user_];
-    uint256 baseAmount = uint256(user.tokenAmount);
     uint256 boost = 1e9;
-    if (baseAmount == 0) {
+    if ((user.passAmount == 0 && user.blueprintAmount == 0) || user.tokenAmount == 0) {
       return boost;
     }
+    uint256 baseAmount = uint256(user.tokenAmount);
     uint256 boostedAmount = baseAmount;
     uint256 limit;
     uint256 passAmount = passForBoostAmount(user_);
@@ -392,9 +370,8 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
    * @return the pending rewards that have yet to be taxed
    */
   function untaxedPendingRewards(address user_, uint256 timestamp) public view override returns (uint256) {
-    User storage user = users[user_];
     uint256 rewards;
-    for (uint256 i = 0; i < user.deposits.length; i++) {
+    for (uint256 i = 0; i < users[user_].deposits.length; i++) {
       rewards += calculateUntaxedRewards(user_, i, timestamp);
     }
     if (rewards > 0) {

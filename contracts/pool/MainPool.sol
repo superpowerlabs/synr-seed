@@ -404,6 +404,7 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     uint256 payload,
     uint16 recipientChain
   ) external virtual onlyBridge returns (uint256) {
+    require(getDepositsLength(user) < 50, "MainPool: maximum number of deposits reached");
     return _stake(user, payload, recipientChain);
   }
 

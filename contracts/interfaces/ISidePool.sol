@@ -152,12 +152,6 @@ interface ISidePool {
     uint256 timestamp
   ) external view returns (uint256);
 
-  function calculateUntaxedRewardsByUser(
-    User memory user,
-    uint256 depositIndex,
-    uint256 timestamp
-  ) external view returns (uint256);
-
   function calculateTaxOnRewards(uint256 rewards) external view returns (uint256);
 
   function passForBoostAmount(address user) external view returns (uint256);

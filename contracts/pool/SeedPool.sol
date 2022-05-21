@@ -43,6 +43,7 @@ contract SeedPool is SidePool {
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
     require(tokenType == BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
+    require(users[_msgSender()].blueprintAmount < 30, "SeedPool: at most 10 blueprint can be staked");
     _stake(
       _msgSender(),
       tokenType,

@@ -21,7 +21,7 @@ function normalize(val, n = 18) {
 
 // test unit coming soon
 
-describe.only("#FarmingPool", function () {
+describe("#FarmingPool", function () {
   let SeedToken, seed;
   let WeedToken, weed;
   let coupon;
@@ -141,38 +141,6 @@ describe.only("#FarmingPool", function () {
     it("should not be updated", async function () {
       await increaseBlockTimestampBy(3 * 24 * 3600);
       expect(await pool.shouldUpdateRatio()).equal(false);
-    });
-  });
-
-  describe("#calculateUntaxedRewards", async function () {
-    let user;
-    beforeEach(async function () {
-      await initAndDeploy(true);
-      const amount = ethers.utils.parseEther("9650");
-      const lockedFrom = await getTimestamp();
-      const lockedUntil = lockedFrom + 3600 * 24 * 180;
-      deposit = {
-        tokenType: SEED_SWAP,
-        lockedFrom,
-        lockedUntil,
-        tokenAmountOrID: amount,
-        unlockedAt: 0,
-        mainIndex: 0,
-        tokenAmount: amount.mul(100),
-        rewardsFactor: 1000,
-      };
-      user = {
-        lastRewardsAt: lockedFrom,
-        deposits: [deposit],
-        passAmount: 0,
-        blueprintsAmount: 0,
-        tokenAmount: 0,
-      };
-    });
-
-    it("should calculate the rewards", async function () {
-      await increaseBlockTimestampBy(21 * 24 * 3600);
-      expect(await pool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("8289773013698630136986");
     });
   });
 
