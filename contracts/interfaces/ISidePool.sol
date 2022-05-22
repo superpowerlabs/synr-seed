@@ -4,6 +4,8 @@ pragma solidity 0.8.11;
 // Author: Francesco Sullo <francesco@sullo.co>
 // (c) 2022+ SuperPower Labs Inc.
 
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
 interface ISidePool {
   event DepositSaved(address indexed user, uint16 indexed mainIndex);
 
@@ -67,6 +69,8 @@ interface ISidePool {
     // @dev when claimed rewards last time
     uint32 lastRewardsAt;
     Deposit[] deposits;
+    // @dev reserved for future custom tokens
+    mapping(uint8 => uint16) extraNftAmounts;
   }
 
   struct Conf {
@@ -111,12 +115,11 @@ interface ISidePool {
     uint32 bPBoostLimit;
   }
 
-  // for future custom tokens
-  function updateNftConf(
-    address tokenAddress,
-    uint16 boostFactor_,
-    uint32 boostLimit_
-  ) external;
+  struct ExtraNftConf {
+    IERC721 token;
+    uint16 boostFactor; // 12500 > 112.5% > +12.5% of boost
+    uint32 boostLimit;
+  }
 
   // functions
 
