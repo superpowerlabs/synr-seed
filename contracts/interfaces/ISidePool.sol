@@ -111,6 +111,15 @@ interface ISidePool {
     uint32 bPBoostLimit;
   }
 
+  // for future custom tokens
+  function updateNftConf(
+    address tokenAddress,
+    uint16 boostFactor_,
+    uint32 boostLimit_
+  ) external;
+
+  // functions
+
   function initPool(
     uint32 rewardsFactor_,
     uint32 decayInterval_,
