@@ -44,6 +44,9 @@ interface IMainPool {
     uint16 maximumLockupTime;
     uint16 earlyUnstakePenalty;
     uint8 status;
+  }
+
+  struct ExtraConf {
     // reserved for future variables
     uint32 reserved1;
     uint32 reserved2;
@@ -51,6 +54,8 @@ interface IMainPool {
     uint32 reserved4;
     uint32 reserved5;
     uint32 reserved6;
+    uint32 reserved7;
+    uint32 reserved8;
   }
 
   struct TVL {
