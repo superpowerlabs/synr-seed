@@ -85,6 +85,18 @@ interface ISidePool {
     uint8 status;
   }
 
+  struct ExtraConf {
+    // reserved for future variables
+    uint32 reserved1;
+    uint32 reserved2;
+    uint32 reserved3;
+    uint32 reserved4;
+    uint32 reserved5;
+    uint32 reserved6;
+    uint32 reserved7;
+    uint32 reserved8;
+  }
+
   struct TVL {
     uint16 blueprintAmount;
     uint96 stakedTokenAmount;

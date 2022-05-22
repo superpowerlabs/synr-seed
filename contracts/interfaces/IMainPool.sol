@@ -44,6 +44,13 @@ interface IMainPool {
     uint16 maximumLockupTime;
     uint16 earlyUnstakePenalty;
     uint8 status;
+    // reserved for future variables
+    uint32 reserved1;
+    uint32 reserved2;
+    uint32 reserved3;
+    uint32 reserved4;
+    uint32 reserved5;
+    uint32 reserved6;
   }
 
   struct TVL {
