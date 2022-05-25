@@ -52,6 +52,7 @@ contract SynCityPasses is ERC721, Ownable {
   //    0x231540a54823De2EFC7631E40A5DD9dD2Ee965bc
   //  ];
 
+  // for debugging purposes
   address[] public team = [
     0x70f41fE744657DF9cC5BD317C58D3e7928e22E1B,
     0x16244cdFb0D364ac5c4B42Aa530497AA762E7bb3,
