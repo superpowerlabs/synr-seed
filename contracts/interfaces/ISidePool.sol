@@ -103,6 +103,7 @@ interface ISidePool {
 
   struct TVL {
     uint16 blueprintAmount;
+    uint16 passAmount;
     uint96 stakedTokenAmount;
   }
 

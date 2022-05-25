@@ -280,6 +280,8 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal {
+    Deposit storage deposit = users[user].deposits[mainIndex];
+    require(deposit.unlockedAt == 0, "MainPool: deposit already unlocked");
     require(tokenType > S_SYNR_SWAP, "MainPool: sSYNR can not be unstaked");
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "MainPool: SYNR Pass cannot be early unstaked");
@@ -290,7 +292,6 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
       users[user].passAmount = uint16(uint256(users[user].passAmount).sub(1));
     }
     _updateTvl(tokenType, tokenAmountOrID, false);
-    Deposit storage deposit = users[user].deposits[mainIndex];
     require(
       uint256(deposit.mainIndex) == mainIndex &&
         uint256(deposit.tokenType) == tokenType &&

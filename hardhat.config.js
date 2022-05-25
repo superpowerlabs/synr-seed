@@ -77,7 +77,7 @@ module.exports = {
     coinmarketcap: process.env.COINMARKETCAP,
   },
   etherscan: {
-    apiKey: process.env.BSCSCAN_KEY,
-    // process.env.ETHERSCAN_KEY,
+    //process.env.BSCSCAN_KEY,
+    apiKey: process.env.ETHERSCAN_KEY,
   },
 };
