@@ -64,7 +64,7 @@ chain and will be lost. This emergency function must be executed by an
 operator, receiving the details about the transaction from a validator
 that assures that the data are correct.
 */
-  function stakeIfBridgeFails(
+  function completeTransferIfBridgeFails(
     address to,
     uint256 tokenType,
     uint256 lockedFrom,
@@ -72,7 +72,7 @@ that assures that the data are correct.
     uint256 mainIndex,
     uint256 tokenAmountOrID,
     bytes memory signature
-  ) external virtual {
+  ) external override {
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SideWormholeBridge: no blueprint allowed here");
     require(operator != address(0) && _msgSender() == operator, "SeedPool: not the operator");
     require(

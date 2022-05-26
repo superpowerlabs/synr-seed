@@ -55,7 +55,7 @@ chain and will be lost. This emergency function must be executed by an
 operator, receiving the details about the transaction from a validator
 that assures that the data are correct.
 */
-  function unstakeIfBridgeFails(
+  function completeTransferIfBridgeFails(
     address to,
     uint256 tokenType,
     uint256 lockedFrom,
@@ -63,7 +63,7 @@ that assures that the data are correct.
     uint256 mainIndex,
     uint256 tokenAmountOrID,
     bytes memory signature
-  ) external virtual {
+  ) external override {
     require(tokenType > S_SYNR_SWAP, "MainWormholeBridge: sSYNR can't be unstaked");
     require(operator != address(0) && _msgSender() == operator, "MainWormholeBridge: not the operator");
     require(
