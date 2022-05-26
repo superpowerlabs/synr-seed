@@ -422,6 +422,4 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
   ) external virtual onlyBridge {
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
-
-  uint256[50] private __gap;
 }

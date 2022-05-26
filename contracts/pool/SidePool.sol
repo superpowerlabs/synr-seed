@@ -17,7 +17,14 @@ import "../interfaces/IERC721Minimal.sol";
 
 import "hardhat/console.sol";
 
-contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+abstract contract SidePool is
+  PayloadUtilsUpgradeable,
+  ISidePool,
+  TokenReceiver,
+  Initializable,
+  OwnableUpgradeable,
+  UUPSUpgradeable
+{
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
 
@@ -45,9 +52,6 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     require(_msgSender() == owner() || (oracle != address(0) && _msgSender() == oracle), "SidePool: not owner nor oracle");
     _;
   }
-
-  //  /// @custom:oz-upgrades-unsafe-allow constructor
-  //  constructor() initializer {}
 
   // solhint-disable-next-line
   function __SidePool_init(
@@ -663,22 +667,6 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     }
   }
 
-  // In SeedFarm you can stake directly only blueprints
-  // Must be overridden in FarmingPool
-  function stake(
-    uint256 tokenType,
-    // solhint-disable-next-line
-    uint256 lockupTime,
-    uint256 tokenAmountOrID
-  ) external virtual override {
-    // mainIndex = type(uint16).max means no meanIndex
-    require(
-      tokenType == BLUEPRINT_STAKE_FOR_BOOST || (tokenType == BLUEPRINT_STAKE_FOR_SEEDS && nftConf.bPSynrEquivalent != 0),
-      "SidePool: stake not allowed"
-    );
-    _stake(_msgSender(), tokenType, block.timestamp, 0, type(uint16).max, tokenAmountOrID);
-  }
-
   function _unstakeDeposit(Deposit memory deposit) internal {
     _unstake(
       _msgSender(),
@@ -688,17 +676,6 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
       uint256(deposit.mainIndex),
       uint256(deposit.tokenAmountOrID)
     );
-  }
-
-  // In SeedFarm you can unstake directly only blueprints
-  // Must be overridden in FarmingPool
-  function unstake(uint256 depositIndex) external virtual override {
-    Deposit storage deposit = users[_msgSender()].deposits[depositIndex];
-    require(
-      deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST || deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS,
-      "SidePool: not a blueprint"
-    );
-    _unstakeDeposit(deposit);
   }
 
   uint256[50] private __gap;

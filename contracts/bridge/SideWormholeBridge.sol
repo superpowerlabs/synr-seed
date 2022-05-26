@@ -3,30 +3,18 @@ pragma solidity 0.8.11;
 
 // Authors: Francesco Sullo <francesco@sullo.co>
 
-import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnel.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-
-import "../Tesseract.sol";
 import "../pool/SeedPool.sol";
-import "../utils/PayloadUtils.sol";
+import "./WormholeBridge.sol";
 
-contract SideWormholeBridge is PayloadUtils, WormholeTunnel {
-  using Address for address;
+contract SideWormholeBridge is WormholeBridge {
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() initializer {}
 
-  Tesseract public tesseract;
-  SeedPool public pool;
-
-  modifier onlyTesseract() {
-    require(address(tesseract) == _msgSender(), "SideWormholeBridge: Forbidden");
-    _;
+  function initialize(address tesseract_, address pool_) public virtual initializer {
+    __WormholeBridge_init(tesseract_, pool_);
   }
 
-  constructor(address tesseract_, address pool_) {
-    require(tesseract_.isContract(), "SideWormholeBridge: tesseract_ not a contract");
-    require(pool_.isContract(), "SideWormholeBridge: pool_ not a contract");
-    tesseract = Tesseract(tesseract_);
-    pool = SeedPool(pool_);
-  }
+  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
   // UNSTAKE starts on the side chain and completes on the main chain
   function wormholeTransfer(
@@ -45,7 +33,7 @@ contract SideWormholeBridge is PayloadUtils, WormholeTunnel {
     ) = deserializeDeposit(payload);
     require(tokenType != S_SYNR_SWAP, "SideWormholeBridge: sSYNR swaps cannot be bridged back");
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SideWormholeBridge: blueprints' unstake does not require bridge");
-    pool.unstakeViaBridge(sender, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    SeedPool(pool).unstakeViaBridge(sender, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     uint64 sequence = _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
     return sequence;
   }
@@ -64,7 +52,33 @@ contract SideWormholeBridge is PayloadUtils, WormholeTunnel {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedFarm: no blueprint allowed here");
-    pool.stakeViaBridge(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SideWormholeBridge: no blueprint allowed here");
+    SeedPool(pool).stakeViaBridge(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+  }
+
+  /*
+During the debugging on the testnet, we experienced some cases where the
+bridge protocol could not complete the process. It is a sporadic event,
+but if it happens, funds will be locked in the contract on the starting
+chain and will be lost. This emergency function must be executed by an
+operator, receiving the details about the transaction from a validator
+that assures that the data are correct.
+*/
+  function completeTransferIfBridgeFails(
+    address to,
+    uint256 tokenType,
+    uint256 lockedFrom,
+    uint256 lockedUntil,
+    uint256 mainIndex,
+    uint256 tokenAmountOrID,
+    bytes memory signature
+  ) external override {
+    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SideWormholeBridge: no blueprint allowed here");
+    require(operator != address(0) && _msgSender() == operator, "SeedPool: not the operator");
+    require(
+      isSignedByValidator(encodeForSignature(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID), signature),
+      "SeedPool: invalid signature"
+    );
+    SeedPool(pool).stakeViaBridge(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 }

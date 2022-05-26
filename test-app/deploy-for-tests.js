@@ -32,6 +32,7 @@ const {
   bPBoostFactor,
   bPBoostLimit,
 } = require("../scripts/parameters");
+const {upgrades} = require("hardhat");
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
@@ -99,14 +100,15 @@ async function main() {
 
   let mainTesseract = await deployUtils.deployProxy("Tesseract");
   await mainTesseract.deployed();
-  let mainBridge = await deployUtils.deploy("MainWormholeBridge", mainTesseract.address, mainPool.address);
+  mainBridge = await deployUtils.deployProxy("MainWormholeBridge", mainTesseract.address, mainPool.address);
   await mainBridge.deployed();
   await mainTesseract.setBridge(1, mainBridge.address);
   await mainPool.setBridge(mainBridge.address, true);
 
   let sideTesseract = await deployUtils.deployProxy("Tesseract");
   await sideTesseract.deployed();
-  let sideBridge = await deployUtils.deploy("SideWormholeBridge", sideTesseract.address, sidePool.address);
+  let sideBridge = await deployUtils.deployProxy("SideWormholeBridge", sideTesseract.address, sidePool.address);
+
   await sideBridge.deployed();
   await sideTesseract.setBridge(1, sideBridge.address);
   await sidePool.setBridge(sideBridge.address, true);

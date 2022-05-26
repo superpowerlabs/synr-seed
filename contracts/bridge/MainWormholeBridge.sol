@@ -3,30 +3,18 @@ pragma solidity 0.8.11;
 
 // Authors: Francesco Sullo <francesco@sullo.co>
 
-import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnel.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-
-import "../Tesseract.sol";
 import "../pool/MainPool.sol";
-import "../utils/PayloadUtils.sol";
+import "./WormholeBridge.sol";
 
-contract MainWormholeBridge is PayloadUtils, WormholeTunnel {
-  using Address for address;
+contract MainWormholeBridge is WormholeBridge {
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() initializer {}
 
-  Tesseract public tesseract;
-  MainPool public pool;
-
-  modifier onlyTesseract() {
-    require(address(tesseract) == _msgSender(), "MainWormholeBridge: Forbidden");
-    _;
+  function initialize(address tesseract_, address pool_) public virtual initializer {
+    __WormholeBridge_init(tesseract_, pool_);
   }
 
-  constructor(address tesseract_, address pool_) {
-    require(tesseract_.isContract(), "MainWormholeBridge: tesseract_ not a contract");
-    require(pool_.isContract(), "MainWormholeBridge: pool_ not a contract");
-    tesseract = Tesseract(tesseract_);
-    pool = MainPool(pool_);
-  }
+  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
   // STAKE/BURN starts on the main chain and completes on the side chain
   function wormholeTransfer(
@@ -36,7 +24,7 @@ contract MainWormholeBridge is PayloadUtils, WormholeTunnel {
     uint32 nonce
   ) public payable override whenNotPaused onlyTesseract returns (uint64) {
     address sender = address(uint160(uint256(recipient)));
-    payload = pool.stake(sender, payload, recipientChain);
+    payload = MainPool(pool).stake(sender, payload, recipientChain);
     uint64 sequence = _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
     return sequence;
   }
@@ -56,6 +44,32 @@ contract MainWormholeBridge is PayloadUtils, WormholeTunnel {
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
     require(tokenType > S_SYNR_SWAP, "MainWormholeBridge: sSYNR can't be unstaked");
-    pool.unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    MainPool(pool).unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+  }
+
+  /*
+During the debugging on the testnet, we experienced some cases where the
+bridge protocol could not complete the process. It is a sporadic event,
+but if it happens, funds will be locked in the contract on the starting
+chain and will be lost. This emergency function must be executed by an
+operator, receiving the details about the transaction from a validator
+that assures that the data are correct.
+*/
+  function completeTransferIfBridgeFails(
+    address to,
+    uint256 tokenType,
+    uint256 lockedFrom,
+    uint256 lockedUntil,
+    uint256 mainIndex,
+    uint256 tokenAmountOrID,
+    bytes memory signature
+  ) external override {
+    require(tokenType > S_SYNR_SWAP, "MainWormholeBridge: sSYNR can't be unstaked");
+    require(operator != address(0) && _msgSender() == operator, "MainWormholeBridge: not the operator");
+    require(
+      isSignedByValidator(encodeForSignature(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID), signature),
+      "MainWormholeBridge: invalid signature"
+    );
+    MainPool(pool).unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 }

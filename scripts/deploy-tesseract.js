@@ -82,10 +82,10 @@ async function main() {
   const tesseract = await deployUtils.deployProxy("Tesseract");
 
   const bridgeName = chainId < 6 ? "MainWormholeBridge" : "SideWormholeBridge";
-  const bridge = await deployUtils.deploy(bridgeName, tesseract.address, pool.address);
+  const bridge = await deployUtils.deployProxy(bridgeName, tesseract.address, pool.address);
 
   await deployUtils.Tx(pool.setBridge(bridge.address, true), "Set bridge in pool");
-  await deployUtils.Tx(tesseract.setBridge(1, bridge.address), "Se bridge in tesseract");
+  await deployUtils.Tx(tesseract.setBridge(1, bridge.address), "Set bridge in tesseract");
 }
 
 main()
