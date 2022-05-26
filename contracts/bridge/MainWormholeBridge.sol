@@ -47,6 +47,14 @@ contract MainWormholeBridge is WormholeBridge {
     MainPool(pool).unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
+  /*
+During the debugging on the testnet, we experienced some cases where the
+bridge protocol could not complete the process. It is a sporadic event,
+but if it happens, funds will be locked in the contract on the starting
+chain and will be lost. This emergency function must be executed by an
+operator, receiving the details about the transaction from a validator
+that assures that the data are correct.
+*/
   function unstakeIfBridgeFails(
     address to,
     uint256 tokenType,
