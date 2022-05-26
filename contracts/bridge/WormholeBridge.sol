@@ -81,7 +81,7 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
   // this is called internally
   // and externally by the web3 app
   function encodeForSignature(
-    address user,
+    address to,
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
@@ -93,7 +93,7 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
         abi.encodePacked(
           "\x19\x01", // EIP-191
           getChainId(),
-          user,
+          to,
           tokenType,
           lockedFrom,
           lockedUntil,
