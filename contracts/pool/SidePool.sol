@@ -589,13 +589,14 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal virtual {
+    (uint256 index, bool exists) = getDepositIndexByMainIndex(user_, mainIndex);
+    require(exists, "SidePool: deposit not found");
+    Deposit storage deposit = users[user_].deposits[index];
+    require(deposit.unlockedAt == 0, "SidePool: deposit already unlocked");
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass and Blueprint used to get SYNR cannot be early unstaked");
     }
     _collectRewards(user_);
-    (uint256 index, bool exists) = getDepositIndexByMainIndex(user_, mainIndex);
-    require(exists, "SidePool: deposit not found");
-    Deposit storage deposit = users[user_].deposits[index];
     require(
       uint256(deposit.tokenType) == tokenType &&
         uint256(deposit.lockedFrom) == lockedFrom &&

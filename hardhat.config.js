@@ -78,6 +78,6 @@ module.exports = {
   },
   etherscan: {
     apiKey: process.env.BSCSCAN_KEY,
-    // process.env.ETHERSCAN_KEY,
+    // apiKey: process.env.ETHERSCAN_KEY,
   },
 };

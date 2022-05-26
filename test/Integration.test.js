@@ -355,6 +355,8 @@ describe("#Integration test", function () {
 
     expect(await seed.balanceOf(user2.address)).equal("50000000000000000000000");
 
+    expect(seedPool.connect(user2).unstake(0)).revertedWith("SidePool: deposit already unlocked");
+
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);
     expect(seedDeposit.unlockedAt).equal(ts + 1);
