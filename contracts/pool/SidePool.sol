@@ -45,16 +45,13 @@ abstract contract SidePool is
 
   // set the storage to manage future changes
   // keeping the contract upgradeable
-  //  ExtraConf public extraConf;
+  ExtraConf public extraConf;
   ExtraNftConf[] public extraNftConf;
 
   modifier onlyOwnerOrOracle() {
     require(_msgSender() == owner() || (oracle != address(0) && _msgSender() == oracle), "SidePool: not owner nor oracle");
     _;
   }
-
-  //  /// @custom:oz-upgrades-unsafe-allow constructor
-  //  constructor() initializer {}
 
   // solhint-disable-next-line
   function __SidePool_init(

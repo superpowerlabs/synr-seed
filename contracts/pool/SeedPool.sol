@@ -4,19 +4,14 @@ pragma solidity 0.8.11;
 // Author: Francesco Sullo <francesco@sullo.co>
 // (c) 2022+ SuperPower Labs Inc.
 
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-
 import "./SidePool.sol";
 import "hardhat/console.sol";
 
 contract SeedPool is SidePool {
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
-  using ECDSAUpgradeable for bytes32;
 
   mapping(address => bool) public bridges;
-  address public operator;
-  address public validator;
 
   modifier onlyBridge() {
     require(bridges[_msgSender()], "SeedPool: forbidden");
@@ -41,19 +36,13 @@ contract SeedPool is SidePool {
     }
   }
 
-  function setOperatorAndValidator(address operator_, address validator_) external onlyOwner {
-    require(operator_ != address(0) && validator_ != address(0), "SeedPool: address zero not allowed");
-    operator = operator_;
-    validator = validator_;
-  }
-
   function stake(
     uint256 tokenType,
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
-    require(tokenType >= BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
+    require(tokenType > SYNR_PASS_STAKE_FOR_SEEDS, "SeedPool: unsupported token");
     require(users[_msgSender()].blueprintAmount < 30, "SeedPool: at most 30 blueprint can be staked");
     _stake(
       _msgSender(),
@@ -99,62 +88,5 @@ contract SeedPool is SidePool {
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
-  // emergency function, if the bridge has issues
-
-  function stakeNoBridge(
-    address user,
-    uint256 tokenType,
-    uint256 lockedFrom,
-    uint256 lockedUntil,
-    uint256 mainIndex,
-    uint256 tokenAmountOrID,
-    bytes memory signature
-  ) external virtual {
-    require(operator != address(0) && _msgSender() == operator, "MainPool: not the operator");
-    require(
-      isSignedByValidator(encodeForSignature(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID), signature),
-      "MainPool: invalid signature"
-    );
-    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
-    _stake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
-  }
-
-  // this is called internally
-  // and externally by the web3 app to test the validation
-  function isSignedByValidator(bytes32 _hash, bytes memory _signature) public view returns (bool) {
-    return validator != address(0) && validator == _hash.recover(_signature);
-  }
-
-  // this is called internally
-  // and externally by the web3 app
-  function encodeForSignature(
-    address user,
-    uint256 tokenType,
-    uint256 lockedFrom,
-    uint256 lockedUntil,
-    uint256 mainIndex,
-    uint256 tokenAmountOrID
-  ) public view returns (bytes32) {
-    return
-      keccak256(
-        abi.encodePacked(
-          "\x19\x01", // EIP-191
-          getChainId(),
-          user,
-          tokenType,
-          lockedFrom,
-          lockedUntil,
-          mainIndex,
-          tokenAmountOrID
-        )
-      );
-  }
-
-  function getChainId() public view returns (uint256) {
-    uint256 id;
-    assembly {
-      id := chainid()
-    }
-    return id;
-  }
+  uint256[50] private __gap;
 }

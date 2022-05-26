@@ -115,7 +115,7 @@ describe("#Params Calculator", function () {
     mainTesseract = await upgrades.deployProxy(Tesseract, []);
     await mainTesseract.deployed();
 
-    mainBridge = await MainWormholeBridge.deploy(mainTesseract.address, mainPool.address);
+    mainBridge = await upgrades.deployProxy(MainWormholeBridge, [mainTesseract.address, mainPool.address]);
     await mainBridge.deployed();
 
     await sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER());
@@ -142,7 +142,7 @@ describe("#Params Calculator", function () {
     sideTesseract = await upgrades.deployProxy(Tesseract);
     await sideTesseract.deployed();
 
-    sideBridge = await SideWormholeBridge.deploy(sideTesseract.address, seedPool.address);
+    sideBridge = await upgrades.deployProxy(SideWormholeBridge, [sideTesseract.address, seedPool.address]);
     await sideBridge.deployed();
 
     await seedPool.setBridge(sideBridge.address, true);
