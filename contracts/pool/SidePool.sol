@@ -45,7 +45,7 @@ abstract contract SidePool is
 
   // set the storage to manage future changes
   // keeping the contract upgradeable
-  ExtraConf public extraConf;
+  //  ExtraConf public extraConf;
   ExtraNftConf[] public extraNftConf;
 
   modifier onlyOwnerOrOracle() {
