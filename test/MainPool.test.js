@@ -87,16 +87,31 @@ describe("#MainPool", function () {
       expect(await mainPool.connect(user1).stake(user1.address, payload, 4))
         .emit(mainPool, "DepositSaved")
         .withArgs(user1.address, 0);
-      await increaseBlockTimestampBy(182.5 * 24 * 3600);
+
       const deposit = await mainPool.getDepositByIndex(user1.address, 0);
+      let vestedPercentage = await mainPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil);
+      expect(vestedPercentage).equal(0);
+
+      expect(await mainPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)).equal("4000000000000000000000");
+
+      await increaseBlockTimestampBy(100 * 24 * 3600);
       // console.log(deposit.lockedFrom, deposit.lockedUntil);
-      const vestedPercentage = await mainPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil);
-      expect(vestedPercentage).equal(5000);
-      const unvested = ethers.BigNumber.from(deposit.tokenAmountOrID.toString())
-        .mul(10000 - vestedPercentage)
-        .div(10000);
+      vestedPercentage = await mainPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil);
+      expect(vestedPercentage).equal(2739);
+
+      expect(await mainPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)).equal("2904400000000000000000");
+
+      await increaseBlockTimestampBy(100 * 24 * 3600);
+      // console.log(deposit.lockedFrom, deposit.lockedUntil);
+      vestedPercentage = await mainPool.getVestedPercentage(getTimestamp(), deposit.lockedFrom, deposit.lockedUntil);
+      expect(vestedPercentage).equal(5479); // 50%
+
+      expect(await mainPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)).equal("1808400000000000000000");
+
+      const unvested = deposit.tokenAmountOrID.mul(10000 - vestedPercentage).div(10000);
       const percentage = (await mainPool.conf()).earlyUnstakePenalty / 100;
       const unvestedPenalty = unvested.mul(percentage).div(100);
+      expect(unvestedPenalty.toString()).equal("1808400000000000000000");
       expect(await mainPool.calculatePenaltyForEarlyUnstake(getTimestamp(), deposit)).equal(unvestedPenalty);
     });
   });
