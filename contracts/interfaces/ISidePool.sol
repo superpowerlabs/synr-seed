@@ -171,7 +171,7 @@ interface ISidePool {
   function updateRatio() external;
 
   function calculateUntaxedRewards(
-    address user_,
+    address user,
     uint256 depositIndex,
     uint256 timestamp
   ) external view returns (uint256);
@@ -182,13 +182,13 @@ interface ISidePool {
 
   function blueprintForBoostAmount(address user) external view returns (uint256);
 
-  function boostWeight(address user_) external view returns (uint256);
+  function boostWeight(address user) external view returns (uint256);
 
   function collectRewards() external;
 
-  function pendingRewards(address user_) external view returns (uint256);
+  function pendingRewards(address user) external view returns (uint256);
 
-  function untaxedPendingRewards(address user_, uint256 timestamp) external view returns (uint256);
+  function untaxedPendingRewards(address user, uint256 timestamp) external view returns (uint256);
 
   function getDepositByIndex(address user, uint256 index) external view returns (Deposit memory);
 

@@ -43,7 +43,7 @@ contract SeedPool is SidePool {
   ) external virtual override {
     // mainIndex = type(uint16).max means no meanIndex
     require(tokenType > SYNR_PASS_STAKE_FOR_SEEDS, "SeedPool: unsupported token");
-    require(users[_msgSender()].blueprintAmount < 30, "SeedPool: at most 10 blueprint can be staked");
+    require(users[_msgSender()].blueprintAmount < 30, "SeedPool: at most 30 blueprint can be staked");
     _stake(
       _msgSender(),
       tokenType,
@@ -66,7 +66,7 @@ contract SeedPool is SidePool {
   }
 
   function stakeViaBridge(
-    address user_,
+    address user,
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
@@ -74,18 +74,18 @@ contract SeedPool is SidePool {
     uint256 tokenAmountOrID
   ) external onlyBridge {
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
-    _stake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    _stake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
   function unstakeViaBridge(
-    address user_,
+    address user,
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) external onlyBridge {
-    _unstake(user_, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
   uint256[50] private __gap;

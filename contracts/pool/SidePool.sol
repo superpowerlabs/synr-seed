@@ -250,16 +250,16 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
    * @return the Amount of untaxed reward
    */
   function calculateUntaxedRewards(
-    address user_,
+    address user,
     uint256 depositIndex,
     uint256 timestamp
   ) public view override returns (uint256) {
-    Deposit storage deposit = users[user_].deposits[depositIndex];
+    Deposit storage deposit = users[user].deposits[depositIndex];
     if (deposit.tokenAmount == 0 || deposit.tokenType == S_SYNR_SWAP || deposit.unlockedAt != 0) {
       return 0;
     }
     uint256 lockedUntil = uint256(deposit.lockedUntil);
-    if (uint256(users[user_].lastRewardsAt) > lockedUntil) {
+    if (uint256(users[user].lastRewardsAt) > lockedUntil) {
       return 0;
     }
     uint256 when = lockedUntil > timestamp ? timestamp : lockedUntil;
@@ -269,7 +269,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
         .div(10000)
         .mul(yieldWeight(deposit))
         .div(10000)
-        .mul(when.sub(users[user_].lastRewardsAt))
+        .mul(when.sub(users[user].lastRewardsAt))
         .div(365 days);
   }
 
