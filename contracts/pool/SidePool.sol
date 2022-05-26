@@ -244,7 +244,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
   }
 
   /**
-   * @param user_ The user's wallet address
+   * @param user The user's wallet address
    * @param depositIndex The index of the deposit
    * @param timestamp Current time of the stake
    * @return the Amount of untaxed reward
@@ -342,26 +342,26 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
 
   /**
    * @notice The reward is collected and the tax is substracted
-   * @param user_ The user collecting the reward
+   * @param user The user collecting the reward
    */
-  function _collectRewards(address user_) internal {
-    uint256 rewards = untaxedPendingRewards(user_, block.timestamp);
+  function _collectRewards(address user) internal {
+    uint256 rewards = untaxedPendingRewards(user, block.timestamp);
     if (rewards > 0) {
       uint256 tax = calculateTaxOnRewards(rewards);
-      rewardsToken.mint(user_, rewards.sub(tax));
+      rewardsToken.mint(user, rewards.sub(tax));
       rewardsToken.mint(address(this), tax);
       taxes += tax;
-      emit RewardsCollected(user_, rewards.sub(tax));
-      users[user_].lastRewardsAt = uint32(block.timestamp);
+      emit RewardsCollected(user, rewards.sub(tax));
+      users[user].lastRewardsAt = uint32(block.timestamp);
     }
   }
 
   /**
    * @notice It returns the total amount of pending claimable rewards
-   * @param user_ The user collecting the reward
+   * @param user The user collecting the reward
    */
-  function pendingRewards(address user_) public view override returns (uint256) {
-    uint256 rewards = untaxedPendingRewards(user_, block.timestamp);
+  function pendingRewards(address user) public view override returns (uint256) {
+    uint256 rewards = untaxedPendingRewards(user, block.timestamp);
     if (rewards > 0) {
       uint256 tax = calculateTaxOnRewards(rewards);
       rewards = rewards.sub(tax);
@@ -370,17 +370,17 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
   }
 
   /**
-   * @param user_ The user collecting the reward
+   * @param user The user collecting the reward
    * @param timestamp Current time of the stake
    * @return the pending rewards that have yet to be taxed
    */
-  function untaxedPendingRewards(address user_, uint256 timestamp) public view override returns (uint256) {
+  function untaxedPendingRewards(address user, uint256 timestamp) public view override returns (uint256) {
     uint256 rewards;
-    for (uint256 i = 0; i < users[user_].deposits.length; i++) {
-      rewards += calculateUntaxedRewards(user_, i, timestamp);
+    for (uint256 i = 0; i < users[user].deposits.length; i++) {
+      rewards += calculateUntaxedRewards(user, i, timestamp);
     }
     if (rewards > 0) {
-      rewards = rewards.mul(boostWeight(user_)).div(1e9);
+      rewards = rewards.mul(boostWeight(user)).div(1e9);
     }
     return rewards;
   }
@@ -430,7 +430,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
 
   /**
    * @notice stakes if the pool is active
-   * @param user_ address of user being updated
+   * @param user address of user being updated
    * @param tokenType identifies the type of transaction being made
    * @param lockedFrom timestamp when locked
    * @param lockedUntil timestamp when can unstake without penalty
@@ -438,7 +438,7 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
    * @param mainIndex index of deposit being updated
    */
   function _stake(
-    address user_,
+    address user,
     uint256 tokenType,
     uint256 lockedFrom,
     uint256 lockedUntil,
@@ -446,13 +446,13 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     uint256 tokenAmountOrID
   ) internal virtual {
     require(conf.status == 1, "SidePool: not initiated or paused");
-    (, bool exists) = getDepositIndexByMainIndex(user_, mainIndex);
+    (, bool exists) = getDepositIndexByMainIndex(user, mainIndex);
     require(!exists, "SidePool: payload already used");
-    if (users[user_].lastRewardsAt == 0) {
-      users[user_].lastRewardsAt = uint32(block.timestamp);
+    if (users[user].lastRewardsAt == 0) {
+      users[user].lastRewardsAt = uint32(block.timestamp);
     }
     updateRatio();
-    _collectRewards(user_);
+    _collectRewards(user);
     uint256 tokenAmount;
     if (tokenType == S_SYNR_SWAP) {
       tokenAmount = tokenAmountOrID.mul(conf.swapFactor).mul(conf.priceRatio).div(1000000);
@@ -461,15 +461,15 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
       tokenAmount = tokenAmountOrID.mul(conf.stakeFactor).mul(conf.priceRatio).div(1000000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
-      users[user_].passAmount++;
+      users[user].passAmount++;
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      users[user_].passAmount++;
+      users[user].passAmount++;
       tokenAmount = uint256(nftConf.sPSynrEquivalent).mul(1e18).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
-      users[user_].blueprintAmount++;
+      users[user].blueprintAmount++;
       // SidePool must be approve to spend blueprints
-      blueprint.safeTransferFrom(user_, address(this), tokenAmountOrID);
+      blueprint.safeTransferFrom(user, address(this), tokenAmountOrID);
       if (tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
         tokenAmount = uint256(nftConf.bPSynrEquivalent).mul(1e18).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
         stakedToken.mint(address(this), tokenAmount);
@@ -477,19 +477,19 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
     } else if (tokenType == SEED_SWAP) {
       tokenAmount = tokenAmountOrID;
       // SidePool must be approve to spend SEED
-      stakedToken.transferFrom(user_, address(this), tokenAmount);
+      stakedToken.transferFrom(user, address(this), tokenAmount);
       taxes += tokenAmount.sub(tokenAmount.mul(conf.burnRatio).div(10000));
       stakedToken.burn(tokenAmount.mul(conf.burnRatio).div(10000));
     } else {
       revert("SidePool: invalid tokenType");
     }
-    users[user_].tokenAmount = uint128(uint256(users[user_].tokenAmount).add(tokenAmount));
+    users[user].tokenAmount = uint128(uint256(users[user].tokenAmount).add(tokenAmount));
     _increaseTvl(tokenType, tokenAmount);
     // add deposit
     if (tokenType == S_SYNR_SWAP || tokenType == SEED_SWAP) {
       lockedUntil = lockedFrom + uint256(conf.coolDownDays).mul(1 days);
     }
-    uint256 index = users[user_].deposits.length;
+    uint256 index = users[user].deposits.length;
     Deposit memory deposit = Deposit({
       tokenType: uint8(tokenType),
       lockedFrom: uint32(lockedFrom),
@@ -500,8 +500,8 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
       tokenAmount: uint128(tokenAmount),
       rewardsFactor: conf.rewardsFactor
     });
-    users[user_].deposits.push(deposit);
-    emit DepositSaved(user_, uint16(index));
+    users[user].deposits.push(deposit);
+    emit DepositSaved(user, uint16(index));
   }
 
   /**
