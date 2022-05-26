@@ -37,6 +37,10 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
 
   TVL public tvl;
 
+  // set the storage to manage future changes
+  // keeping the contract upgradeable
+  ExtraConf public extraConf;
+
   modifier onlyBridge() {
     require(bridges[_msgSender()], "MainPool: forbidden");
     _;

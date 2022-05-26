@@ -2218,92 +2218,92 @@
     },
     {
       "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-      "txHash": "0x124c29caffed42393e9431f3d3feb42e0bf0e244b93ae17b6895128fbe5be6e7",
+      "txHash": "0x06becdb6f5be319f38318c63fb18559f801e08be81ecdbe307fe68cb00f7a12f",
       "kind": "uups"
     },
     {
       "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-      "txHash": "0x1d64c80cc9023fc7118b71ef6e0e1bea1450fe20859238c07eab6af3e2624743",
+      "txHash": "0xb7227aef23a8de1ce5ade557f5867c4b395afcbf2e188f09309cd5a4cc681c6d",
       "kind": "uups"
     },
     {
       "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
-      "txHash": "0x4f5618d82c577e340e4ea7fd4534a6d3bcdb85c8ead4ad41b4f556226bd6cace",
+      "txHash": "0x0f2d76010efdf61c48a490e89e01b74be4ed4fb80ccc41c159c76e8c9f06f7b2",
       "kind": "uups"
     },
     {
       "address": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
-      "txHash": "0x3b7bbf5d4457bdb00a04005b7cde312f13c9523fe11bc7809ef6242d551e1fd7",
+      "txHash": "0x073f8263729a3a6bcc083cbe82a3c71799f62ac9acfeac1493b2b20e868d61d7",
       "kind": "uups"
     },
     {
       "address": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
-      "txHash": "0xf256fa1c13366a809230a7ad38d08f720f82926a71dad628b4d071a79849fe62",
+      "txHash": "0x59a5acea85a681f7eaf2ba922b2efd2440987c6c70405419ae3b3ccd53bc9a7b",
       "kind": "uups"
     },
     {
       "address": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
-      "txHash": "0xe720c9bf5d2f85502391ac75d002fe59831494f5482926f9b01d3efc080b00d9",
+      "txHash": "0x383ef193e71d461363a453a8c5a35d816f386ecb383b05d4af94658a7d36c171",
       "kind": "uups"
     },
     {
       "address": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
-      "txHash": "0xab7c0b0cf64be9d993efe907477abea8bf7bfbecaed69c3f0d353828011ff252",
+      "txHash": "0xa45f057f79a5d9182a9855f092537f284aecd9aae7aaa56427f6580455eb9a0d",
       "kind": "uups"
     },
     {
       "address": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
-      "txHash": "0xc9f39ab951bc2466d50be051686102ed7350832fffaf2a5b2d6454b5b8b505c6",
+      "txHash": "0xac3b6f1abd07cd3fad3b547184e8534d1e329108ce39fe1a8a44ac9c575fbc1e",
       "kind": "uups"
     },
     {
       "address": "0x36b58F5C1969B7b6591D752ea6F5486D069010AB",
-      "txHash": "0xce60bbbe693bc46712c80f1d9e71ddf94d7195eabacbad0d1685afae2585705a",
+      "txHash": "0xef68a018cf8a4114cca0cc4ffcdd6f0b53e47660671d1b60b8a0aee64d014ca7",
       "kind": "uups"
     },
     {
       "address": "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d",
-      "txHash": "0x756037f20f77d2513fbd0dbb128b874403110898da8bf74f0b7cf886c5f58ce7",
+      "txHash": "0xfd0fe7dc2d04040e7489dada5a2172712656928ab38947c049b759e7442078c9",
       "kind": "uups"
     },
     {
       "address": "0xf953b3A269d80e3eB0F2947630Da976B896A8C5b",
-      "txHash": "0xc1378e23765807c3522826c062d52a22e1f2b009cc0b43bec71354d631ee4af3",
+      "txHash": "0x6bfe92841265a8978a50f394b55789abfca1a6af907bc238afb70461377d4a98",
       "kind": "uups"
     },
     {
       "address": "0xD5ac451B0c50B9476107823Af206eD814a2e2580",
-      "txHash": "0xf071308cba5244df6baa606d48584843b3d622acba8180bdfa58ef6da9848010",
+      "txHash": "0x2b170dba358f051c38d2c4ea6bb93a2274985ea6eaea7399f5af46665a3ca741",
       "kind": "uups"
     },
     {
       "address": "0x276C216D241856199A83bf27b2286659e5b877D3",
-      "txHash": "0x17c38055f7edb3db91dd7f0d1f9b0ab78c88e7beb3f7ddd51327f20a56c1518c",
+      "txHash": "0x0f0e8b9180875e97b2921085137f55b1ec654cd25d766af07991693632876a5a",
       "kind": "uups"
     },
     {
       "address": "0x525C7063E7C20997BaaE9bDa922159152D0e8417",
-      "txHash": "0x70ee79d7c6f268ae6de71a0478b3a1e77b1910e931cb605e678bb00b4c6346cb",
+      "txHash": "0xc4ebc432bd4f960b2d4120279fffaf1ecafaa5ca7dadd792a1c82ba0d7910346",
       "kind": "uups"
     },
     {
       "address": "0x99dBE4AEa58E518C50a1c04aE9b48C9F6354612f",
-      "txHash": "0x4edcea259b5287730850b496a72696892741b7962aa33715e04c581fa6e0c47e",
+      "txHash": "0x380e761a240099d624c04f6435406a7796e8bc636525f615af3f5b3a25435c06",
       "kind": "uups"
     },
     {
       "address": "0x927b167526bAbB9be047421db732C663a0b77B11",
-      "txHash": "0x00c2dc91be4ab50f5bcb0363911bfd7657b4a4e3b56da97b846bf27c335b2b6b",
+      "txHash": "0xd34810a9ac74c5fea787b8fc649aa363552e15cb0d1f3a6a88779b2255a3d099",
       "kind": "uups"
     },
     {
       "address": "0x4bf010f1b9beDA5450a8dD702ED602A104ff65EE",
-      "txHash": "0x22f8de0a3cc60d94b38a38a79cdc07af0f8c79529e3414e9839abe18d2428137",
+      "txHash": "0xbb61dcec47bb2741ca126ef77cfc7f4fd917834d221ce930a5772c1dd169d05a",
       "kind": "uups"
     },
     {
       "address": "0xaca81583840B1bf2dDF6CDe824ada250C1936B4D",
-      "txHash": "0xb1481a98e4e3db8d2761160f77b473d048a0205390a9133b2033739a559fb90c",
+      "txHash": "0x5d8f276f80026f609412da6628370c7698cf99d3ad3943c29fb90f24fa0f6aa2",
       "kind": "uups"
     },
     {
@@ -2313,7 +2313,7 @@
     },
     {
       "address": "0x1780bCf4103D3F501463AD3414c7f4b654bb7aFd",
-      "txHash": "0x9a11780e96bfe8b15e191c41385af361298af21c3cd6ab4c2cd59f0633fbb497",
+      "txHash": "0xa1ae4bd65eab628806095c171e9644ac096479cb7d1f03b17096d5d80f3f30d0",
       "kind": "uups"
     },
     {
@@ -2323,7 +2323,7 @@
     },
     {
       "address": "0xAdE429ba898c34722e722415D722A70a297cE3a2",
-      "txHash": "0xc48b758c98c6817219033d4ce64a5093d63562919784df59ce7ebd661f7700a5",
+      "txHash": "0x97a4c088e05baf49738a2ae508eedf0a8d4943e09f47c4c498b22e2e1b276102",
       "kind": "uups"
     },
     {
@@ -2333,7 +2333,7 @@
     },
     {
       "address": "0x70eE76691Bdd9696552AF8d4fd634b3cF79DD529",
-      "txHash": "0x3498195e20c07dbb32e7444ba637afce84eae9f5c79b5875c9f93926fa4ff84e",
+      "txHash": "0xe4f9af57e7acb804411e760911fd4179e47c7fe1ede675cdcdf9d887cc4c9aca",
       "kind": "uups"
     },
     {
@@ -2343,7 +2343,7 @@
     },
     {
       "address": "0x683d9CDD3239E0e01E8dC6315fA50AD92aB71D2d",
-      "txHash": "0x80248e2868d35fe125bac0582f97138132e9be6dc1dbb27e833f2d54dcdead69",
+      "txHash": "0x997d8fe33726a64eae09edadd34cc8946633eaca6ce9ac998d88c85334ee4593",
       "kind": "uups"
     },
     {
@@ -2353,7 +2353,7 @@
     },
     {
       "address": "0x547382C0D1b23f707918D3c83A77317B71Aa8470",
-      "txHash": "0xe274381a07e8463651026ba721283968eb4979808cc87d6b68cb854fb048ea38",
+      "txHash": "0x15203fd7c20c55bfb94657eaa1e549bca1ba628c8751250c15b879e1937b89dd",
       "kind": "uups"
     },
     {
@@ -2363,7 +2363,7 @@
     },
     {
       "address": "0x4593ed9CbE6003e687e5e77368534bb04b162503",
-      "txHash": "0x9ce9d0114c4fd118c3e979e23a64e0937539385bc69e1299c59aa2c918a7afec",
+      "txHash": "0xe0d16e585d1e3c0c1376dd6f320f5bffd707d785b85622791f94768fccc83248",
       "kind": "uups"
     },
     {
@@ -2373,7 +2373,7 @@
     },
     {
       "address": "0xA9e6Bfa2BF53dE88FEb19761D9b2eE2e821bF1Bf",
-      "txHash": "0x6c0cd56e8f6b286714e2252b1ee9aac509825efba36c2bd0315f1569ac27a004",
+      "txHash": "0x2dc2308e252e4b1d4721e3a9a449f23b116d075c8957ad137d1c585430295b64",
       "kind": "uups"
     },
     {
@@ -2383,7 +2383,7 @@
     },
     {
       "address": "0x5Ffe31E4676D3466268e28a75E51d1eFa4298620",
-      "txHash": "0x14f5d368fa5fad0a0c8ab3d27be5c3eed66a8c8f4b73ec73956698822208ba01",
+      "txHash": "0x02c43dc5c3f84a39b6614b14a601bae5df76fa7fa111979ced8caa6fcac9eca4",
       "kind": "uups"
     },
     {
@@ -2393,7 +2393,7 @@
     },
     {
       "address": "0xAD2935E147b61175D5dc3A9e7bDa93B0975A43BA",
-      "txHash": "0x18c839034dc33e20696f81767ce3d764578ef92db33ab4e3405c43e7aef90b8d",
+      "txHash": "0xd99da6899339a2cefa1f595f59532a53a62d9455408d1cd6ca4d07c2b83665e1",
       "kind": "uups"
     },
     {
@@ -2403,7 +2403,7 @@
     },
     {
       "address": "0x103A3b128991781EE2c8db0454cA99d67b257923",
-      "txHash": "0xec22302ffbb0d6531d9abbc19fb2dead2c176ebe303f3bf41ec879c60f30ce4b",
+      "txHash": "0x5321347c69a14efcab573ebad9d1af2f66bae4630155f1a1bd5d3443df919cc6",
       "kind": "uups"
     },
     {
@@ -2413,7 +2413,7 @@
     },
     {
       "address": "0x90b97E83e22AFa2e6A96b3549A0E495D5Bae61aF",
-      "txHash": "0x38b3f23b85c6ee52e7ec66d550040493e1c999754f4b93f36c38e9b1aa11426b",
+      "txHash": "0x991966a80ed1a9407c719d59668c20d40d8ed510f7026bdc3018d377aab05d60",
       "kind": "uups"
     },
     {
@@ -2423,7 +2423,7 @@
     },
     {
       "address": "0x25C0a2F0A077F537Bd11897F04946794c2f6f1Ef",
-      "txHash": "0x80e22578aea71f0981c1129d305a49eaf908b2b30c31b79a68d1b8eaa7679e91",
+      "txHash": "0xe76d77e27e49715ee5891333996a57f13cb840c2b209fe7af4bcd38a28196b74",
       "kind": "uups"
     },
     {
@@ -2433,7 +2433,7 @@
     },
     {
       "address": "0x75b0B516B47A27b1819D21B26203Abf314d42CCE",
-      "txHash": "0xd3aaef07d286b4a3d8cd62becb89239fc1a7f5f1e72ef7c47fdc810ae1c2e4ab",
+      "txHash": "0x8e6de5ae15c836c849428128bd2d3df8171e5af97b7cd27bb59f99faf1887b12",
       "kind": "uups"
     },
     {
@@ -2443,7 +2443,7 @@
     },
     {
       "address": "0x40A633EeF249F21D95C8803b7144f19AAfeEF7ae",
-      "txHash": "0x9bb516534e43473519fc9752a637b0c22c6d118f7250f83a8a7cd989c793109d",
+      "txHash": "0x3e981b034c7b1e2957f67c63a0c42d224c8fcc8db7dafb8706c01c3e3c844744",
       "kind": "uups"
     },
     {
@@ -2453,7 +2453,7 @@
     },
     {
       "address": "0x6f2E42BB4176e9A7352a8bF8886255Be9F3D2d13",
-      "txHash": "0xf4b870e02586db64508dea59963dbef5d9b4b3ebc0e9a4259770cc3fd54d9e9f",
+      "txHash": "0x30e0307c570a12b18fddecc11e4e455bdc67d02e4c18e506c71c01d3b7651151",
       "kind": "uups"
     },
     {
@@ -2463,7 +2463,7 @@
     },
     {
       "address": "0x21915b79E1d334499272521a3508061354D13FF0",
-      "txHash": "0xfcffea2472d3eb5a292415fa627bb7122ee9b8685a74ccc130af0c91d51b877a",
+      "txHash": "0x2ccd52cb645790e3244c215afdf639b0f160a735aa79a0eb388100813eb36f0c",
       "kind": "uups"
     },
     {
@@ -2473,7 +2473,7 @@
     },
     {
       "address": "0x5E5713a0d915701F464DEbb66015adD62B2e6AE9",
-      "txHash": "0x354fe6ee50927a37d504fbc42ade1895a188833fe777a9ab40076f9987ed7968",
+      "txHash": "0x27c832a1ab4673abb37a85fb015fcb393cbede8d465e1b351dbd9482847c7074",
       "kind": "uups"
     },
     {
@@ -2483,7 +2483,7 @@
     },
     {
       "address": "0x4ea0Be853219be8C9cE27200Bdeee36881612FF2",
-      "txHash": "0xa77f132f0cc37242fa8f247010da90c463743c1ba4f5614252da9070d5781170",
+      "txHash": "0x57905cc95de299b82d501e3f35040b36e8d90d9f960c11a83238c837a9f82571",
       "kind": "uups"
     },
     {
@@ -2493,7 +2493,7 @@
     },
     {
       "address": "0x05bB67cB592C1753425192bF8f34b95ca8649f09",
-      "txHash": "0x466be385f3e54a348bc0e70a22fc40358bdb3be4895271be871a925560fbf99c",
+      "txHash": "0x9cb3fae79b07044cb4ad037b0c0fd337d10dc5cadb9b8ce9d0761360709c61ca",
       "kind": "uups"
     },
     {
@@ -2503,197 +2503,197 @@
     },
     {
       "address": "0xd9abC93F81394Bd161a1b24B03518e0a570bDEAd",
-      "txHash": "0x9b26c636d204c16f94f7aabc25b3461898137ce69e43ceb2ba6cf9f6ccc78bac",
+      "txHash": "0xc4a55bfe2aa01f451f5e6e7bca05cd6ad769d6bac1d76efb97715f4f32b6055b",
       "kind": "uups"
     },
     {
       "address": "0x746a48E39dC57Ff14B872B8979E20efE5E5100B1",
-      "txHash": "0x76c76347c5da76b6886b1c2309e6957e6d64085f2d7bdf8770f8fd8671ce6ba8",
+      "txHash": "0x0e688f44d6e8bf115dba8805c9758ffbb5cbc23f62c49215171a8d4d6c050e33",
       "kind": "uups"
     },
     {
       "address": "0xDC57724Ea354ec925BaFfCA0cCf8A1248a8E5CF1",
-      "txHash": "0x7427d43fe684bf947cf8b9d51b43b4aea0309d633dd2020189f4e39f87cb7750",
+      "txHash": "0xf5885de574883989d3d535f8f7d21e87e23fccaf68ade6c316cf184d40b9cf7c",
       "kind": "uups"
     },
     {
       "address": "0x8731d45ff9684d380302573cCFafd994Dfa7f7d3",
-      "txHash": "0xb404d40977144cd59028a369981f77a84b868efd6688d62c5c0b6ff77b18cdf7",
+      "txHash": "0x979ea14592224de2406f02c4c3597d2eb3bfa9b5ba60392300c22cfcc59f0c3b",
       "kind": "uups"
     },
     {
       "address": "0x1B25157F05B25438441bF7CDe38A95A55ccf8E50",
-      "txHash": "0x7b75dc73f8cef8866a8f9ac4d5793e1b5d2571ee695414b2b750482aed1fd4da",
+      "txHash": "0x621752bdba0938eff854b9e465d92eabe9a8e48a390c544316ca27982d9f98c7",
       "kind": "uups"
     },
     {
       "address": "0x55027d3dBBcEA0327eF73eFd74ba0Af42A13A966",
-      "txHash": "0xcbfce77fedfc196ef4f02de0e4dc0e36bf6adf07c5c1efe08b394574c8dff5ff",
+      "txHash": "0x688db4403a0e3b81c77b35359b4ca1fa8eeaf1a12ef2d81c14094f6d93c2bb56",
       "kind": "uups"
     },
     {
       "address": "0x20BBE62B175134D21b10C157498b663F048672bA",
-      "txHash": "0x03e16a80fd913bacc2d2380c9018e7532e4919c8cb30f20db7608e4f8042bf8a",
+      "txHash": "0xe681ef265277f428f9f9d8d23bc82b98204fc4c1fc919cf086962a289cba1897",
       "kind": "uups"
     },
     {
       "address": "0xc3b99d27eF3B07C94Ee3cFD670281F0CF98A02f1",
-      "txHash": "0x5d9422bbcd754acb816e33f8d67b3213c8f6a2d1495bf7b7d820d3eafa5e8a9d",
+      "txHash": "0x1dccf21988f9720d900959d03b0a01ca2bafe74388644aa374daa5196e2674a9",
       "kind": "uups"
     },
     {
       "address": "0x8d375dE3D5DDde8d8caAaD6a4c31bD291756180b",
-      "txHash": "0x1c87037ded26f49bcb8a7124d10fb828e9f6cbf4e2d94c3a1965e0ef28e9e008",
+      "txHash": "0x65e162b6d332c29a51b81a743525b19fd50e55ef63c83742ebeb84b7ef9fa508",
       "kind": "uups"
     },
     {
       "address": "0x8b9d5A75328b5F3167b04B42AD00092E7d6c485c",
-      "txHash": "0xd8fc52514d95abf0122dcde76da72c3638e7246ce9fee292b2a52396462219fd",
+      "txHash": "0x75bd41ad48b597dd6b0a9f605dd71968e870a642aee1b87bcae169a125171594",
       "kind": "uups"
     },
     {
       "address": "0x76a999d5F7EFDE0a300e710e6f52Fb0A4b61aD58",
-      "txHash": "0xfa91ad97e0caa52a543df2144bb79d619eb10f8f5dfd62436d5c74d9047bb149",
+      "txHash": "0x52fd64bf5218a430bd65717b816507e69472081f8845ad98f326f68e1b378f50",
       "kind": "uups"
     },
     {
       "address": "0x8B342f4Ddcc71Af65e4D2dA9CD00cc0E945cFD12",
-      "txHash": "0x56dc31224f556faa0dd46235a6461241597f7b16a2f03ea0ba54ab5d1a11a1b5",
+      "txHash": "0x3e911c75a7ef7a33239e2f773360254b8dc570b0d323d2257b6d66fe3166ccb4",
       "kind": "uups"
     },
     {
       "address": "0xad203b3144f8c09a20532957174fc0366291643c",
-      "txHash": "0x01cabdb1b87fa5bedf3b26f08b6f34aa8fc0e8c628376450e5edfd66244225be",
+      "txHash": "0x10fabfae7300b944a912e10f4060483078847aebc012d7d0f3852380852b9dc9",
       "kind": "uups"
     },
     {
       "address": "0x5f246ADDCF057E0f778CD422e20e413be70f9a0c",
-      "txHash": "0xf2bae43f3e474cc28420f8e186857fcd0149b7fddca689facb04e18a66876b33",
+      "txHash": "0x77390572ed88f6fa516b1d18b09e3108a924aa3f7705791634a3560ee3cd3478",
       "kind": "uups"
     },
     {
       "address": "0x4f1F87d512650f32bf9949C4c5Ef37a3cc891C6D",
-      "txHash": "0x26d99506060ed8427123e2de7c19187e75627a36f0526256c97cbf4f22c22f06",
+      "txHash": "0xab26bcf646d55a263cab2fcd4db21a90a1b9299ee27452c190f911132c02e418",
       "kind": "uups"
     },
     {
       "address": "0x834Ea01e45F9b5365314358159d92d134d89feEb",
-      "txHash": "0x8eaca71fd4905330b4129df2a5b1abb95b127dbb909bd4a96b5edd70d27cc420",
+      "txHash": "0x29047d3afcd2d0c9db4d771d55257279c825dc78cf700812e588e2ca96abdcc7",
       "kind": "uups"
     },
     {
       "address": "0x3Af511B1bdD6A0377e23796aD6B7391d8De68636",
-      "txHash": "0xe9599bcd4c7a93a342b72797e4c0ecb4f07a922da085ccc2fd506bfe7f94193a",
+      "txHash": "0xa3a13b264274ebbb659dc06b3ed404b5771e612851bdcd873bcce6df29851558",
       "kind": "uups"
     },
     {
       "address": "0x82A9286dB983093Ff234cefCea1d8fA66382876B",
-      "txHash": "0x9e4d6f3cb109e17d792858cf8515b90f215aec539234ba5bae0e58db4c5d571b",
+      "txHash": "0xfac55ef9657465bfa03ad7ff9091f48bf4726b735a393e8f48fffc4e27b291f3",
       "kind": "uups"
     },
     {
       "address": "0x820638ecd57B55e51CE6EaD7D137962E7A201dD9",
-      "txHash": "0x735762485770fe3b0faf6039530e49adc92fcb1d950210b0f8f2a0d42c9277df",
+      "txHash": "0xcecf779115603a2f2a75b7f627a9b83587509dde325431663d58d7ced7d0db7a",
       "kind": "uups"
     },
     {
       "address": "0x67Fc5Aa53440518DdbAd4B381fD4b86fFD77B776",
-      "txHash": "0xc754515eb740ff35ef5e7292fd4a9437ae5898a98275fb2dbcda16f578a54cb8",
+      "txHash": "0xdca273b7fa9cfaf73c39542793e135d9d151c8c01fe9a6e24e6c433439fd1cc5",
       "kind": "uups"
     },
     {
       "address": "0xa9efDEf197130B945462163a0B852019BA529a66",
-      "txHash": "0xf5be2a95e3e07333ecbd4f337d8fbde8d5f72829c8d095339f8040e3eb47a0dd",
+      "txHash": "0x53ff02e7116330eec79ba773239390b7d5bc75fd6e7fe6f57173c80dd68724ba",
       "kind": "uups"
     },
     {
       "address": "0x7aB5cEee0Ff304b053CE1F67d84C33F0ff407a55",
-      "txHash": "0x67bea973d5747176f133ef499dc2199bde3facc3b1cdce8661b9460760909490",
+      "txHash": "0xd8a4ab4b1d1397a333843b99d3ec8bb762a36676a694cb0161044b801c4e1f6f",
       "kind": "uups"
     },
     {
       "address": "0xa138575a030a2F4977D19Cc900781E7BE3fD2bc0",
-      "txHash": "0x3f5e3f0c29afde20a09d3c08a783f6130d679bb2daf9f104997d10f1a63629e6",
+      "txHash": "0x37e62d5b56f16817771f7c760cf1c00565bfb050db6a5cf0b807d952b5e20e25",
       "kind": "uups"
     },
     {
       "address": "0x2aA12f98795E7A65072950AfbA9d1E023D398241",
-      "txHash": "0xcf097d18a18c098a778877bfe23b7bc78ba9198ce72076b40b06499499cd2ab0",
+      "txHash": "0x3b8857ce545029fcc20caf84939a58345c67475a4d40986efe399977039122d9",
       "kind": "uups"
     },
     {
       "address": "0x01c93598EeC9131C05a2450Cd033cbd8F82da31e",
-      "txHash": "0x57ea6b8a69d68e4df58559844869e7005737799ccf992b5428a6ec15a92ab2a8",
+      "txHash": "0x7eadd9f14aa37eae6fb299127dd47a028041c8b87b61d99b45615eebd6c6fcb6",
       "kind": "uups"
     },
     {
       "address": "0xB354ECF032e9e14442bE590D9Eaee37d2924B67A",
-      "txHash": "0xa2bac5bf92914acf1192702e5dc6b5be5a96388f96d8ac18871ee2823d29f4b2",
+      "txHash": "0x870d4ce479b592271dc0e84c45c482d0c46115dbd2f044ceba4d7eac27526335",
       "kind": "uups"
     },
     {
       "address": "0x0BbfcD7a557FFB8A70CB0948FF680F0E573bbFf2",
-      "txHash": "0x264875045b794da67c14f3577ac3a52e0c1f4bcbd69337bba4f1927c8bdc6e70",
+      "txHash": "0xc6f341830645de0881e274d284f51cd33e14744c98872c0ee0de7eca81ad66bc",
       "kind": "uups"
     },
     {
       "address": "0x0b5dcAf621a877dAcF3C540c1e5208C8a3eb7B23",
-      "txHash": "0x3f51133c20e042e886b30f308159a9653556f0313405aeb44a12adcea0cc5169",
+      "txHash": "0x80600012ea31b5fa63f4cd4cdeba6b8bb2b974eddc5948f7e710d323a4947ea5",
       "kind": "uups"
     },
     {
       "address": "0xa51807d5a12E7e78148c66dC4851CD33EEd1FDfD",
-      "txHash": "0x8e1962d3039406471007da9d6098e7cd304398699a37ff81b7c1afdc8229a8f2",
+      "txHash": "0x723bfcda89b5c8eeaa3dec269e9de3b69283b94d58762ceba49520b9df6c449c",
       "kind": "uups"
     },
     {
       "address": "0x7A3A9876c08B3f001D10c6a8aF685699BC52e7c8",
-      "txHash": "0x26e76b3ae36a04dafaf0da9e6d8574acf1e947e530639d96b89984c0fa8957d2",
+      "txHash": "0xb6b13e636b46defa9a48fe5b01d5e243448383641ddc738cb6f223fd7b53d1f3",
       "kind": "uups"
     },
     {
       "address": "0x72aC6A36de2f72BD39e9c782e9db0DCc41FEbfe2",
-      "txHash": "0xe982db4da1c510c9b834550519ddea7d6fe0002cfab5be35c0f20509b3429fb9",
+      "txHash": "0xaf15ac2e75234c4befc12362b1b9c9ba0f286dfe9eb63a7f3038e5b7946860e6",
       "kind": "uups"
     },
     {
       "address": "0xCd9BC6cE45194398d12e27e1333D5e1d783104dD",
-      "txHash": "0x3b4f57d2145f53a39a131e760805a9e068e492d474f73b6dc75e01dae9af1729",
+      "txHash": "0x450bec6ef1cfd9e23c6c7ffbbca2db35b13ff78c92611486dd9e59c490c070a2",
       "kind": "uups"
     },
     {
       "address": "0xfaA7b3a4b5c3f54a934a2e33D34C7bC099f96CCE",
-      "txHash": "0xfeb26e0257c1257c217759c7dcd0c6d27c0683f19c2817d2bb12674f202680de",
+      "txHash": "0x5bf1206ceb2737218c097427928da8faf7f4a0719c621d1afa4de8ea1102e2e6",
       "kind": "uups"
     },
     {
       "address": "0x3576293Ba6Adacba1A81397db889558Dd91A8519",
-      "txHash": "0x4920d3423593ae460c51f6d511098d08b2a3ccb8ef2ca2e9986471ed994f1ca9",
+      "txHash": "0x6de8d05843184c7208557e56a67af8e6e9d3f1a581204de7fb0065d0e095d629",
       "kind": "uups"
     },
     {
       "address": "0x6B763F54D260aFF608CbbAeD8721c96992eC24Db",
-      "txHash": "0xf8b0ed3e57459b4a6f2dd6ca2b0feff1b5d4e13b8baa8df2d38add39a298d73a",
+      "txHash": "0x75f51997ddf95ebfe5d344e53e886b268df2da9b70a13ad90dd37e45effa81aa",
       "kind": "uups"
     },
     {
       "address": "0x9581c795DBcaf408E477F6f1908a41BE43093122",
-      "txHash": "0x49626cadd96016521ba155a24e3d0b54b2a29ad53b98b5cbfb49a15c6feb51f0",
+      "txHash": "0xe286504fe7a5f5b33c3cc064d8f16ad236e2d0e341b0fcadb985c15168b35c05",
       "kind": "uups"
     },
     {
       "address": "0xC1dC7a8379885676a6Ea08E67b7Defd9a235De71",
-      "txHash": "0xdf96010fe83466979630d7aa091a88d1873133f3cba4b131bc3c3a5445c9d32d",
+      "txHash": "0x278a5d791bacc6dfd0f3d1b623275c53077940ac6480566e6934638156bc8456",
       "kind": "uups"
     },
     {
       "address": "0x1D87585dF4D48E52436e26521a3C5856E4553e3F",
-      "txHash": "0x5f0877f226759a95a8eca74c8608a717ce36d429d1806c88b83caa95bf4180c4",
+      "txHash": "0xe3af6fa2f1677bd899fb0aad328fde794e0306664e008612acf7029bd00b23cb",
       "kind": "uups"
     },
     {
       "address": "0xD185B4846E5fd5419fD4D077dc636084BEfC51C0",
-      "txHash": "0xe2a494c54de5c525a5ae18d3381c6b95604823537f196ba33b13e9ed05600a1c",
+      "txHash": "0x6aaf9641fd3b058de88145c39eb72206480207bbf24f1d68c1e833268a632748",
       "kind": "uups"
     }
   ],
@@ -4810,7 +4810,7 @@
     },
     "c365d06c86ad2205532d9be90cd04b501668a4cbdcdfe6878f4973170491232a": {
       "address": "0x70bDA08DBe07363968e9EE53d899dFE48560605B",
-      "txHash": "0x24fa4211adbae17ab300502c62849b545c4ca7e884869498c61d4de8ff02be1d",
+      "txHash": "0x609efb9193b2e08e03656089283296bab55d3bde1caa44d0040c0785acca3ef9",
       "layout": {
         "storage": [
           {
@@ -4920,7 +4920,7 @@
     },
     "86e8329104f481bca11f5ee88a82c81dcbbb3fead898c6faa3ba8f609d5ded1a": {
       "address": "0xc3023a2c9f7B92d1dd19F488AF6Ee107a78Df9DB",
-      "txHash": "0x489f131e9907cf447114be6e4142a150ab5fa154b732dec1bef6f1a191f5b700",
+      "txHash": "0x2b0f1a2c168cba83ece37e1a95116ad3128c82960c596aa6e7b7113289e5be39",
       "layout": {
         "storage": [
           {
@@ -5032,324 +5032,6 @@
           "t_uint256": {
             "label": "uint256",
             "numberOfBytes": "32"
-          }
-        }
-      }
-    },
-    "0f85428f7fb6582965ece331882ac38f6386879d5c250b0942eab0311b212bf0": {
-      "address": "0x04d7478fDF318C3C22cECE62Da9D78ff94807D77",
-      "txHash": "0x96a09b3c49d90b165a12e37f9ad968471aa2e54151e6d9a104729ba13048c39b",
-      "layout": {
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ContextUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
-          },
-          {
-            "label": "_owner",
-            "offset": 0,
-            "slot": "51",
-            "type": "t_address",
-            "contract": "OwnableUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "52",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "OwnableUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:87"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "101",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1967UpgradeUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "151",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "UUPSUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
-          },
-          {
-            "label": "users",
-            "offset": 0,
-            "slot": "201",
-            "type": "t_mapping(t_address,t_struct(User)7187_storage)",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:27"
-          },
-          {
-            "label": "conf",
-            "offset": 0,
-            "slot": "202",
-            "type": "t_struct(Conf)7196_storage",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:28"
-          },
-          {
-            "label": "synr",
-            "offset": 0,
-            "slot": "203",
-            "type": "t_contract(ISyndicateERC20)7733",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:30"
-          },
-          {
-            "label": "sSynr",
-            "offset": 0,
-            "slot": "204",
-            "type": "t_contract(ISyntheticSyndicateERC20)7768",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:31"
-          },
-          {
-            "label": "pass",
-            "offset": 0,
-            "slot": "205",
-            "type": "t_contract(IERC721Minimal)7131",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:32"
-          },
-          {
-            "label": "penalties",
-            "offset": 0,
-            "slot": "206",
-            "type": "t_uint256",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:34"
-          },
-          {
-            "label": "bridges",
-            "offset": 0,
-            "slot": "207",
-            "type": "t_mapping(t_address,t_bool)",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:36"
-          },
-          {
-            "label": "tvl",
-            "offset": 0,
-            "slot": "208",
-            "type": "t_struct(TVL)7201_storage",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:38"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "209",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:422"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_array(t_struct(Deposit)7178_storage)dyn_storage": {
-            "label": "struct IMainPool.Deposit[]",
-            "numberOfBytes": "32"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]",
-            "numberOfBytes": "1568"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]",
-            "numberOfBytes": "1600"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_contract(IERC721Minimal)7131": {
-            "label": "contract IERC721Minimal",
-            "numberOfBytes": "20"
-          },
-          "t_contract(ISyndicateERC20)7733": {
-            "label": "contract ISyndicateERC20",
-            "numberOfBytes": "20"
-          },
-          "t_contract(ISyntheticSyndicateERC20)7768": {
-            "label": "contract ISyntheticSyndicateERC20",
-            "numberOfBytes": "20"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_struct(User)7187_storage)": {
-            "label": "mapping(address => struct IMainPool.User)",
-            "numberOfBytes": "32"
-          },
-          "t_struct(Conf)7196_storage": {
-            "label": "struct IMainPool.Conf",
-            "members": [
-              {
-                "label": "minimumLockupTime",
-                "type": "t_uint16",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "maximumLockupTime",
-                "type": "t_uint16",
-                "offset": 2,
-                "slot": "0"
-              },
-              {
-                "label": "earlyUnstakePenalty",
-                "type": "t_uint16",
-                "offset": 4,
-                "slot": "0"
-              },
-              {
-                "label": "status",
-                "type": "t_uint8",
-                "offset": 6,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(Deposit)7178_storage": {
-            "label": "struct IMainPool.Deposit",
-            "members": [
-              {
-                "label": "tokenType",
-                "type": "t_uint8",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "lockedFrom",
-                "type": "t_uint32",
-                "offset": 1,
-                "slot": "0"
-              },
-              {
-                "label": "lockedUntil",
-                "type": "t_uint32",
-                "offset": 5,
-                "slot": "0"
-              },
-              {
-                "label": "tokenAmountOrID",
-                "type": "t_uint96",
-                "offset": 9,
-                "slot": "0"
-              },
-              {
-                "label": "unlockedAt",
-                "type": "t_uint32",
-                "offset": 21,
-                "slot": "0"
-              },
-              {
-                "label": "otherChain",
-                "type": "t_uint16",
-                "offset": 25,
-                "slot": "0"
-              },
-              {
-                "label": "mainIndex",
-                "type": "t_uint16",
-                "offset": 27,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(TVL)7201_storage": {
-            "label": "struct IMainPool.TVL",
-            "members": [
-              {
-                "label": "passAmount",
-                "type": "t_uint16",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "synrAmount",
-                "type": "t_uint96",
-                "offset": 2,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(User)7187_storage": {
-            "label": "struct IMainPool.User",
-            "members": [
-              {
-                "label": "synrAmount",
-                "type": "t_uint96",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "passAmount",
-                "type": "t_uint16",
-                "offset": 12,
-                "slot": "0"
-              },
-              {
-                "label": "deposits",
-                "type": "t_array(t_struct(Deposit)7178_storage)dyn_storage",
-                "offset": 0,
-                "slot": "1"
-              }
-            ],
-            "numberOfBytes": "64"
-          },
-          "t_uint16": {
-            "label": "uint16",
-            "numberOfBytes": "2"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint32": {
-            "label": "uint32",
-            "numberOfBytes": "4"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          },
-          "t_uint96": {
-            "label": "uint96",
-            "numberOfBytes": "12"
           }
         }
       }
@@ -9894,9 +9576,9 @@
         }
       }
     },
-    "56ca1944e980193b4a78404bf76b3d094e4fa00ae42c14b5470d802ae3d62193": {
+    "9fc4324c7a2f83dd789d81ac3611e9fe98f29278cf36ef77a659201f314d2281": {
       "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-      "txHash": "0xbbae51023436d1bf3dd82ddb0500ce4ffc7eef0e7e18bdf43d43cd748bed3001",
+      "txHash": "0x8b7d5b9619900f2aa8dc5fa369b244ed9c9f35043c37f3e1e2e6ec05817f6be3",
       "layout": {
         "storage": [
           {
@@ -9959,7 +9641,7 @@
             "label": "users",
             "offset": 0,
             "slot": "201",
-            "type": "t_mapping(t_address,t_struct(User)7449_storage)",
+            "type": "t_mapping(t_address,t_struct(User)7471_storage)",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:25"
           },
@@ -9967,7 +9649,7 @@
             "label": "conf",
             "offset": 0,
             "slot": "202",
-            "type": "t_struct(Conf)7476_storage",
+            "type": "t_struct(Conf)7498_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:26"
           },
@@ -9975,7 +9657,7 @@
             "label": "nftConf",
             "offset": 0,
             "slot": "204",
-            "type": "t_struct(NftConf)7494_storage",
+            "type": "t_struct(NftConf)7533_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:27"
           },
@@ -9983,7 +9665,7 @@
             "label": "rewardsToken",
             "offset": 0,
             "slot": "205",
-            "type": "t_contract(SideToken)16373",
+            "type": "t_contract(SideToken)16430",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:29"
           },
@@ -9991,7 +9673,7 @@
             "label": "stakedToken",
             "offset": 0,
             "slot": "206",
-            "type": "t_contract(SideToken)16373",
+            "type": "t_contract(SideToken)16430",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:30"
           },
@@ -10031,22 +9713,38 @@
             "label": "tvl",
             "offset": 0,
             "slot": "211",
-            "type": "t_struct(TVL)7481_storage",
+            "type": "t_struct(TVL)7520_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:37"
           },
           {
-            "label": "__gap",
+            "label": "extraConf",
             "offset": 0,
             "slot": "212",
-            "type": "t_array(t_uint256)50_storage",
+            "type": "t_struct(ExtraConf)7515_storage",
             "contract": "SidePool",
-            "src": "contracts/pool/SidePool.sol:699"
+            "src": "contracts/pool/SidePool.sol:41"
+          },
+          {
+            "label": "extraNftConf",
+            "offset": 0,
+            "slot": "213",
+            "type": "t_array(t_struct(ExtraNftConf)7541_storage)dyn_storage",
+            "contract": "SidePool",
+            "src": "contracts/pool/SidePool.sol:42"
           },
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "262",
+            "slot": "214",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "SidePool",
+            "src": "contracts/pool/SidePool.sol:703"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "264",
             "type": "t_array(t_uint256)50_storage",
             "contract": "FarmingPool",
             "src": "contracts/pool/FarmingPool.sol:60"
@@ -10057,8 +9755,12 @@
             "label": "address",
             "numberOfBytes": "20"
           },
-          "t_array(t_struct(Deposit)7436_storage)dyn_storage": {
+          "t_array(t_struct(Deposit)7454_storage)dyn_storage": {
             "label": "struct ISidePool.Deposit[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(ExtraNftConf)7541_storage)dyn_storage": {
+            "label": "struct ISidePool.ExtraNftConf[]",
             "numberOfBytes": "32"
           },
           "t_array(t_uint256)49_storage": {
@@ -10073,19 +9775,27 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
+          "t_contract(IERC721)4834": {
+            "label": "contract IERC721",
+            "numberOfBytes": "20"
+          },
           "t_contract(IERC721Minimal)7131": {
             "label": "contract IERC721Minimal",
             "numberOfBytes": "20"
           },
-          "t_contract(SideToken)16373": {
+          "t_contract(SideToken)16430": {
             "label": "contract SideToken",
             "numberOfBytes": "20"
           },
-          "t_mapping(t_address,t_struct(User)7449_storage)": {
+          "t_mapping(t_address,t_struct(User)7471_storage)": {
             "label": "mapping(address => struct ISidePool.User)",
             "numberOfBytes": "32"
           },
-          "t_struct(Conf)7476_storage": {
+          "t_mapping(t_uint8,t_uint16)": {
+            "label": "mapping(uint8 => uint16)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Conf)7498_storage": {
             "label": "struct ISidePool.Conf",
             "members": [
               {
@@ -10169,7 +9879,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Deposit)7436_storage": {
+          "t_struct(Deposit)7454_storage": {
             "label": "struct ISidePool.Deposit",
             "members": [
               {
@@ -10223,7 +9933,85 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(NftConf)7494_storage": {
+          "t_struct(ExtraConf)7515_storage": {
+            "label": "struct ISidePool.ExtraConf",
+            "members": [
+              {
+                "label": "reserved1",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "reserved2",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "reserved3",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "reserved4",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "reserved5",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "reserved6",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "reserved7",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "reserved8",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ExtraNftConf)7541_storage": {
+            "label": "struct ISidePool.ExtraNftConf",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_contract(IERC721)4834",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "boostFactor",
+                "type": "t_uint16",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "boostLimit",
+                "type": "t_uint32",
+                "offset": 22,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(NftConf)7533_storage": {
             "label": "struct ISidePool.NftConf",
             "members": [
               {
@@ -10265,7 +10053,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(TVL)7481_storage": {
+          "t_struct(TVL)7520_storage": {
             "label": "struct ISidePool.TVL",
             "members": [
               {
@@ -10283,7 +10071,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(User)7449_storage": {
+          "t_struct(User)7471_storage": {
             "label": "struct ISidePool.User",
             "members": [
               {
@@ -10312,12 +10100,18 @@
               },
               {
                 "label": "deposits",
-                "type": "t_array(t_struct(Deposit)7436_storage)dyn_storage",
+                "type": "t_array(t_struct(Deposit)7454_storage)dyn_storage",
                 "offset": 0,
                 "slot": "1"
+              },
+              {
+                "label": "extraNftAmounts",
+                "type": "t_mapping(t_uint8,t_uint16)",
+                "offset": 0,
+                "slot": "2"
               }
             ],
-            "numberOfBytes": "64"
+            "numberOfBytes": "96"
           },
           "t_uint128": {
             "label": "uint128",
@@ -10346,9 +10140,9 @@
         }
       }
     },
-    "1100e784d6cef5a1b79a8ef814d0ea8813643d2f5d442f22e9afa911eafb1e8f": {
+    "0f1e0c46adfcdbb6c50c62c1d96d613cbb2f36c30e497439326f443624828286": {
       "address": "0xefAB0Beb0A557E452b398035eA964948c750b2Fd",
-      "txHash": "0xe0d7ca94076a07aeeec9ce41bc5d6615825a506d4ca55f2f00a57119ed3acbef",
+      "txHash": "0x9645d9854b2617175419c0d398f497bcdf5e0348bde76c226a9f6d408f7371e9",
       "layout": {
         "storage": [
           {
@@ -10427,7 +10221,7 @@
             "label": "synr",
             "offset": 0,
             "slot": "203",
-            "type": "t_contract(ISyndicateERC20)7733",
+            "type": "t_contract(ISyndicateERC20)7780",
             "contract": "MainPool",
             "src": "contracts/pool/MainPool.sol:30"
           },
@@ -10435,7 +10229,7 @@
             "label": "sSynr",
             "offset": 0,
             "slot": "204",
-            "type": "t_contract(ISyntheticSyndicateERC20)7768",
+            "type": "t_contract(ISyntheticSyndicateERC20)7815",
             "contract": "MainPool",
             "src": "contracts/pool/MainPool.sol:31"
           },
@@ -10467,17 +10261,25 @@
             "label": "tvl",
             "offset": 0,
             "slot": "208",
-            "type": "t_struct(TVL)7201_storage",
+            "type": "t_struct(TVL)7218_storage",
             "contract": "MainPool",
             "src": "contracts/pool/MainPool.sol:38"
           },
           {
-            "label": "__gap",
+            "label": "extraConf",
             "offset": 0,
             "slot": "209",
+            "type": "t_struct(ExtraConf)7213_storage",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:42"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "210",
             "type": "t_array(t_uint256)50_storage",
             "contract": "MainPool",
-            "src": "contracts/pool/MainPool.sol:422"
+            "src": "contracts/pool/MainPool.sol:426"
           }
         ],
         "types": {
@@ -10505,11 +10307,11 @@
             "label": "contract IERC721Minimal",
             "numberOfBytes": "20"
           },
-          "t_contract(ISyndicateERC20)7733": {
+          "t_contract(ISyndicateERC20)7780": {
             "label": "contract ISyndicateERC20",
             "numberOfBytes": "20"
           },
-          "t_contract(ISyntheticSyndicateERC20)7768": {
+          "t_contract(ISyntheticSyndicateERC20)7815": {
             "label": "contract ISyntheticSyndicateERC20",
             "numberOfBytes": "20"
           },
@@ -10599,7 +10401,61 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(TVL)7201_storage": {
+          "t_struct(ExtraConf)7213_storage": {
+            "label": "struct IMainPool.ExtraConf",
+            "members": [
+              {
+                "label": "reserved1",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "reserved2",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "reserved3",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "reserved4",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "reserved5",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "reserved6",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "reserved7",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "reserved8",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(TVL)7218_storage": {
             "label": "struct IMainPool.TVL",
             "members": [
               {
@@ -10664,9 +10520,9 @@
         }
       }
     },
-    "ae35001c0f3681794b22c9e1de2e34d89222b9fb744bf087b4bad0ea918a6fe6": {
+    "bea97c0e29c28c8a19014dc7ee6dde522008f07cd08ad40032603d9850bed78e": {
       "address": "0x821f3361D454cc98b7555221A06Be563a7E2E0A6",
-      "txHash": "0x17dc0b11cf5fdb0cc701f3047dba4f5371bda12262279d8f684c0253abf312fc",
+      "txHash": "0x992d22f93c5e3aed8583cb419c7f4541f8876520974c49148d288b63195b95aa",
       "layout": {
         "storage": [
           {
@@ -10729,7 +10585,7 @@
             "label": "users",
             "offset": 0,
             "slot": "201",
-            "type": "t_mapping(t_address,t_struct(User)7449_storage)",
+            "type": "t_mapping(t_address,t_struct(User)7471_storage)",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:25"
           },
@@ -10737,7 +10593,7 @@
             "label": "conf",
             "offset": 0,
             "slot": "202",
-            "type": "t_struct(Conf)7476_storage",
+            "type": "t_struct(Conf)7498_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:26"
           },
@@ -10745,7 +10601,7 @@
             "label": "nftConf",
             "offset": 0,
             "slot": "204",
-            "type": "t_struct(NftConf)7494_storage",
+            "type": "t_struct(NftConf)7533_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:27"
           },
@@ -10753,7 +10609,7 @@
             "label": "rewardsToken",
             "offset": 0,
             "slot": "205",
-            "type": "t_contract(SideToken)16373",
+            "type": "t_contract(SideToken)16430",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:29"
           },
@@ -10761,7 +10617,7 @@
             "label": "stakedToken",
             "offset": 0,
             "slot": "206",
-            "type": "t_contract(SideToken)16373",
+            "type": "t_contract(SideToken)16430",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:30"
           },
@@ -10801,22 +10657,38 @@
             "label": "tvl",
             "offset": 0,
             "slot": "211",
-            "type": "t_struct(TVL)7481_storage",
+            "type": "t_struct(TVL)7520_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:37"
           },
           {
-            "label": "__gap",
+            "label": "extraConf",
             "offset": 0,
             "slot": "212",
+            "type": "t_struct(ExtraConf)7515_storage",
+            "contract": "SidePool",
+            "src": "contracts/pool/SidePool.sol:41"
+          },
+          {
+            "label": "extraNftConf",
+            "offset": 0,
+            "slot": "213",
+            "type": "t_array(t_struct(ExtraNftConf)7541_storage)dyn_storage",
+            "contract": "SidePool",
+            "src": "contracts/pool/SidePool.sol:42"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "214",
             "type": "t_array(t_uint256)50_storage",
             "contract": "SidePool",
-            "src": "contracts/pool/SidePool.sol:699"
+            "src": "contracts/pool/SidePool.sol:703"
           },
           {
             "label": "bridges",
             "offset": 0,
-            "slot": "262",
+            "slot": "264",
             "type": "t_mapping(t_address,t_bool)",
             "contract": "SeedPool",
             "src": "contracts/pool/SeedPool.sol:14"
@@ -10824,7 +10696,7 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "263",
+            "slot": "265",
             "type": "t_array(t_uint256)50_storage",
             "contract": "SeedPool",
             "src": "contracts/pool/SeedPool.sol:91"
@@ -10835,8 +10707,12 @@
             "label": "address",
             "numberOfBytes": "20"
           },
-          "t_array(t_struct(Deposit)7436_storage)dyn_storage": {
+          "t_array(t_struct(Deposit)7454_storage)dyn_storage": {
             "label": "struct ISidePool.Deposit[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(ExtraNftConf)7541_storage)dyn_storage": {
+            "label": "struct ISidePool.ExtraNftConf[]",
             "numberOfBytes": "32"
           },
           "t_array(t_uint256)49_storage": {
@@ -10851,11 +10727,15 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
+          "t_contract(IERC721)4834": {
+            "label": "contract IERC721",
+            "numberOfBytes": "20"
+          },
           "t_contract(IERC721Minimal)7131": {
             "label": "contract IERC721Minimal",
             "numberOfBytes": "20"
           },
-          "t_contract(SideToken)16373": {
+          "t_contract(SideToken)16430": {
             "label": "contract SideToken",
             "numberOfBytes": "20"
           },
@@ -10863,11 +10743,15 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(User)7449_storage)": {
+          "t_mapping(t_address,t_struct(User)7471_storage)": {
             "label": "mapping(address => struct ISidePool.User)",
             "numberOfBytes": "32"
           },
-          "t_struct(Conf)7476_storage": {
+          "t_mapping(t_uint8,t_uint16)": {
+            "label": "mapping(uint8 => uint16)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Conf)7498_storage": {
             "label": "struct ISidePool.Conf",
             "members": [
               {
@@ -10951,7 +10835,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Deposit)7436_storage": {
+          "t_struct(Deposit)7454_storage": {
             "label": "struct ISidePool.Deposit",
             "members": [
               {
@@ -11005,7 +10889,85 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(NftConf)7494_storage": {
+          "t_struct(ExtraConf)7515_storage": {
+            "label": "struct ISidePool.ExtraConf",
+            "members": [
+              {
+                "label": "reserved1",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "reserved2",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "reserved3",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "reserved4",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "reserved5",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "reserved6",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "reserved7",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "reserved8",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ExtraNftConf)7541_storage": {
+            "label": "struct ISidePool.ExtraNftConf",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_contract(IERC721)4834",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "boostFactor",
+                "type": "t_uint16",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "boostLimit",
+                "type": "t_uint32",
+                "offset": 22,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(NftConf)7533_storage": {
             "label": "struct ISidePool.NftConf",
             "members": [
               {
@@ -11047,7 +11009,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(TVL)7481_storage": {
+          "t_struct(TVL)7520_storage": {
             "label": "struct ISidePool.TVL",
             "members": [
               {
@@ -11065,7 +11027,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(User)7449_storage": {
+          "t_struct(User)7471_storage": {
             "label": "struct ISidePool.User",
             "members": [
               {
@@ -11094,12 +11056,18 @@
               },
               {
                 "label": "deposits",
-                "type": "t_array(t_struct(Deposit)7436_storage)dyn_storage",
+                "type": "t_array(t_struct(Deposit)7454_storage)dyn_storage",
                 "offset": 0,
                 "slot": "1"
+              },
+              {
+                "label": "extraNftAmounts",
+                "type": "t_mapping(t_uint8,t_uint16)",
+                "offset": 0,
+                "slot": "2"
               }
             ],
-            "numberOfBytes": "64"
+            "numberOfBytes": "96"
           },
           "t_uint128": {
             "label": "uint128",
@@ -11128,9 +11096,389 @@
         }
       }
     },
-    "8d7178199bc270058b92a0c6882836c90330560f595236fb40068abc3a15ae5b": {
+    "daa6abd830103290d0209e71202336a7430b4870298e567b9882b2d9b211fad7": {
+      "address": "0x04d7478fDF318C3C22cECE62Da9D78ff94807D77",
+      "txHash": "0x857820dad0fdd608e24d711e77444dec39529a1d66545aa42b1d097bbfd1bc9c",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:87"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "users",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_address,t_struct(User)7187_storage)",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:27"
+          },
+          {
+            "label": "conf",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_struct(Conf)7196_storage",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:28"
+          },
+          {
+            "label": "synr",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_contract(ISyndicateERC20)7780",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:30"
+          },
+          {
+            "label": "sSynr",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_contract(ISyntheticSyndicateERC20)7815",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:31"
+          },
+          {
+            "label": "pass",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_contract(IERC721Minimal)7131",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:32"
+          },
+          {
+            "label": "penalties",
+            "offset": 0,
+            "slot": "206",
+            "type": "t_uint256",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:34"
+          },
+          {
+            "label": "bridges",
+            "offset": 0,
+            "slot": "207",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:36"
+          },
+          {
+            "label": "tvl",
+            "offset": 0,
+            "slot": "208",
+            "type": "t_struct(TVL)7218_storage",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:38"
+          },
+          {
+            "label": "extraConf",
+            "offset": 0,
+            "slot": "209",
+            "type": "t_struct(ExtraConf)7213_storage",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:42"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "210",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "MainPool",
+            "src": "contracts/pool/MainPool.sol:426"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_struct(Deposit)7178_storage)dyn_storage": {
+            "label": "struct IMainPool.Deposit[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(IERC721Minimal)7131": {
+            "label": "contract IERC721Minimal",
+            "numberOfBytes": "20"
+          },
+          "t_contract(ISyndicateERC20)7780": {
+            "label": "contract ISyndicateERC20",
+            "numberOfBytes": "20"
+          },
+          "t_contract(ISyntheticSyndicateERC20)7815": {
+            "label": "contract ISyntheticSyndicateERC20",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(User)7187_storage)": {
+            "label": "mapping(address => struct IMainPool.User)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Conf)7196_storage": {
+            "label": "struct IMainPool.Conf",
+            "members": [
+              {
+                "label": "minimumLockupTime",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "maximumLockupTime",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "earlyUnstakePenalty",
+                "type": "t_uint16",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "status",
+                "type": "t_uint8",
+                "offset": 6,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Deposit)7178_storage": {
+            "label": "struct IMainPool.Deposit",
+            "members": [
+              {
+                "label": "tokenType",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "lockedFrom",
+                "type": "t_uint32",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "lockedUntil",
+                "type": "t_uint32",
+                "offset": 5,
+                "slot": "0"
+              },
+              {
+                "label": "tokenAmountOrID",
+                "type": "t_uint96",
+                "offset": 9,
+                "slot": "0"
+              },
+              {
+                "label": "unlockedAt",
+                "type": "t_uint32",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "otherChain",
+                "type": "t_uint16",
+                "offset": 25,
+                "slot": "0"
+              },
+              {
+                "label": "mainIndex",
+                "type": "t_uint16",
+                "offset": 27,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ExtraConf)7213_storage": {
+            "label": "struct IMainPool.ExtraConf",
+            "members": [
+              {
+                "label": "reserved1",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "reserved2",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "reserved3",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "reserved4",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "reserved5",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "reserved6",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "reserved7",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "reserved8",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(TVL)7218_storage": {
+            "label": "struct IMainPool.TVL",
+            "members": [
+              {
+                "label": "passAmount",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "synrAmount",
+                "type": "t_uint96",
+                "offset": 2,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(User)7187_storage": {
+            "label": "struct IMainPool.User",
+            "members": [
+              {
+                "label": "synrAmount",
+                "type": "t_uint96",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "passAmount",
+                "type": "t_uint16",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "deposits",
+                "type": "t_array(t_struct(Deposit)7178_storage)dyn_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          },
+          "t_uint96": {
+            "label": "uint96",
+            "numberOfBytes": "12"
+          }
+        }
+      }
+    },
+    "72b36298635637cf734267352873ff55ce62249329a13b14a5c49a7ae8315506": {
       "address": "0xa8fcCF4D0e2f2c4451123fF2F9ddFc9be465Fa1d",
-      "txHash": "0xecceba6aebd3925a7c428a295cf29e483bc37c38d8d9efa3391cf94c9296b363",
+      "txHash": "0xe5f792a8f195314d196bdc380c00eb33f971c58a8ffd5e84bb16b79333067141",
       "layout": {
         "storage": [
           {
@@ -11193,7 +11541,7 @@
             "label": "users",
             "offset": 0,
             "slot": "201",
-            "type": "t_mapping(t_address,t_struct(User)7449_storage)",
+            "type": "t_mapping(t_address,t_struct(User)7471_storage)",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:25"
           },
@@ -11201,7 +11549,7 @@
             "label": "conf",
             "offset": 0,
             "slot": "202",
-            "type": "t_struct(Conf)7476_storage",
+            "type": "t_struct(Conf)7498_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:26"
           },
@@ -11209,7 +11557,7 @@
             "label": "nftConf",
             "offset": 0,
             "slot": "204",
-            "type": "t_struct(NftConf)7494_storage",
+            "type": "t_struct(NftConf)7533_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:27"
           },
@@ -11217,7 +11565,7 @@
             "label": "rewardsToken",
             "offset": 0,
             "slot": "205",
-            "type": "t_contract(SideToken)16373",
+            "type": "t_contract(SideToken)16430",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:29"
           },
@@ -11225,7 +11573,7 @@
             "label": "stakedToken",
             "offset": 0,
             "slot": "206",
-            "type": "t_contract(SideToken)16373",
+            "type": "t_contract(SideToken)16430",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:30"
           },
@@ -11265,22 +11613,38 @@
             "label": "tvl",
             "offset": 0,
             "slot": "211",
-            "type": "t_struct(TVL)7481_storage",
+            "type": "t_struct(TVL)7520_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:37"
           },
           {
-            "label": "__gap",
+            "label": "extraConf",
             "offset": 0,
             "slot": "212",
+            "type": "t_struct(ExtraConf)7515_storage",
+            "contract": "SidePool",
+            "src": "contracts/pool/SidePool.sol:41"
+          },
+          {
+            "label": "extraNftConf",
+            "offset": 0,
+            "slot": "213",
+            "type": "t_array(t_struct(ExtraNftConf)7541_storage)dyn_storage",
+            "contract": "SidePool",
+            "src": "contracts/pool/SidePool.sol:42"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "214",
             "type": "t_array(t_uint256)50_storage",
             "contract": "SidePool",
-            "src": "contracts/pool/SidePool.sol:699"
+            "src": "contracts/pool/SidePool.sol:703"
           },
           {
             "label": "bridges",
             "offset": 0,
-            "slot": "262",
+            "slot": "264",
             "type": "t_mapping(t_address,t_bool)",
             "contract": "SeedPool",
             "src": "contracts/pool/SeedPool.sol:14"
@@ -11288,7 +11652,7 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "263",
+            "slot": "265",
             "type": "t_array(t_uint256)50_storage",
             "contract": "SeedPool",
             "src": "contracts/pool/SeedPool.sol:91"
@@ -11299,8 +11663,12 @@
             "label": "address",
             "numberOfBytes": "20"
           },
-          "t_array(t_struct(Deposit)7436_storage)dyn_storage": {
+          "t_array(t_struct(Deposit)7454_storage)dyn_storage": {
             "label": "struct ISidePool.Deposit[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(ExtraNftConf)7541_storage)dyn_storage": {
+            "label": "struct ISidePool.ExtraNftConf[]",
             "numberOfBytes": "32"
           },
           "t_array(t_uint256)49_storage": {
@@ -11315,11 +11683,15 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
+          "t_contract(IERC721)4834": {
+            "label": "contract IERC721",
+            "numberOfBytes": "20"
+          },
           "t_contract(IERC721Minimal)7131": {
             "label": "contract IERC721Minimal",
             "numberOfBytes": "20"
           },
-          "t_contract(SideToken)16373": {
+          "t_contract(SideToken)16430": {
             "label": "contract SideToken",
             "numberOfBytes": "20"
           },
@@ -11327,11 +11699,15 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(User)7449_storage)": {
+          "t_mapping(t_address,t_struct(User)7471_storage)": {
             "label": "mapping(address => struct ISidePool.User)",
             "numberOfBytes": "32"
           },
-          "t_struct(Conf)7476_storage": {
+          "t_mapping(t_uint8,t_uint16)": {
+            "label": "mapping(uint8 => uint16)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Conf)7498_storage": {
             "label": "struct ISidePool.Conf",
             "members": [
               {
@@ -11415,7 +11791,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Deposit)7436_storage": {
+          "t_struct(Deposit)7454_storage": {
             "label": "struct ISidePool.Deposit",
             "members": [
               {
@@ -11469,7 +11845,85 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(NftConf)7494_storage": {
+          "t_struct(ExtraConf)7515_storage": {
+            "label": "struct ISidePool.ExtraConf",
+            "members": [
+              {
+                "label": "reserved1",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "reserved2",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "reserved3",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "reserved4",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "reserved5",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "reserved6",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "reserved7",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "reserved8",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ExtraNftConf)7541_storage": {
+            "label": "struct ISidePool.ExtraNftConf",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_contract(IERC721)4834",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "boostFactor",
+                "type": "t_uint16",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "boostLimit",
+                "type": "t_uint32",
+                "offset": 22,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(NftConf)7533_storage": {
             "label": "struct ISidePool.NftConf",
             "members": [
               {
@@ -11511,7 +11965,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(TVL)7481_storage": {
+          "t_struct(TVL)7520_storage": {
             "label": "struct ISidePool.TVL",
             "members": [
               {
@@ -11529,7 +11983,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(User)7449_storage": {
+          "t_struct(User)7471_storage": {
             "label": "struct ISidePool.User",
             "members": [
               {
@@ -11558,12 +12012,18 @@
               },
               {
                 "label": "deposits",
-                "type": "t_array(t_struct(Deposit)7436_storage)dyn_storage",
+                "type": "t_array(t_struct(Deposit)7454_storage)dyn_storage",
                 "offset": 0,
                 "slot": "1"
+              },
+              {
+                "label": "extraNftAmounts",
+                "type": "t_mapping(t_uint8,t_uint16)",
+                "offset": 0,
+                "slot": "2"
               }
             ],
-            "numberOfBytes": "64"
+            "numberOfBytes": "96"
           },
           "t_uint128": {
             "label": "uint128",
@@ -11592,9 +12052,9 @@
         }
       }
     },
-    "287ae269080f8eec2d1c739d34d585fd91be5f82c5a0c89eb37fb24dd12439f0": {
+    "9bb005579b9ef062fe47ec4b6e0a5852e32aca39d3948c439580636752f046a7": {
       "address": "0x49AeF2C4005Bf572665b09014A563B5b9E46Df21",
-      "txHash": "0x3e076956313d25984a3b6159181e60dfc5d96f0172055e39d6e5f03a3c4baab2",
+      "txHash": "0x52dd4f547eed56f54e795fa8d587c5018943be419c48c185ab88df38b1193c85",
       "layout": {
         "storage": [
           {
@@ -11657,7 +12117,7 @@
             "label": "users",
             "offset": 0,
             "slot": "201",
-            "type": "t_mapping(t_address,t_struct(User)7449_storage)",
+            "type": "t_mapping(t_address,t_struct(User)7471_storage)",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:25"
           },
@@ -11665,7 +12125,7 @@
             "label": "conf",
             "offset": 0,
             "slot": "202",
-            "type": "t_struct(Conf)7476_storage",
+            "type": "t_struct(Conf)7498_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:26"
           },
@@ -11673,7 +12133,7 @@
             "label": "nftConf",
             "offset": 0,
             "slot": "204",
-            "type": "t_struct(NftConf)7494_storage",
+            "type": "t_struct(NftConf)7533_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:27"
           },
@@ -11681,7 +12141,7 @@
             "label": "rewardsToken",
             "offset": 0,
             "slot": "205",
-            "type": "t_contract(SideToken)16373",
+            "type": "t_contract(SideToken)16430",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:29"
           },
@@ -11689,7 +12149,7 @@
             "label": "stakedToken",
             "offset": 0,
             "slot": "206",
-            "type": "t_contract(SideToken)16373",
+            "type": "t_contract(SideToken)16430",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:30"
           },
@@ -11729,17 +12189,33 @@
             "label": "tvl",
             "offset": 0,
             "slot": "211",
-            "type": "t_struct(TVL)7481_storage",
+            "type": "t_struct(TVL)7520_storage",
             "contract": "SidePool",
             "src": "contracts/pool/SidePool.sol:37"
           },
           {
-            "label": "__gap",
+            "label": "extraConf",
             "offset": 0,
             "slot": "212",
+            "type": "t_struct(ExtraConf)7515_storage",
+            "contract": "SidePool",
+            "src": "contracts/pool/SidePool.sol:41"
+          },
+          {
+            "label": "extraNftConf",
+            "offset": 0,
+            "slot": "213",
+            "type": "t_array(t_struct(ExtraNftConf)7541_storage)dyn_storage",
+            "contract": "SidePool",
+            "src": "contracts/pool/SidePool.sol:42"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "214",
             "type": "t_array(t_uint256)50_storage",
             "contract": "SidePool",
-            "src": "contracts/pool/SidePool.sol:699"
+            "src": "contracts/pool/SidePool.sol:703"
           }
         ],
         "types": {
@@ -11747,8 +12223,12 @@
             "label": "address",
             "numberOfBytes": "20"
           },
-          "t_array(t_struct(Deposit)7436_storage)dyn_storage": {
+          "t_array(t_struct(Deposit)7454_storage)dyn_storage": {
             "label": "struct ISidePool.Deposit[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(ExtraNftConf)7541_storage)dyn_storage": {
+            "label": "struct ISidePool.ExtraNftConf[]",
             "numberOfBytes": "32"
           },
           "t_array(t_uint256)49_storage": {
@@ -11763,19 +12243,27 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
+          "t_contract(IERC721)4834": {
+            "label": "contract IERC721",
+            "numberOfBytes": "20"
+          },
           "t_contract(IERC721Minimal)7131": {
             "label": "contract IERC721Minimal",
             "numberOfBytes": "20"
           },
-          "t_contract(SideToken)16373": {
+          "t_contract(SideToken)16430": {
             "label": "contract SideToken",
             "numberOfBytes": "20"
           },
-          "t_mapping(t_address,t_struct(User)7449_storage)": {
+          "t_mapping(t_address,t_struct(User)7471_storage)": {
             "label": "mapping(address => struct ISidePool.User)",
             "numberOfBytes": "32"
           },
-          "t_struct(Conf)7476_storage": {
+          "t_mapping(t_uint8,t_uint16)": {
+            "label": "mapping(uint8 => uint16)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Conf)7498_storage": {
             "label": "struct ISidePool.Conf",
             "members": [
               {
@@ -11859,7 +12347,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Deposit)7436_storage": {
+          "t_struct(Deposit)7454_storage": {
             "label": "struct ISidePool.Deposit",
             "members": [
               {
@@ -11913,7 +12401,85 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(NftConf)7494_storage": {
+          "t_struct(ExtraConf)7515_storage": {
+            "label": "struct ISidePool.ExtraConf",
+            "members": [
+              {
+                "label": "reserved1",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "reserved2",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "reserved3",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "reserved4",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "reserved5",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "reserved6",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "reserved7",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "reserved8",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ExtraNftConf)7541_storage": {
+            "label": "struct ISidePool.ExtraNftConf",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_contract(IERC721)4834",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "boostFactor",
+                "type": "t_uint16",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "boostLimit",
+                "type": "t_uint32",
+                "offset": 22,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(NftConf)7533_storage": {
             "label": "struct ISidePool.NftConf",
             "members": [
               {
@@ -11955,7 +12521,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(TVL)7481_storage": {
+          "t_struct(TVL)7520_storage": {
             "label": "struct ISidePool.TVL",
             "members": [
               {
@@ -11973,7 +12539,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(User)7449_storage": {
+          "t_struct(User)7471_storage": {
             "label": "struct ISidePool.User",
             "members": [
               {
@@ -12002,12 +12568,18 @@
               },
               {
                 "label": "deposits",
-                "type": "t_array(t_struct(Deposit)7436_storage)dyn_storage",
+                "type": "t_array(t_struct(Deposit)7454_storage)dyn_storage",
                 "offset": 0,
                 "slot": "1"
+              },
+              {
+                "label": "extraNftAmounts",
+                "type": "t_mapping(t_uint8,t_uint16)",
+                "offset": 0,
+                "slot": "2"
               }
             ],
-            "numberOfBytes": "64"
+            "numberOfBytes": "96"
           },
           "t_uint128": {
             "label": "uint128",

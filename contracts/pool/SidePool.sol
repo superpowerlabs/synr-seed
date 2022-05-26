@@ -36,6 +36,11 @@ contract SidePool is PayloadUtilsUpgradeable, ISidePool, TokenReceiver, Initiali
 
   TVL public tvl;
 
+  // set the storage to manage future changes
+  // keeping the contract upgradeable
+  ExtraConf public extraConf;
+  ExtraNftConf[] public extraNftConf;
+
   modifier onlyOwnerOrOracle() {
     require(_msgSender() == owner() || (oracle != address(0) && _msgSender() == oracle), "SidePool: not owner nor oracle");
     _;
