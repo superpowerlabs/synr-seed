@@ -14,6 +14,7 @@ const {
   SYNR_PASS_STAKE_FOR_BOOST,
   SYNR_PASS_STAKE_FOR_SEEDS,
   BLUEPRINT_STAKE_FOR_BOOST,
+  BN,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -276,6 +277,7 @@ describe("#Integration test", function () {
     const untaxedPendingRewards = await seedPool.untaxedPendingRewards(fundOwner.address, ts + 1);
 
     let boostWeight = await seedPool.boostWeight(fundOwner.address);
+    // no boost
     expect(boostWeight).equal(1e9);
 
     await seedPool.connect(fundOwner).collectRewards();
@@ -353,6 +355,8 @@ describe("#Integration test", function () {
 
     expect(await seed.balanceOf(user2.address)).equal("50000000000000000000000");
 
+    expect(seedPool.connect(user2).unstake(0)).revertedWith("SidePool: deposit already unlocked");
+
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);
     expect(seedDeposit.unlockedAt).equal(ts + 1);
@@ -372,6 +376,62 @@ describe("#Integration test", function () {
     await seedPool.withdrawPenaltiesOrTaxes(0, treasury.address, 0);
     expect(await seedPool.taxes()).equal(0);
     await assertThrowsMessage(seedPool.withdrawPenaltiesOrTaxes(10, treasury.address, 0), "SidePool: amount not available");
+  });
+
+  it("should verify that collecting rewards by week or at the end sums to same amount", async function () {
+    const amount = ethers.utils.parseEther("10000");
+
+    async function setUp() {
+      await initAndDeploy();
+      // stake SYNR in the Tesseract
+      let payload = await serializeInput(
+        SYNR_STAKE, // SYNR
+        365, // 1 year
+        amount
+      );
+      expect(payload).equal("1000000000000000000000036502");
+
+      await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("35000"));
+
+      expect(
+        await mainTesseract.connect(fundOwner).crossChainTransfer(
+          1,
+          payload,
+          4, // BSC
+
+          1
+        )
+      )
+        .emit(mainTesseract, "DepositSaved")
+        .withArgs(fundOwner.address, 0);
+
+      let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
+      const finalPayload = await fromDepositToTransferPayload(deposit);
+
+      expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload)))
+        .emit(sideTesseract, "DepositSaved")
+        .withArgs(fundOwner.address, 0);
+    }
+
+    await setUp();
+
+    const DAY = 3600 * 24;
+
+    for (let i = 0; i < 54; i++) {
+      await increaseBlockTimestampBy(7 * DAY);
+      await seedPool.connect(fundOwner).collectRewards();
+    }
+
+    let balance0 = await seed.balanceOf(fundOwner.address);
+
+    await setUp();
+
+    await increaseBlockTimestampBy(366 * DAY);
+    await seedPool.connect(fundOwner).collectRewards();
+
+    let balance1 = await seed.balanceOf(fundOwner.address);
+
+    expect(balance1.sub(balance0).toNumber()).lt(100);
   });
 
   it("should verify early unstake", async function () {

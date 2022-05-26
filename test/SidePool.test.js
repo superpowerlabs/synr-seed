@@ -145,7 +145,7 @@ describe("#SidePool", function () {
       await initAndDeploy(true);
     });
     it("should revert if not oracle", async function () {
-      await assertThrowsMessage(sidePool.updatePriceRatio(0), "SidePool: not the oracle");
+      await assertThrowsMessage(sidePool.connect(user1).updatePriceRatio(0), "SidePool: not owner nor oracle");
     });
     it("should update the Price Ratio", async function () {
       const ratio = 11111;
@@ -204,83 +204,6 @@ describe("#SidePool", function () {
     it("should not be updated", async function () {
       await increaseBlockTimestampBy(3 * DAY);
       expect(await sidePool.shouldUpdateRatio()).equal(false);
-    });
-  });
-
-  describe("#calculateUntaxedRewards", async function () {
-    beforeEach(async function () {
-      await initAndDeploy(true);
-      const amount = ethers.utils.parseEther("9650");
-      const lockedFrom = await getTimestamp();
-      const lockedUntil = lockedFrom + 3600 * 24 * 365;
-      deposit = {
-        tokenType: SYNR_STAKE,
-        lockedFrom,
-        lockedUntil,
-        tokenAmountOrID: amount,
-        unlockedAt: 0,
-        tokenAmount: amount.mul(100),
-        mainIndex: 0,
-        lastRewardsAt: lockedFrom,
-        rewardsFactor: 1000,
-      };
-    });
-
-    it("should calculate the rewards", async function () {
-      await increaseBlockTimestampBy(21 * DAY);
-      let user = {
-        lastRewardsAt: deposit.lockedFrom,
-        deposits: [deposit],
-        passAmount: 0,
-        blueprintsAmount: 0,
-        tokenAmount: 0,
-      };
-
-      expect(await sidePool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp())).equal("11104109589041095890410");
-    });
-
-    it("should verify that collecting rewards by week or at the end sums to same amount", async function () {
-      let count = ethers.BigNumber.from("0");
-      let user = {
-        lastRewardsAt: deposit.lockedFrom,
-        deposits: [deposit],
-        passAmount: 0,
-        blueprintsAmount: 0,
-        tokenAmount: 0,
-      };
-
-      for (let i = 0; i < 54; i++) {
-        await increaseBlockTimestampBy(7 * DAY);
-        let ts = await getTimestamp();
-        count = count.add(await sidePool.calculateUntaxedRewardsByUser(user, 0, ts));
-        user.lastRewardsAt = ts;
-      }
-      await initAndDeploy(true);
-      const amount = ethers.utils.parseEther("9650");
-      const lockedFrom = await getTimestamp();
-      const lockedUntil = lockedFrom + 3600 * 24 * 365;
-      deposit = {
-        tokenType: SYNR_STAKE,
-        lockedFrom,
-        lockedUntil,
-        tokenAmountOrID: amount,
-        unlockedAt: 0,
-        tokenAmount: amount.mul(100),
-        mainIndex: 0,
-        lastRewardsAt: lockedFrom,
-        rewardsFactor: 1000,
-      };
-      user = {
-        lastRewardsAt: deposit.lockedFrom,
-        deposits: [deposit],
-        passAmount: 0,
-        blueprintsAmount: 0,
-        tokenAmount: 0,
-      };
-      await increaseBlockTimestampBy(YEAR + DAY);
-      let total = await sidePool.calculateUntaxedRewardsByUser(user, 0, await getTimestamp());
-
-      expect(total.sub(count).toNumber()).lessThan(100);
     });
   });
 

@@ -67,7 +67,7 @@ env.json
 /etherscan
 export
 .env.*
-.openzeppelin
 
 /flattened
 package-lock.json
+.openzeppelin

@@ -37,6 +37,10 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
 
   TVL public tvl;
 
+  // set the storage to manage future changes
+  // keeping the contract upgradeable
+  ExtraConf public extraConf;
+
   modifier onlyBridge() {
     require(bridges[_msgSender()], "MainPool: forbidden");
     _;
@@ -276,6 +280,16 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) internal {
+    Deposit storage deposit = users[user].deposits[mainIndex];
+    require(
+      uint256(deposit.mainIndex) == mainIndex &&
+        uint256(deposit.tokenType) == tokenType &&
+        uint256(deposit.lockedFrom) == lockedFrom &&
+        uint256(deposit.lockedUntil) == lockedUntil &&
+        uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
+      "MainPool: inconsistent deposit"
+    );
+    require(deposit.unlockedAt == 0, "MainPool: deposit already unlocked");
     require(tokenType > S_SYNR_SWAP, "MainPool: sSYNR can not be unstaked");
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "MainPool: SYNR Pass cannot be early unstaked");
@@ -286,16 +300,6 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
       users[user].passAmount = uint16(uint256(users[user].passAmount).sub(1));
     }
     _updateTvl(tokenType, tokenAmountOrID, false);
-    Deposit storage deposit = users[user].deposits[mainIndex];
-    require(
-      uint256(deposit.mainIndex) == mainIndex &&
-        uint256(deposit.tokenType) == tokenType &&
-        uint256(deposit.lockedFrom) == lockedFrom &&
-        uint256(deposit.lockedUntil) == lockedUntil &&
-        uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
-      "MainPool: inconsistent deposit"
-    );
-    require(deposit.unlockedAt == 0, "MainPool: deposit already unstaked");
     if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       pass.safeTransferFrom(address(this), user, uint256(tokenAmountOrID));
     } else {
@@ -344,8 +348,8 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
       return 0;
     }
     uint256 vestedPercentage = getVestedPercentage(when, uint256(deposit.lockedFrom), uint256(deposit.lockedUntil));
-    uint256 unvestedAmount = uint256(deposit.tokenAmountOrID).mul(vestedPercentage).div(10000);
-    return unvestedAmount.mul(conf.earlyUnstakePenalty).div(10000);
+    uint256 vestedAmount = uint256(deposit.tokenAmountOrID).mul(vestedPercentage).div(10000);
+    return uint256(deposit.tokenAmountOrID).sub(vestedAmount).mul(conf.earlyUnstakePenalty).div(10000);
   }
 
   /**
@@ -404,6 +408,7 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     uint256 payload,
     uint16 recipientChain
   ) external virtual onlyBridge returns (uint256) {
+    require(getDepositsLength(user) < 50, "MainPool: maximum number of deposits reached");
     return _stake(user, payload, recipientChain);
   }
 
