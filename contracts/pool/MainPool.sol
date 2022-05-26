@@ -348,8 +348,8 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
       return 0;
     }
     uint256 vestedPercentage = getVestedPercentage(when, uint256(deposit.lockedFrom), uint256(deposit.lockedUntil));
-    uint256 unvestedAmount = uint256(deposit.tokenAmountOrID).mul(vestedPercentage).div(10000);
-    return unvestedAmount.mul(conf.earlyUnstakePenalty).div(10000);
+    uint256 vestedAmount = uint256(deposit.tokenAmountOrID).mul(vestedPercentage).div(10000);
+    return uint256(deposit.tokenAmountOrID).sub(vestedAmount).mul(conf.earlyUnstakePenalty).div(10000);
   }
 
   /**
