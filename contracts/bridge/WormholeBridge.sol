@@ -16,7 +16,6 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
 
   Tesseract public tesseract;
   address public pool;
-  address public operator;
   address public validator;
 
   modifier onlyTesseract() {
@@ -33,9 +32,8 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
     pool = pool_;
   }
 
-  function setOperatorAndValidator(address operator_, address validator_) external onlyOwner {
-    require(operator_ != address(0) && validator_ != address(0), "MainPool: address zero not allowed");
-    operator = operator_;
+  function setValidator(address validator_) external onlyOwner {
+    require(validator_ != address(0), "MainPool: address zero not allowed");
     validator = validator_;
   }
 
