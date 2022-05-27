@@ -88,5 +88,5 @@ contract SeedPool is SidePool {
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
-  uint256[50] private __gap;
+  //  uint256[50] private __gap;
 }

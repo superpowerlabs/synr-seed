@@ -128,7 +128,7 @@ class DeployUtils {
     await deployed.deployed();
     console.debug("Deployed at", deployed.address);
     await this.saveDeployed(chainId, [contractName], [deployed.address]);
-    await this.verifyCodeInstructions(contractName);
+    // console.debug(await this.verifyCodeInstructions(contractName));
     return deployed;
   }
 
@@ -140,7 +140,7 @@ class DeployUtils {
     console.debug("Tx:", upgraded.deployTransaction.hash);
     await upgraded.deployed();
     console.debug("Upgraded");
-    // await this.verifyCodeInstructions(contractName);
+    // console.debug(await this.verifyCodeInstructions(contractName));
     return upgraded;
   }
 
@@ -197,7 +197,10 @@ class DeployUtils {
     let chainName = oZChainName[chainId] || "unknown-" + chainId;
     const oz = JSON.parse(await fs.readFile(path.resolve(__dirname, "../../.openzeppelin", chainName + ".json")));
     let address;
-    LOOP: for (let key in oz.impls) {
+    let keys = Object.keys(oz.impls);
+    let i = keys.length - 1;
+    LOOP: while (i >= 0) {
+      let key = keys[i];
       let storage = oz.impls[key].layout.storage;
       for (let s of storage) {
         if (s.contract === contractName) {
@@ -205,6 +208,7 @@ class DeployUtils {
           break LOOP;
         }
       }
+      i--;
     }
 
     let response = `To verify ${contractName} source code, flatten the source code and verify manually at 
