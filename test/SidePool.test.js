@@ -309,7 +309,9 @@ describe("#SidePool", function () {
         .emit(sidePool, "DepositSaved")
         .withArgs(user1.address, 0);
 
-      expect(await sidePool.connect(user1).unstake(0))
+      let deposit = await sidePool.getDepositByIndex(user1.address, 0);
+
+      expect(await sidePool.connect(user1).unstake(deposit))
         .emit(sidePool, "DepositUnlocked")
         .withArgs(user1.address, 0);
     });

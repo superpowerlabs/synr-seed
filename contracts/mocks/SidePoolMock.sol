@@ -29,8 +29,7 @@ contract SidePoolMock is SidePool {
     _stake(_msgSender(), tokenType, block.timestamp, 0, type(uint16).max, tokenAmountOrID);
   }
 
-  function unstake(uint256 depositIndex) external virtual override {
-    Deposit storage deposit = users[_msgSender()].deposits[depositIndex];
+  function unstake(Deposit memory deposit) external virtual override {
     require(
       deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST || deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS,
       "SidePool: not a blueprint"
