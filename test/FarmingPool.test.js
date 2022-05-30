@@ -265,6 +265,8 @@ describe("#FarmingPool", function () {
       expect(await pool.connect(user0).unstake(deposit))
         .emit(pool, "DepositUnlocked")
         .withArgs(user0.address, 0);
+      deposit = await pool.getDepositByIndex(user0.address, 0);
+      assert.isTrue(deposit.unlockedAt !== 0);
     });
 
     it("should revert if unstake is not blueprint", async function () {
