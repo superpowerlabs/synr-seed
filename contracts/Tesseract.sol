@@ -75,6 +75,7 @@ contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, Ownabl
     uint32 nonce,
     bytes32 recipient
   ) external payable virtual override returns (uint64 sequence) {
+    require(getChainId() < 6, "Tesseract: not allowed on this chain");
     if (bridgeType == 1) {
       return IWormholeBridge(bridges[1]).wormholeTransfer(payload, recipientChain, recipient, nonce);
     } else {
@@ -82,5 +83,12 @@ contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, Ownabl
     }
   }
 
+  function getChainId() public view returns (uint256) {
+    uint256 id;
+    assembly {
+      id := chainid()
+    }
+    return id;
+  }
   //  uint256[50] private __gap;
 }
