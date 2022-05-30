@@ -49,10 +49,10 @@ contract FarmingPool is SidePool {
 
   /**
    * @notice calls _unstake function
-   * @param depositIndex index of the deposit
+   * @param deposit the deposit
    */
-  function unstake(uint256 depositIndex) external override {
-    Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
+  function unstake(Deposit memory deposit) external override {
+    //    Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
     require(deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST, "FarmingPool: only blueprints can be unstaked");
     _unstakeDeposit(deposit);
   }

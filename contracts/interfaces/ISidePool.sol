@@ -218,5 +218,5 @@ interface ISidePool {
     uint256 tokenAmountOrID
   ) external;
 
-  function unstake(uint256 depositIndex) external;
+  function unstake(Deposit memory deposit) external;
 }

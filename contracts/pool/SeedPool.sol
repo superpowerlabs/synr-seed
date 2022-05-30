@@ -12,6 +12,7 @@ contract SeedPool is SidePool {
   using AddressUpgradeable for address;
 
   mapping(address => bool) public bridges;
+  mapping(address => uint16) internal _mainIndexForBlueprint;
 
   modifier onlyBridge() {
     require(bridges[_msgSender()], "SeedPool: forbidden");
@@ -41,21 +42,19 @@ contract SeedPool is SidePool {
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) external virtual override {
-    // mainIndex = type(uint16).max means no meanIndex
-    require(tokenType > SYNR_PASS_STAKE_FOR_SEEDS, "SeedPool: unsupported token");
+    uint16 mainIndex = _mainIndexForBlueprint[_msgSender()];
+    if (mainIndex == 0) {
+      mainIndex = type(uint16).max;
+    } else {
+      mainIndex -= 1;
+    }
+    _mainIndexForBlueprint[_msgSender()] = mainIndex;
+    require(tokenType >= BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
     require(users[_msgSender()].blueprintAmount < 30, "SeedPool: at most 30 blueprint can be staked");
-    _stake(
-      _msgSender(),
-      tokenType,
-      block.timestamp,
-      block.timestamp.add(lockupTime * 1 days),
-      type(uint16).max,
-      tokenAmountOrID
-    );
+    _stake(_msgSender(), tokenType, block.timestamp, block.timestamp.add(lockupTime * 1 days), mainIndex, tokenAmountOrID);
   }
 
-  function unstake(uint256 depositIndex) external override {
-    Deposit memory deposit = users[_msgSender()].deposits[depositIndex];
+  function unstake(Deposit memory deposit) external override {
     require(
       deposit.tokenType == S_SYNR_SWAP ||
         deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST ||
@@ -88,5 +87,9 @@ contract SeedPool is SidePool {
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
-  uint256[50] private __gap;
+  // to upgrade in testnet
+
+  //  uint256[50] private __gap;
+  //
+  //  mapping(address => uint16) internal _mainIndexForBlueprint;
 }

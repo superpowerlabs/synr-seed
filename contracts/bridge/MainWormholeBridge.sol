@@ -65,7 +65,6 @@ that assures that the data are correct.
     bytes memory signature
   ) external override {
     require(tokenType > S_SYNR_SWAP, "MainWormholeBridge: sSYNR can't be unstaked");
-    require(operator != address(0) && _msgSender() == operator, "MainWormholeBridge: not the operator");
     require(
       isSignedByValidator(encodeForSignature(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID), signature),
       "MainWormholeBridge: invalid signature"

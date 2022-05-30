@@ -243,13 +243,28 @@ describe("#SeedPool", function () {
       await initAndDeploy(true);
     });
 
-    it("should unstake blueprints", async function () {
+    it("should unstake 3 blueprints", async function () {
       await blueprint.mint(user0.address, 4);
+      await blueprint.mint(user0.address, 5);
+      await blueprint.mint(user0.address, 6);
       await blueprint.connect(user0).approve(pool.address, 4);
+      await blueprint.connect(user0).approve(pool.address, 5);
+      await blueprint.connect(user0).approve(pool.address, 6);
       await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 4);
-      expect(await pool.connect(user0).unstake(0))
+      await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 5);
+      await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 6);
+      let deposit = await pool.getDepositByIndex(user0.address, 0);
+      expect(await pool.connect(user0).unstake(deposit))
         .emit(pool, "DepositUnlocked")
         .withArgs(user0.address, 0);
+      deposit = await pool.getDepositByIndex(user0.address, 1);
+      expect(await pool.connect(user0).unstake(deposit))
+        .emit(pool, "DepositUnlocked")
+        .withArgs(user0.address, 1);
+      deposit = await pool.getDepositByIndex(user0.address, 2);
+      expect(await pool.connect(user0).unstake(deposit))
+        .emit(pool, "DepositUnlocked")
+        .withArgs(user0.address, 2);
     });
   });
 });

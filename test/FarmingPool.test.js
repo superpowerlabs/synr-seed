@@ -261,8 +261,8 @@ describe("#FarmingPool", function () {
       await blueprint.mint(user0.address, 5);
       await blueprint.connect(user0).approve(pool.address, id);
       await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id);
-
-      expect(await pool.connect(user0).unstake(0))
+      let deposit = await pool.getDepositByIndex(user0.address, 0);
+      expect(await pool.connect(user0).unstake(deposit))
         .emit(pool, "DepositUnlocked")
         .withArgs(user0.address, 0);
     });
@@ -272,7 +272,8 @@ describe("#FarmingPool", function () {
       await seed.unpauseAllowance();
       await seed.connect(user0).approve(pool.address, amount);
       await pool.connect(user0).stake(SEED_SWAP, 0, amount);
-      await assertThrowsMessage(pool.connect(user0).unstake(0), "FarmingPool: only blueprints can be unstaked");
+      let deposit = await pool.getDepositByIndex(user0.address, 0);
+      await assertThrowsMessage(pool.connect(user0).unstake(deposit), "FarmingPool: only blueprints can be unstaked");
     });
   });
 });

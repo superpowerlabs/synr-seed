@@ -350,12 +350,13 @@ describe("#Integration test", function () {
     // unstake SEED from sSYNR
 
     expect(await seed.balanceOf(user2.address)).equal("0");
+    deposit = await seedPool.getDepositByIndex(user2.address, 0);
 
-    await seedPool.connect(user2).unstake(0);
+    await seedPool.connect(user2).unstake(deposit);
 
     expect(await seed.balanceOf(user2.address)).equal("50000000000000000000000");
 
-    expect(seedPool.connect(user2).unstake(0)).revertedWith("SidePool: deposit already unlocked");
+    expect(seedPool.connect(user2).unstake(deposit)).revertedWith("SidePool: deposit already unlocked");
 
     seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
     expect(seedDeposit.tokenAmountOrID).equal(amount);

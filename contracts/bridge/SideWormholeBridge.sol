@@ -74,10 +74,9 @@ that assures that the data are correct.
     bytes memory signature
   ) external override {
     require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SideWormholeBridge: no blueprint allowed here");
-    require(operator != address(0) && _msgSender() == operator, "SeedPool: not the operator");
     require(
       isSignedByValidator(encodeForSignature(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID), signature),
-      "SeedPool: invalid signature"
+      "SideWormholeBridge: invalid signature"
     );
     SeedPool(pool).stakeViaBridge(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
