@@ -28,7 +28,7 @@ function normalize(val, n = 18) {
   return "" + val + "0".repeat(n);
 }
 
-describe.only("#Integration test", function () {
+describe("#Integration test", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
@@ -154,7 +154,7 @@ describe.only("#Integration test", function () {
     await initAndDeploy();
   });
 
-  it("should manage the entire flow", async function () {
+  it("should manage the full flow", async function () {
     const amount = ethers.utils.parseEther("10000");
     const amount2 = ethers.utils.parseEther("20000");
     const amount3 = ethers.utils.parseEther("5000");
@@ -182,16 +182,6 @@ describe.only("#Integration test", function () {
     expect(payload3).equal("500000000000000000000000001");
 
     await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("35000"));
-
-    expect(
-      mainTesseract.connect(fundOwner).crossChainTransferOnBehalf(
-        1,
-        payload,
-        4, // BSC
-        1,
-        bob.address
-      )
-    ).revertedWith("Tesseract: not allowed on this chain");
 
     expect(
       await mainTesseract.connect(fundOwner).crossChainTransfer(
@@ -878,7 +868,6 @@ describe.only("#Integration test", function () {
       1,
       payload,
       4, // BSC
-
       1
     );
     let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);

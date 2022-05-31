@@ -67,28 +67,4 @@ contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, Ownabl
       revert("Tesseract: unsupported bridge");
     }
   }
-
-  function crossChainTransferOnBehalf(
-    uint8 bridgeType,
-    uint256 payload,
-    uint16 recipientChain,
-    uint32 nonce,
-    bytes32 recipient
-  ) external payable virtual override returns (uint64 sequence) {
-    require(getChainId() < 6, "Tesseract: not allowed on this chain");
-    if (bridgeType == 1) {
-      return IWormholeBridge(bridges[1]).wormholeTransfer(payload, recipientChain, recipient, nonce);
-    } else {
-      revert("Tesseract: unsupported bridge");
-    }
-  }
-
-  function getChainId() public view returns (uint256) {
-    uint256 id;
-    assembly {
-      id := chainid()
-    }
-    return id;
-  }
-  //  uint256[50] private __gap;
 }

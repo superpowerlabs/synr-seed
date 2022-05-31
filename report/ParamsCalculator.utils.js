@@ -353,8 +353,11 @@ describe("#Params Calculator", function () {
       //   100000, //sPBoostFactor
       //   1000000, //sPBoostLimit
       // ],
-      // [100000, 2630, 1000000],
-      [100000, 2640, 1000000],
+      // SYNR PASS
+      // [100000, 13220, 200000],
+
+      // blueprints (the calculations works the same)
+      [10000, 13220, 20000],
       // [100000, 2660, 1000000],
     ];
 

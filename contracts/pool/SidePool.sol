@@ -355,6 +355,7 @@ abstract contract SidePool is
     if (limit < amount) {
       amount = limit;
     }
+
     return (amount, boosted.add(amount.mul(factor).div(10000)));
   }
 
