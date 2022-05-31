@@ -92,6 +92,8 @@ describe("#Integration test", function () {
     await pass.mintToken(alice.address);
     aliceTokenID = (await pass.nextTokenId()).sub(1).toNumber();
     await pass.mintToken(alice.address);
+    await pass.mintToken(alice.address);
+    await pass.mintToken(alice.address);
 
     mainPool = await upgrades.deployProxy(MainPool, [synr.address, sSynr.address, pass.address]);
     await mainPool.deployed();
@@ -120,7 +122,7 @@ describe("#Integration test", function () {
     seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await seedPool.deployed();
     await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10);
-    await seedPool.updateNftConf(100000, 1500, 500000, 3000, 150, 1000);
+    await seedPool.updateNftConf(100000, 1500, 1000000, 3000, 150, 1000);
 
     // process.exit()
 
@@ -152,6 +154,255 @@ describe("#Integration test", function () {
   });
 
   it("should manage the entire flow", async function () {
+    const amount = ethers.utils.parseEther("10000");
+    const amount2 = ethers.utils.parseEther("20000");
+    const amount3 = ethers.utils.parseEther("5000");
+
+    // stake SYNR in the Tesseract
+    let payload = await serializeInput(
+      SYNR_STAKE, // SYNR
+      365, // 1 year
+      amount
+    );
+    expect(payload).equal("1000000000000000000000036502");
+
+    let payload2 = await serializeInput(
+      SYNR_STAKE, // SYNR
+      150,
+      amount2
+    );
+    expect(payload2).equal("2000000000000000000000015002");
+
+    let payload3 = await serializeInput(
+      S_SYNR_SWAP, // sSYNR
+      0, // 1 year
+      amount3
+    );
+    expect(payload3).equal("500000000000000000000000001");
+
+    await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("35000"));
+
+    expect(
+      mainTesseract.connect(fundOwner).crossChainTransferOnBehalf(
+        1,
+        payload,
+        4, // BSC
+        1,
+        bob.address
+      )
+    ).revertedWith("Tesseract: not allowed on this chain");
+
+    expect(
+      await mainTesseract.connect(fundOwner).crossChainTransfer(
+        1,
+        payload,
+        4, // BSC
+
+        1
+      )
+    )
+      .emit(mainTesseract, "DepositSaved")
+      .withArgs(fundOwner.address, 0);
+
+    let tvl = await mainPool.tvl();
+    expect(tvl.synrAmount).equal(amount);
+
+    let deposit = await mainPool.getDepositByIndex(fundOwner.address, 0);
+    expect(deposit.tokenAmountOrID).equal(amount);
+    expect(deposit.tokenType).equal(SYNR_STAKE);
+    expect(deposit.otherChain).equal(4);
+
+    const finalPayload = await fromMainDepositToTransferPayload(deposit);
+
+    await sSynr.connect(alice).approve(mainPool.address, ethers.utils.parseEther("30000"));
+
+    expect(
+      await mainTesseract.connect(alice).crossChainTransfer(
+        1,
+        payload3,
+        4, // BSC
+
+        1
+      )
+    )
+      .emit(mainTesseract, "DepositSaved")
+      .withArgs(alice.address, 0);
+
+    let deposit3 = await mainPool.getDepositByIndex(alice.address, 0);
+    expect(deposit3.tokenAmountOrID).equal(amount3);
+    expect(deposit3.tokenType).equal(S_SYNR_SWAP);
+    expect(deposit3.otherChain).equal(4);
+    const finalPayload3 = await fromMainDepositToTransferPayload(deposit3);
+
+    expect(
+      await mainTesseract.connect(fundOwner).crossChainTransfer(
+        1,
+        payload2,
+        4, // BSC
+
+        2
+      )
+    )
+      .emit(mainTesseract, "DepositSaved")
+      .withArgs(fundOwner.address, 1);
+
+    tvl = await mainPool.tvl();
+    expect(tvl.synrAmount).equal(amount.add(amount2));
+
+    let deposit2 = await mainPool.getDepositByIndex(fundOwner.address, 1);
+    expect(deposit2.tokenAmountOrID).equal(amount2);
+    expect(deposit2.tokenType).equal(SYNR_STAKE);
+    expect(deposit2.otherChain).equal(4);
+    const finalPayload2 = await fromMainDepositToTransferPayload(deposit2);
+
+    expect(await synr.balanceOf(mainPool.address)).equal(amount.add(amount2));
+
+    expect((await mainPool.users(fundOwner.address)).synrAmount).equal("30000000000000000000000");
+
+    expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload)))
+      .emit(sideTesseract, "DepositSaved")
+      .withArgs(fundOwner.address, 0);
+
+    let conf2 = await seedPool.conf();
+    let tvl2 = await seedPool.tvl();
+    let seedAmount = amount.mul(conf2.stakeFactor).mul(conf2.priceRatio).div(1000000);
+    expect(tvl2.stakedTokenAmount).equal(seedAmount);
+
+    expect(await seed.balanceOf(fundOwner.address)).equal(0);
+
+    expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload2)))
+      .emit(sideTesseract, "DepositSaved")
+      .withArgs(fundOwner.address, 1);
+
+    // expect(await seed.balanceOf(fundOwner.address)).equal("964363846981227803145611364");
+
+    await seed.unpauseAllowance();
+
+    await seed.connect(fundOwner).approve(operator.address, ethers.utils.parseEther("10"));
+
+    expect(await seed.allowance(fundOwner.address, operator.address)).equal(ethers.utils.parseEther("10"));
+
+    expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(alice.address, finalPayload3)))
+      .emit(sideTesseract, "DepositSaved")
+      .withArgs(alice.address, 0);
+
+    conf2 = await seedPool.conf();
+    tvl2 = await seedPool.tvl();
+    let seedAmount2 = amount2.mul(conf2.stakeFactor).mul(conf2.priceRatio).div(1000000);
+    let seedAmount3 = amount3.mul(conf2.swapFactor).mul(conf2.priceRatio).div(1000000);
+
+    expect(tvl2.stakedTokenAmount).equal(seedAmount.add(seedAmount2).add(seedAmount3));
+
+    await increaseBlockTimestampBy(20 * 24 * 3600);
+
+    let ts = await getTimestamp();
+    const untaxedPendingRewards = await seedPool.untaxedPendingRewards(fundOwner.address, ts + 1);
+
+    let boostWeight = await seedPool.boostWeight(fundOwner.address);
+    // no boost
+    expect(boostWeight).equal(1e9);
+
+    await seedPool.connect(fundOwner).collectRewards();
+    let seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+    let user = await seedPool.users(fundOwner.address);
+    expect(user.lastRewardsAt).equal(await getTimestamp());
+
+    ts = await getTimestamp();
+    const untaxedPendingRewards3 = await seedPool.untaxedPendingRewards(alice.address, ts + 1);
+    const tax = await seedPool.calculateTaxOnRewards(untaxedPendingRewards3);
+    expect(await seed.balanceOf(alice.address)).equal(0);
+
+    await seedPool.connect(alice).collectRewards();
+    expect(await seed.balanceOf(alice.address)).equal(untaxedPendingRewards3.sub(tax));
+
+    let payload4 = await serializeInput(
+      SYNR_PASS_STAKE_FOR_BOOST, // sSYNR
+      0,
+      9
+    );
+    expect(payload4).equal("900003");
+
+    // approve the spending of the pass
+    await pass.connect(fundOwner).approve(mainPool.address, 9);
+
+    expect(
+      await mainTesseract.connect(fundOwner).crossChainTransfer(
+        1,
+        payload4,
+        4, // BSC
+
+        3
+      )
+    )
+      .emit(mainTesseract, "DepositSaved")
+      .withArgs(fundOwner.address, 2);
+
+    let deposit4 = await mainPool.getDepositByIndex(fundOwner.address, 2);
+    const finalPayload4 = await fromMainDepositToTransferPayload(deposit4);
+
+    expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, finalPayload4)))
+      .emit(sideTesseract, "DepositSaved")
+      .withArgs(fundOwner.address, 2);
+
+    boostWeight = await seedPool.boostWeight(fundOwner.address);
+    expect(boostWeight).equal(1150000000);
+
+    await increaseBlockTimestampBy(20 * 24 * 3600);
+
+    ts = await getTimestamp();
+
+    const untaxedPendingRewardsBoosted = await seedPool.untaxedPendingRewards(fundOwner.address, ts + 1);
+
+    // console.log(untaxedPendingRewards.toString())
+    // console.log(untaxedPendingRewardsBoosted.toString())
+
+    await increaseBlockTimestampBy(330 * 24 * 3600);
+
+    expect(seedDeposit.unlockedAt).equal(0);
+    expect(seedDeposit.tokenAmount).equal(ethers.utils.parseEther("10000"));
+
+    const seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
+
+    ts = await getTimestamp();
+    // unstake
+
+    expect(await sideTesseract.connect(fundOwner).crossChainTransfer(1, seedPayload, 2, 1))
+      .emit(sideTesseract, "DepositUnlocked")
+      .withArgs(fundOwner.address, 0);
+
+    // unstake SEED from sSYNR
+
+    expect(await seed.balanceOf(alice.address)).equal("0");
+    deposit = await seedPool.getDepositByIndex(alice.address, 0);
+
+    await seedPool.connect(alice).unstake(deposit);
+
+    expect(await seed.balanceOf(alice.address)).equal("50000000000000000000000");
+
+    expect(seedPool.connect(alice).unstake(deposit)).revertedWith("SidePool: deposit already unlocked");
+
+    seedDeposit = await seedPool.getDepositByIndex(fundOwner.address, 0);
+    expect(seedDeposit.stakedAmount).equal(amount);
+    expect(seedDeposit.unlockedAt).equal(ts + 1);
+    const synrBalanceBefore = await synr.balanceOf(fundOwner.address);
+
+    expect(await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(fundOwner.address, seedPayload)))
+      .emit(mainTesseract, "DepositUnlocked")
+      .withArgs(fundOwner.address, 0);
+
+    const synrBalanceAfter = await synr.balanceOf(fundOwner.address);
+    expect(synrBalanceAfter.sub(synrBalanceBefore)).equal(amount);
+
+    let treasuryBalanceBefore = await seed.balanceOf(treasury.address);
+    await seedPool.withdrawPenaltiesOrTaxes(10, treasury.address, 0);
+    let treasuryBalanceAfter = await seed.balanceOf(treasury.address);
+    expect(treasuryBalanceAfter - treasuryBalanceBefore).equal(10);
+    await seedPool.withdrawPenaltiesOrTaxes(0, treasury.address, 0);
+    expect(await seedPool.taxes()).equal(0);
+    await assertThrowsMessage(seedPool.withdrawPenaltiesOrTaxes(10, treasury.address, 0), "SidePool: amount not available");
+  });
+
+  it.only("should verify the boost", async function () {
     const amount = ethers.utils.parseEther("10000");
     const amount2 = ethers.utils.parseEther("20000");
     const amount3 = ethers.utils.parseEther("5000");
@@ -615,8 +866,6 @@ describe("#Integration test", function () {
 
     expect(balanceBob.div(1000)).equal(balanceAlice.div(1000));
   });
-  // 2367999988330796549974
-  // 236799998833079654997
 
   it("should start the process, upgrade the contract and complete the flow", async function () {
     const amount = ethers.utils.parseEther("10000");

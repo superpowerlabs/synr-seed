@@ -323,21 +323,39 @@ abstract contract SidePool is
     if (passAmount > 0) {
       // if a SYNR Pass can boost 15000 SYNR (i.e., nftConf.sPBoostLimit)
       // there is a potential limit that depends on how many pass you staked
-      limit = uint256(passAmount).mul(nftConf.sPBoostLimit).mul(1e18);
-      if (limit < baseAmount) {
-        baseAmount = limit;
-      }
-      boostedAmount += baseAmount.mul(nftConf.sPBoostFactor).div(10000);
+      (baseAmount, boostedAmount) = _calculateBoost(
+        boostedAmount,
+        baseAmount,
+        passAmount,
+        nftConf.sPBoostLimit,
+        nftConf.sPBoostFactor
+      );
       baseAmount = uint256(user.stakedAmount).sub(baseAmount);
     }
     if (blueprintAmount > 0) {
-      limit = uint256(blueprintAmount).mul(nftConf.bPBoostLimit).mul(1e18);
-      if (limit < boostedAmount) {
-        baseAmount = limit;
-      }
-      boostedAmount += baseAmount.mul(nftConf.bPBoostFactor).div(10000);
+      (baseAmount, boostedAmount) = _calculateBoost(
+        boostedAmount,
+        baseAmount,
+        blueprintAmount,
+        nftConf.bPBoostLimit,
+        nftConf.bPBoostFactor
+      );
     }
     return boost.mul(boostedAmount).div(user.stakedAmount);
+  }
+
+  function _calculateBoost(
+    uint256 boosted,
+    uint256 amount,
+    uint256 nftAmount,
+    uint256 limit,
+    uint256 factor
+  ) internal view returns (uint256, uint256) {
+    limit = uint256(nftAmount).mul(limit).mul(1e18);
+    if (limit < amount) {
+      amount = limit;
+    }
+    return (amount, boosted.add(amount.mul(factor).div(10000)));
   }
 
   function collectRewards() public override {
