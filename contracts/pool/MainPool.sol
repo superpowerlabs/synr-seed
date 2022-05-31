@@ -165,7 +165,8 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
       tokenAmountOrID: uint96(tokenAmountOrID),
       unlockedAt: 0,
       otherChain: otherChain,
-      mainIndex: uint16(mainIndex)
+      mainIndex: uint16(mainIndex),
+      extra: 0
     });
     users[user].deposits.push(deposit);
     return deposit;

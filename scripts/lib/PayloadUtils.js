@@ -1,5 +1,13 @@
 const ethers = require("ethers");
 
+const S_SYNR_SWAP = 1;
+const SYNR_STAKE = 2;
+const SYNR_PASS_STAKE_FOR_BOOST = 3;
+const SYNR_PASS_STAKE_FOR_SEEDS = 4;
+const BLUEPRINT_STAKE_FOR_BOOST = 5;
+const BLUEPRINT_STAKE_FOR_SEEDS = 6;
+const SEED_SWAP = 7;
+
 const BN = ethers.BigNumber.from;
 async function BNMulBy(param, num = 1, repeat = 0) {
   if (repeat) {

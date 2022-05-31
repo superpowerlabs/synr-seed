@@ -396,7 +396,7 @@ abstract contract SidePool is
    * @return the deposit
    */
   function getDepositByIndex(address user, uint256 index) public view override returns (Deposit memory) {
-    require(users[user].deposits[index].tokenAmountOrID > 0, "SidePool: deposit not found");
+    require(users[user].deposits[index].lockedFrom > 0, "SidePool: deposit not found");
     return users[user].deposits[index];
   }
 
@@ -480,23 +480,26 @@ abstract contract SidePool is
     }
     updateRatio();
     _collectRewards(user);
+    uint256 tokenID;
     (uint256 stakedAmount, uint256 tokenAmount) = _getStakedAndLockedAmount(tokenType, tokenAmountOrID);
     if (tokenType <= SYNR_STAKE) {
       stakedToken.mint(address(this), tokenAmount);
     } else if (tokenType >= BLUEPRINT_STAKE_FOR_BOOST) {
       users[user].blueprintAmount++;
-      blueprint.safeTransferFrom(user, address(this), tokenAmountOrID);
+      tokenID = tokenAmountOrID;
       if (tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
         stakedToken.mint(address(this), tokenAmount);
       }
+      blueprint.safeTransferFrom(user, address(this), tokenAmountOrID);
     } else {
       users[user].passAmount++;
+      tokenID = tokenAmountOrID;
       if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
         stakedToken.mint(address(this), tokenAmount);
       }
     }
+    users[user].stakedAmount = uint96(uint256(users[user].stakedAmount).add(stakedAmount));
     users[user].tokenAmount = uint128(uint256(users[user].tokenAmount).add(tokenAmount));
-    users[user].stakedAmount = uint128(uint256(users[user].stakedAmount).add(stakedAmount));
     _increaseTvl(tokenType, tokenAmount);
     if (tokenType == S_SYNR_SWAP) {
       lockedUntil = lockedFrom + uint256(conf.coolDownDays).mul(1 days);
@@ -506,11 +509,16 @@ abstract contract SidePool is
       tokenType: uint8(tokenType),
       lockedFrom: uint32(lockedFrom),
       lockedUntil: uint32(lockedUntil),
-      tokenAmountOrID: uint96(tokenAmountOrID),
+      stakedAmount: uint96(stakedAmount),
+      tokenID: uint16(tokenID),
       unlockedAt: 0,
       mainIndex: uint16(mainIndex),
       tokenAmount: uint128(tokenAmount),
-      rewardsFactor: conf.rewardsFactor
+      rewardsFactor: conf.rewardsFactor,
+      extra1: 0,
+      extra2: 0,
+      extra3: 0,
+      extra4: 0
     });
     users[user].deposits.push(deposit);
     emit DepositSaved(user, uint16(index));
@@ -613,7 +621,11 @@ abstract contract SidePool is
       uint256(deposit.tokenType) == tokenType &&
         uint256(deposit.lockedFrom) == lockedFrom &&
         uint256(deposit.lockedUntil) == lockedUntil &&
-        uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
+        (
+          tokenType < SYNR_PASS_STAKE_FOR_BOOST
+            ? uint256(deposit.stakedAmount) == tokenAmountOrID
+            : uint256(deposit.tokenID) == tokenAmountOrID
+        ),
       "SidePool: inconsistent deposit"
     );
     uint256 unlockedAmount;
@@ -639,7 +651,7 @@ abstract contract SidePool is
       users[user_].passAmount--;
     } else if (deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST || deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
       users[user_].blueprintAmount--;
-      blueprint.safeTransferFrom(address(this), user_, uint256(deposit.tokenAmountOrID));
+      blueprint.safeTransferFrom(address(this), user_, uint256(deposit.tokenID));
       if (deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
         stakedToken.transfer(user_, deposit.tokenAmount);
       }
@@ -684,7 +696,7 @@ abstract contract SidePool is
       uint256(deposit.lockedFrom),
       uint256(deposit.lockedUntil),
       uint256(deposit.mainIndex),
-      uint256(deposit.tokenAmountOrID)
+      deposit.tokenType < SYNR_PASS_STAKE_FOR_BOOST ? uint256(deposit.stakedAmount) : uint256(deposit.tokenID)
     );
   }
 

@@ -5,9 +5,9 @@ pragma solidity 0.8.11;
 // (c) 2022+ SuperPower Labs Inc.
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "./IUser.sol";
+import "./ISideUser.sol";
 
-interface ISidePool is IUser {
+interface ISidePool is ISideUser {
   event RewardsCollected(address indexed user, uint256 indexed rewards);
 
   event PoolInitiatedOrUpdated(
