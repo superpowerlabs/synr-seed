@@ -28,7 +28,7 @@ function normalize(val, n = 18) {
   return "" + val + "0".repeat(n);
 }
 
-describe("#Integration test", function () {
+describe.only("#Integration test", function () {
   let WormholeMock, wormhole;
   let SyndicateERC20, synr;
   let SyntheticSyndicateERC20, sSynr;
@@ -123,7 +123,7 @@ describe("#Integration test", function () {
     seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
     await seedPool.deployed();
     await seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10);
-    await seedPool.updateNftConf(100000, 1500, 1000000, 3000, 150, 1000);
+    await seedPool.updateNftConf(100000, 1500, 1000000, 3000, 150, 30000);
 
     // process.exit()
 
@@ -403,7 +403,7 @@ describe("#Integration test", function () {
     await assertThrowsMessage(seedPool.withdrawPenaltiesOrTaxes(10, treasury.address, 0), "SidePool: amount not available");
   });
 
-  it.only("should verify the boost", async function () {
+  it.skip("should verify the boost", async function () {
     // like the synr equivalent
     const amount = ethers.utils.parseEther("100000");
 
