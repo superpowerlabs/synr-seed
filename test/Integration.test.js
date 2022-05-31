@@ -171,6 +171,16 @@ describe("#Integration test", function () {
     await synr.connect(fundOwner).approve(mainPool.address, ethers.utils.parseEther("35000"));
 
     expect(
+      mainTesseract.connect(fundOwner).crossChainTransferOnBehalf(
+        1,
+        payload,
+        4, // BSC
+        1,
+        user1.address
+      )
+    ).revertedWith("Tesseract: not allowed on this chain");
+
+    expect(
       await mainTesseract.connect(fundOwner).crossChainTransfer(
         1,
         payload,
