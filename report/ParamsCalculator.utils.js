@@ -23,6 +23,12 @@ function formatBN(bn) {
   return t.join(".");
 }
 
+function threeDecimals(n) {
+  let t = n.toString().split(".");
+  t[1] = t[1].substring(0, 3);
+  return t.join(".");
+}
+
 const {
   rewardsFactor,
   decayInterval,
@@ -347,7 +353,9 @@ describe("#Params Calculator", function () {
       //   100000, //sPBoostFactor
       //   1000000, //sPBoostLimit
       // ],
-      [100000, 20600, 200000],
+      // [100000, 3300, 1000000],
+      [100000, 2600, 1000000],
+      // [100000, 3600, 1000000],
       // [100000, 200000, 500000],
     ];
 
@@ -362,8 +370,6 @@ describe("#Params Calculator", function () {
         "SEEDNoPass",
         "SEEDPassSeed",
         "SEEDPassBoost",
-        "OneDeposit",
-        "TwoDeposits",
         "Boost",
         "Ratio",
       ],
@@ -372,8 +378,8 @@ describe("#Params Calculator", function () {
     const k = 365;
     for (let i = 0; i < params.length; i++) {
       let [sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_] = params[i];
-      for (let w = 1; w < 5; w++) {
-        const tokenAmount = ((sPSynrEquivalent_ * w) / 2).toString();
+      for (let w = 1; w < 11; w++) {
+        const tokenAmount = ((sPBoostLimit_ * w) / 10).toString();
         const amount = ethers.utils.parseEther(tokenAmount);
         const row = [tokenAmount, k, sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_, tokenAmount];
         await initAndDeploy(undefined, undefined, sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_);
@@ -391,12 +397,6 @@ describe("#Params Calculator", function () {
         await stakeSYNR(bob, amount);
         await stakeSYNR(alice, amount);
         await stakeSYNR(mark, amount);
-
-        // two stakes
-        await stakeSYNR(frank, amount);
-        await stakeSYNR(frank, ethers.utils.parseEther("100000"), 1);
-
-        await stakeSYNR(fred, amount.add(ethers.utils.parseEther("100000")));
 
         // mark stake a SYNR Pass for boost
         let payloadPass = await serializeInput(
@@ -426,49 +426,36 @@ describe("#Params Calculator", function () {
 
         await increaseBlockTimestampBy(366 * 24 * 3600);
 
-        console.log("Alice", formatBN((await seedPool.users(alice.address)).tokenAmount));
-        console.log("Bob", formatBN((await seedPool.users(bob.address)).tokenAmount));
-        console.log("Mark", formatBN((await seedPool.users(mark.address)).tokenAmount));
-        console.log("Frank", formatBN((await seedPool.users(frank.address)).tokenAmount));
-        console.log("Fred", formatBN((await seedPool.users(fred.address)).tokenAmount));
-
-        async function unstake(user) {
-          let seedDeposit = await seedPool.getDepositByIndex(user.address, 0);
+        async function unstake(user, index = 0) {
+          let seedDeposit = await seedPool.getDepositByIndex(user.address, index);
           let seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
           await sideTesseract.connect(user).crossChainTransfer(1, seedPayload, 2, 1);
           await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, seedPayload));
         }
 
         await unstake(bob);
+        await unstake(bob, 1);
         await unstake(alice);
         await unstake(mark);
-        await unstake(frank);
-        await unstake(fred);
+        await unstake(mark, 1);
 
         const noBoostNoSeed = await seed.balanceOf(alice.address);
         const forBoost = await seed.balanceOf(mark.address);
         const forSeed = await seed.balanceOf(bob.address);
-        const twoDeposits = await seed.balanceOf(frank.address);
-        const oneDeposit = await seed.balanceOf(fred.address);
 
         row.push(formatBN(noBoostNoSeed));
         row.push(formatBN(forSeed));
         row.push(formatBN(forBoost));
-        row.push(formatBN(oneDeposit));
-        row.push(formatBN(twoDeposits));
-        let boost = parseFloat(formatBN(forBoost)) / parseFloat(formatBN(noBoostNoSeed));
+
+        let boost = threeDecimals(parseFloat(formatBN(forBoost)) / parseFloat(formatBN(noBoostNoSeed)));
         row.push(boost);
 
-        let ratio = parseFloat(formatBN(forBoost)) / parseFloat(formatBN(forSeed));
-
+        let ratio = threeDecimals(parseFloat(formatBN(forBoost)) / parseFloat(formatBN(forSeed)));
         row.push(ratio);
 
         report.push(row);
 
         // break
-        // if (1 - ratio < 0.2) {
-        //   break
-        // }
       }
     }
     await fs.ensureDir(path.resolve(__dirname, "../tmp"));

@@ -315,7 +315,7 @@ abstract contract SidePool is
     if ((user.passAmount == 0 && user.blueprintAmount == 0) || user.tokenAmount == 0) {
       return boost;
     }
-    uint256 baseAmount = uint256(user.tokenAmount);
+    uint256 baseAmount = uint256(user.stakedAmount);
     uint256 boostedAmount = baseAmount;
     uint256 limit;
     uint256 passAmount = passForBoostAmount(user_);
@@ -328,7 +328,7 @@ abstract contract SidePool is
         baseAmount = limit;
       }
       boostedAmount += baseAmount.mul(nftConf.sPBoostFactor).div(10000);
-      baseAmount = uint256(user.tokenAmount).sub(baseAmount);
+      baseAmount = uint256(user.stakedAmount).sub(baseAmount);
     }
     if (blueprintAmount > 0) {
       limit = uint256(blueprintAmount).mul(nftConf.bPBoostLimit).mul(1e18);
@@ -337,7 +337,7 @@ abstract contract SidePool is
       }
       boostedAmount += baseAmount.mul(nftConf.bPBoostFactor).div(10000);
     }
-    return boost.mul(boostedAmount).div(user.tokenAmount);
+    return boost.mul(boostedAmount).div(user.stakedAmount);
   }
 
   function collectRewards() public override {
