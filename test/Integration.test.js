@@ -403,6 +403,66 @@ describe("#Integration test", function () {
     await assertThrowsMessage(seedPool.withdrawPenaltiesOrTaxes(10, treasury.address, 0), "SidePool: amount not available");
   });
 
+  it.only("should verify the boost", async function () {
+    // like the synr equivalent
+    const amount = ethers.utils.parseEther("100000");
+
+    async function stakeSYNR(user, amount, index = 0) {
+      await synr.connect(user).approve(mainPool.address, amount);
+      let payload = await serializeInput(SYNR_STAKE, 365, amount);
+      await mainTesseract.connect(user).crossChainTransfer(1, payload, 4, 1);
+      let deposit = await mainPool.getDepositByIndex(user.address, index);
+      let finalPayload = await fromMainDepositToTransferPayload(deposit);
+      await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, finalPayload));
+    }
+
+    async function unstake(user, index = 0) {
+      let seedDeposit = await seedPool.getDepositByIndex(user.address, index);
+      let seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
+      await sideTesseract.connect(user).crossChainTransfer(1, seedPayload, 2, 1);
+      await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, seedPayload));
+    }
+
+    async function stakePass(user, id, index = 0) {
+      let payloadPass = await serializeInput(SYNR_PASS_STAKE_FOR_SEEDS, 365, id);
+      await pass.connect(user).approve(mainPool.address, id);
+      await mainTesseract.connect(user).crossChainTransfer(1, payloadPass, 4, 1);
+
+      let deposit = await mainPool.getDepositByIndex(user.address, index);
+      let finalPayload = await fromMainDepositToTransferPayload(deposit);
+      await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, finalPayload));
+    }
+
+    await stakeSYNR(alice, amount);
+
+    let payloadPass = await serializeInput(
+      SYNR_PASS_STAKE_FOR_SEEDS,
+      365, // 1 year
+      aliceTokenID
+    );
+    await pass.connect(alice).approve(mainPool.address, aliceTokenID);
+    await mainTesseract.connect(alice).crossChainTransfer(1, payloadPass, 4, 1);
+
+    let deposit = await mainPool.getDepositByIndex(alice.address, 1);
+    let finalPayload = await fromMainDepositToTransferPayload(deposit);
+    await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(alice.address, finalPayload));
+
+    await increaseBlockTimestampBy(366 * 24 * 3600);
+
+    await unstake(bob);
+    await unstake(bob, 1);
+    await unstake(alice);
+    await unstake(alice, 1);
+
+    await seedPool.connect(bob).collectRewards();
+    await seedPool.connect(alice).collectRewards();
+
+    const balanceBob = await seed.balanceOf(bob.address);
+    const balanceAlice = await seed.balanceOf(alice.address);
+
+    expect(balanceBob.div(1000)).equal(balanceAlice.div(1000));
+  });
+
   it("should verify that collecting rewards by week or at the end sums to same amount", async function () {
     const amount = ethers.utils.parseEther("10000");
 
