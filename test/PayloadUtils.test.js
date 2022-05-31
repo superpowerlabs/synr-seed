@@ -1,6 +1,6 @@
 const {expect, assert, use} = require("chai");
 
-const {fromDepositToTransferPayload, serializeInput} = require("../scripts/lib/PayloadUtils");
+const {fromMainDepositToTransferPayload, serializeInput} = require("../scripts/lib/PayloadUtils");
 
 const {
   initEthers,
@@ -117,7 +117,7 @@ describe("#PayloadUtils", function () {
         mainIndex: 0,
       };
 
-      const payload = await fromDepositToTransferPayload(deposit);
+      const payload = await fromMainDepositToTransferPayload(deposit);
       const [tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID] = await payloadUtils.deserializeDeposit(payload);
 
       expect(tokenType).equal(deposit.tokenType);

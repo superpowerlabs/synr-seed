@@ -8,6 +8,7 @@ const {
   bytes32Address,
   BLUEPRINT_STAKE_FOR_BOOST,
   SEED_SWAP,
+  SYNR_STAKE,
 } = require("./helpers");
 const {upgrades} = require("hardhat");
 
@@ -101,12 +102,17 @@ describe("#SeedPool", function () {
         tokenType: BLUEPRINT_STAKE_FOR_BOOST,
         lockedFrom,
         lockedUntil,
-        tokenAmountOrID: amount,
+        stakedAmount: amount,
         tokenAmount: amount.mul(100),
         unlockedAt: 0,
         mainIndex: 0,
         lastRewardsAt: lockedFrom,
         rewardsFactor: 1000,
+        tokenID: 0,
+        extra1: 0,
+        extra2: 0,
+        extra3: 0,
+        extra4: 0,
       };
     });
 
@@ -180,7 +186,7 @@ describe("#SeedPool", function () {
 
       const lockedUntil = await getTimestamp();
       let deposit = await pool.getDepositByIndex(user0.address, 0);
-      expect(deposit.tokenAmountOrID).equal(4);
+      expect(deposit.tokenID).equal(4);
       expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
       expect(deposit.lockedUntil).equal(lockedUntil);
     });

@@ -21,12 +21,20 @@ const WEEK = DAY * 7;
 const YEAR = 365 * DAY;
 
 const PayloadUtils = {
-  async fromDepositToTransferPayload(deposit) {
+  async fromMainDepositToTransferPayload(deposit) {
     return BN(deposit.tokenType)
       .add(await BNMulBy(deposit.lockedFrom, 100))
       .add(await BNMulBy(deposit.lockedUntil, 1, 12))
       .add(await BNMulBy(deposit.mainIndex, 1, 22))
       .add(await BNMulBy(deposit.tokenAmountOrID, 1, 27));
+  },
+
+  async fromSideDepositToTransferPayload(deposit) {
+    return BN(deposit.tokenType)
+      .add(await BNMulBy(deposit.lockedFrom, 100))
+      .add(await BNMulBy(deposit.lockedUntil, 1, 12))
+      .add(await BNMulBy(deposit.mainIndex, 1, 22))
+      .add(await BNMulBy(deposit.tokenType < SYNR_PASS_STAKE_FOR_BOOST ? deposit.stakedAmount : deposit.tokenID, 1, 27));
   },
 
   async serializeInput(tokenType, lockupTime, tokenAmountOrID) {

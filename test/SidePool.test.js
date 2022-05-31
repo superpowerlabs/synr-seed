@@ -13,6 +13,16 @@ const {
 const {upgrades} = require("hardhat");
 const PayloadUtils = require("../scripts/lib/PayloadUtils");
 
+const rewardsFactor = 17000;
+const stakeFactor = 400;
+const swapFactor = 2000;
+const sPSynrEquivalent = 100000;
+const sPBoostFactor = 1500;
+const sPBoostLimit = 500000;
+const bPSynrEquivalent = 3000;
+const bPBoostFactor = 150;
+const bPBoostLimit = 1000;
+
 // tests to be fixed
 
 function normalize(val, n = 18) {
@@ -51,8 +61,16 @@ describe("#SidePool", function () {
     await sidePool.deployed();
 
     if (initPool) {
-      await sidePool.initPool(1000, WEEK, 9800, 1000, 100, 800, 3000, 10);
-      await sidePool.updateNftConf(100000, 1500, 120000, 3000, 150, 1000);
+      await sidePool.initPool(rewardsFactor, WEEK, 9800, swapFactor, stakeFactor, 800, 3000, 14);
+
+      await sidePool.updateNftConf(
+        sPSynrEquivalent,
+        sPBoostFactor,
+        sPBoostLimit,
+        bPSynrEquivalent,
+        bPBoostFactor,
+        bPBoostLimit
+      );
     }
   }
 
@@ -87,12 +105,17 @@ describe("#SidePool", function () {
         tokenType: SYNR_STAKE,
         lockedFrom,
         lockedUntil,
-        tokenAmountOrID: amount,
+        stakedAmount: amount,
         tokenAmount: amount.mul(100),
+        tokenID: 0,
         unlockedAt: 0,
         mainIndex: 0,
         lastRewardsAt: lockedFrom,
         rewardsFactor: 1000,
+        extra1: 0,
+        extra2: 0,
+        extra3: 0,
+        extra4: 0,
       };
     });
 
@@ -216,7 +239,7 @@ describe("#SidePool", function () {
       await increaseBlockTimestampBy(23 * DAY);
       await sidePool.updateRatio();
       const conf = await sidePool.conf();
-      expect(conf.rewardsFactor).equal(940);
+      expect(conf.rewardsFactor).equal(15999);
       expect(conf.lastRatioUpdateAt).equal(await getTimestamp());
       expect(await sidePool.shouldUpdateRatio()).equal(false);
     });
@@ -225,10 +248,10 @@ describe("#SidePool", function () {
       await increaseBlockTimestampBy(13 * DAY);
       await sidePool.updateRatio();
       let conf = await sidePool.conf();
-      expect(conf.rewardsFactor).equal(980);
+      expect(conf.rewardsFactor).equal(16660);
       await sidePool.updateRatio();
       conf = await sidePool.conf();
-      expect(conf.rewardsFactor).equal(980);
+      expect(conf.rewardsFactor).equal(16660);
     });
   });
 
@@ -248,7 +271,7 @@ describe("#SidePool", function () {
 
       //const lockedUntil = (await getTimestamp());
       let deposit = await sidePool.getDepositByIndex(user1.address, 0);
-      expect(deposit.tokenAmountOrID).equal(id);
+      expect(deposit.tokenID).equal(id);
       expect(deposit.tokenType).equal(BLUEPRINT_STAKE_FOR_BOOST);
       //expect(deposit.lockedUntil).equal(lockedUntil);
     });
