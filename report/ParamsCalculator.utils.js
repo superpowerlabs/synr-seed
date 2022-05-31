@@ -54,6 +54,7 @@ const {
   SYNR_PASS_STAKE_FOR_BOOST,
   SYNR_PASS_STAKE_FOR_SEEDS,
   BLUEPRINT_STAKE_FOR_BOOST,
+  sleep,
 } = require("../test/helpers");
 const {upgrades} = require("hardhat");
 
@@ -77,12 +78,11 @@ describe("#Params Calculator", function () {
   let SynCityCouponsSimplified, blueprint;
   let tokenId1, tokenId3;
 
-  let deployer, fundOwner, superAdmin, operator, validator, bob, alice, mark, treasury, frank, user5;
+  let deployer, fundOwner, superAdmin, operator, validator, bob, alice, mark, treasury, frank, fred;
 
   before(async function () {
     initEthers(ethers);
-    [deployer, fundOwner, superAdmin, operator, validator, bob, alice, mark, treasury, frank, user5] =
-      await ethers.getSigners();
+    [deployer, fundOwner, superAdmin, operator, validator, bob, alice, mark, treasury, frank, fred] = await ethers.getSigners();
     SyndicateERC20 = await ethers.getContractFactory("SyndicateERC20");
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
     Tesseract = await ethers.getContractFactory("Tesseract");
@@ -134,6 +134,7 @@ describe("#Params Calculator", function () {
     synr.connect(fundOwner).transfer(alice.address, ethers.utils.parseEther("1000000000"));
     synr.connect(fundOwner).transfer(mark.address, ethers.utils.parseEther("1000000000"));
     synr.connect(fundOwner).transfer(frank.address, ethers.utils.parseEther("1000000000"));
+    synr.connect(fundOwner).transfer(fred.address, ethers.utils.parseEther("1000000000"));
 
     sSynr = await SyntheticSyndicateERC20.deploy(superAdmin.address);
     await sSynr.deployed();
@@ -361,6 +362,8 @@ describe("#Params Calculator", function () {
         "SEEDNoPass",
         "SEEDPassSeed",
         "SEEDPassBoost",
+        "OneDeposit",
+        "TwoDeposits",
         "Boost",
         "Ratio",
       ],
@@ -375,11 +378,11 @@ describe("#Params Calculator", function () {
         const row = [tokenAmount, k, sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_, tokenAmount];
         await initAndDeploy(undefined, undefined, sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_);
 
-        async function stakeSYNR(user, amount, m = 1) {
-          await synr.connect(user).approve(mainPool.address, amount.mul(m));
-          let payload = await serializeInput(SYNR_STAKE, k, amount.mul(m));
+        async function stakeSYNR(user, amount, index = 0) {
+          await synr.connect(user).approve(mainPool.address, amount);
+          let payload = await serializeInput(SYNR_STAKE, k, amount);
           await mainTesseract.connect(user).crossChainTransfer(1, payload, 4, 1);
-          let deposit = await mainPool.getDepositByIndex(user.address, 0);
+          let deposit = await mainPool.getDepositByIndex(user.address, index);
           let finalPayload = await fromMainDepositToTransferPayload(deposit);
           await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, finalPayload));
           // console.log(formatBN((await seedPool.getDepositByIndex(user.address, 0)).tokenAmount))
@@ -388,6 +391,12 @@ describe("#Params Calculator", function () {
         await stakeSYNR(bob, amount);
         await stakeSYNR(alice, amount);
         await stakeSYNR(mark, amount);
+
+        // two stakes
+        await stakeSYNR(frank, amount);
+        await stakeSYNR(frank, ethers.utils.parseEther("100000"), 1);
+
+        await stakeSYNR(fred, amount.add(ethers.utils.parseEther("100000")));
 
         // mark stake a SYNR Pass for boost
         let payloadPass = await serializeInput(
@@ -420,6 +429,8 @@ describe("#Params Calculator", function () {
         console.log("Alice", formatBN((await seedPool.users(alice.address)).tokenAmount));
         console.log("Bob", formatBN((await seedPool.users(bob.address)).tokenAmount));
         console.log("Mark", formatBN((await seedPool.users(mark.address)).tokenAmount));
+        console.log("Frank", formatBN((await seedPool.users(frank.address)).tokenAmount));
+        console.log("Fred", formatBN((await seedPool.users(fred.address)).tokenAmount));
 
         async function unstake(user) {
           let seedDeposit = await seedPool.getDepositByIndex(user.address, 0);
@@ -431,14 +442,20 @@ describe("#Params Calculator", function () {
         await unstake(bob);
         await unstake(alice);
         await unstake(mark);
+        await unstake(frank);
+        await unstake(fred);
 
         const noBoostNoSeed = await seed.balanceOf(alice.address);
         const forBoost = await seed.balanceOf(mark.address);
         const forSeed = await seed.balanceOf(bob.address);
+        const twoDeposits = await seed.balanceOf(frank.address);
+        const oneDeposit = await seed.balanceOf(fred.address);
 
         row.push(formatBN(noBoostNoSeed));
         row.push(formatBN(forSeed));
         row.push(formatBN(forBoost));
+        row.push(formatBN(oneDeposit));
+        row.push(formatBN(twoDeposits));
         let boost = parseFloat(formatBN(forBoost)) / parseFloat(formatBN(noBoostNoSeed));
         row.push(boost);
 
