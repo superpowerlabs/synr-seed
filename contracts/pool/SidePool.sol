@@ -613,6 +613,7 @@ abstract contract SidePool is
     require(exists, "SidePool: deposit not found");
     Deposit storage deposit = users[user_].deposits[index];
     require(deposit.unlockedAt == 0, "SidePool: deposit already unlocked");
+    require(tokenType <= BLUEPRINT_STAKE_FOR_SEEDS, "SidePool: unsupported tokenType");
     if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
       require(lockedUntil < block.timestamp, "SidePool: SYNR Pass and Blueprint used to get SYNR cannot be early unstaked");
     }
@@ -628,8 +629,6 @@ abstract contract SidePool is
         ),
       "SidePool: inconsistent deposit"
     );
-    uint256 unlockedAmount;
-    uint256 unstakedAmount;
     if (tokenType <= SYNR_STAKE) {
       uint256 vestedPercentage = getVestedPercentage(
         block.timestamp,
@@ -644,19 +643,23 @@ abstract contract SidePool is
         vestedAmount = uint256(deposit.tokenAmount);
       }
       stakedToken.transfer(user_, vestedAmount);
-    } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      stakedToken.transfer(user_, deposit.tokenAmount);
-      users[user_].passAmount--;
-    } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
-      users[user_].passAmount--;
-    } else if (deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST || deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+    } else if (deposit.tokenType >= BLUEPRINT_STAKE_FOR_BOOST) {
       users[user_].blueprintAmount--;
       blueprint.safeTransferFrom(address(this), user_, uint256(deposit.tokenID));
       if (deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
         stakedToken.transfer(user_, deposit.tokenAmount);
       }
     } else {
-      revert("SidePool: invalid tokenType");
+      if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
+        stakedToken.transfer(user_, deposit.tokenAmount);
+      }
+      users[user_].passAmount--;
+    }
+    if (deposit.stakedAmount > 0) {
+      users[user_].stakedAmount = uint96(uint256(users[user_].stakedAmount).sub(deposit.stakedAmount));
+    }
+    if (deposit.tokenAmount > 0) {
+      users[user_].tokenAmount = uint128(uint256(users[user_].tokenAmount).sub(deposit.tokenAmount));
     }
     _decreaseTvl(deposit);
     deposit.unlockedAt = uint32(block.timestamp);
