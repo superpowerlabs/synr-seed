@@ -410,7 +410,6 @@ abstract contract SidePool is
 
   function _increaseTvl(uint256 tokenType, uint256 tokenAmount) internal {
     if (
-      tokenType == SEED_SWAP ||
       tokenType == S_SYNR_SWAP ||
       tokenType == SYNR_STAKE ||
       tokenType == SYNR_PASS_STAKE_FOR_SEEDS ||
@@ -430,6 +429,30 @@ abstract contract SidePool is
     if (deposit.tokenType != BLUEPRINT_STAKE_FOR_BOOST) {
       tvl.stakedTokenAmount = uint96(uint256(tvl.stakedTokenAmount).sub(deposit.tokenAmount));
     }
+  }
+
+  function _calculateTokenAmount(uint256 amount, uint256 tokenType) internal view returns (uint256) {
+    return amount.mul(tokenType == S_SYNR_SWAP ? conf.swapFactor : conf.stakeFactor).mul(conf.priceRatio).div(1000000);
+  }
+
+  function _getStakedAndLockedAmount(uint256 tokenType, uint256 tokenAmountOrID) internal view returns (uint256, uint256) {
+    uint256 stakedAmount;
+    uint256 lockedAmount;
+    if (tokenType == S_SYNR_SWAP) {
+      lockedAmount = _calculateTokenAmount(tokenAmountOrID, tokenType);
+    } else if (tokenType == SYNR_STAKE) {
+      lockedAmount = _calculateTokenAmount(tokenAmountOrID, tokenType);
+      stakedAmount = tokenAmountOrID;
+    } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
+      stakedAmount = uint256(nftConf.sPSynrEquivalent).mul(1e18);
+      lockedAmount = _calculateTokenAmount(stakedAmount, tokenType);
+    } else if (tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+      stakedAmount = uint256(nftConf.bPSynrEquivalent).mul(1e18);
+      lockedAmount = _calculateTokenAmount(stakedAmount, tokenType);
+    } else if (tokenType != BLUEPRINT_STAKE_FOR_BOOST && tokenType != SYNR_PASS_STAKE_FOR_BOOST) {
+      revert("SidePool: invalid tokenType");
+    }
+    return (stakedAmount, lockedAmount);
   }
 
   /**
@@ -457,40 +480,25 @@ abstract contract SidePool is
     }
     updateRatio();
     _collectRewards(user);
-    uint256 tokenAmount;
-    if (tokenType == S_SYNR_SWAP) {
-      tokenAmount = tokenAmountOrID.mul(conf.swapFactor).mul(conf.priceRatio).div(1000000);
+    (uint256 stakedAmount, uint256 tokenAmount) = _getStakedAndLockedAmount(tokenType, tokenAmountOrID);
+    if (tokenType <= SYNR_STAKE) {
       stakedToken.mint(address(this), tokenAmount);
-    } else if (tokenType == SYNR_STAKE) {
-      tokenAmount = tokenAmountOrID.mul(conf.stakeFactor).mul(conf.priceRatio).div(1000000);
-      stakedToken.mint(address(this), tokenAmount);
-    } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
-      users[user].passAmount++;
-    } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      users[user].passAmount++;
-      tokenAmount = uint256(nftConf.sPSynrEquivalent).mul(1e18).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
-      stakedToken.mint(address(this), tokenAmount);
-    } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+    } else if (tokenType >= BLUEPRINT_STAKE_FOR_BOOST) {
       users[user].blueprintAmount++;
-      // SidePool must be approve to spend blueprints
       blueprint.safeTransferFrom(user, address(this), tokenAmountOrID);
       if (tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
-        tokenAmount = uint256(nftConf.bPSynrEquivalent).mul(1e18).mul(conf.stakeFactor).mul(conf.priceRatio).div(10000);
         stakedToken.mint(address(this), tokenAmount);
       }
-    } else if (tokenType == SEED_SWAP) {
-      tokenAmount = tokenAmountOrID;
-      // SidePool must be approve to spend SEED
-      stakedToken.transferFrom(user, address(this), tokenAmount);
-      taxes += tokenAmount.sub(tokenAmount.mul(conf.burnRatio).div(10000));
-      stakedToken.burn(tokenAmount.mul(conf.burnRatio).div(10000));
     } else {
-      revert("SidePool: invalid tokenType");
+      users[user].passAmount++;
+      if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
+        stakedToken.mint(address(this), tokenAmount);
+      }
     }
     users[user].tokenAmount = uint128(uint256(users[user].tokenAmount).add(tokenAmount));
+    users[user].stakedAmount = uint128(uint256(users[user].stakedAmount).add(stakedAmount));
     _increaseTvl(tokenType, tokenAmount);
-    // add deposit
-    if (tokenType == S_SYNR_SWAP || tokenType == SEED_SWAP) {
+    if (tokenType == S_SYNR_SWAP) {
       lockedUntil = lockedFrom + uint256(conf.coolDownDays).mul(1 days);
     }
     uint256 index = users[user].deposits.length;
@@ -608,20 +616,22 @@ abstract contract SidePool is
         uint256(deposit.tokenAmountOrID) == tokenAmountOrID,
       "SidePool: inconsistent deposit"
     );
-    if (tokenType == SYNR_STAKE || tokenType == SEED_SWAP || tokenType == S_SYNR_SWAP) {
+    uint256 unlockedAmount;
+    uint256 unstakedAmount;
+    if (tokenType <= SYNR_STAKE) {
       uint256 vestedPercentage = getVestedPercentage(
         block.timestamp,
         uint256(deposit.lockedFrom),
         uint256(deposit.lockedUntil)
       );
-      uint256 unstakedAmount;
+      uint256 vestedAmount;
       if (vestedPercentage < 10000) {
-        unstakedAmount = uint256(deposit.tokenAmount).mul(vestedPercentage).div(10000);
-        penalties += uint256(deposit.tokenAmount).sub(unstakedAmount);
+        vestedAmount = uint256(deposit.tokenAmount).mul(vestedPercentage).div(10000);
+        penalties += uint256(deposit.tokenAmount).sub(vestedAmount);
       } else {
-        unstakedAmount = uint256(deposit.tokenAmount);
+        vestedAmount = uint256(deposit.tokenAmount);
       }
-      stakedToken.transfer(user_, unstakedAmount);
+      stakedToken.transfer(user_, vestedAmount);
     } else if (tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
       stakedToken.transfer(user_, deposit.tokenAmount);
       users[user_].passAmount--;
