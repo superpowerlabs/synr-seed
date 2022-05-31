@@ -5,8 +5,6 @@ pragma solidity 0.8.11;
 // (c) 2022+ SuperPower Labs Inc.
 
 interface ITesseract {
-  event OperatorSet(address operator);
-  event OperatorRevoked(address operator);
   event BridgeSet(uint16 bridgeType, address bridge);
 
   function setBridge(uint16 bridgeType, address bridge_) external;

@@ -166,6 +166,7 @@ abstract contract SidePool is
   function updateOracle(address oracle_) external override onlyOwner {
     require(oracle_ != address(0), "SidePool: not a valid address");
     oracle = oracle_;
+    emit OracleUpdated(oracle_);
   }
 
   // put to zero any parameter that remains the same

@@ -36,6 +36,7 @@ contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, Ownabl
   function setBridge(uint16 bridgeType, address bridge_) external override onlyOwner {
     require(bridge_.isContract(), "Tesseract: bridge_ not a contract");
     bridges[bridgeType] = bridge_;
+    emit BridgeSet(bridgeType, bridge_);
   }
 
   function supportedBridgeById(uint256 id) external view virtual override returns (string memory) {
