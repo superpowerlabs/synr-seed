@@ -59,6 +59,15 @@ contract SynCityPasses is ERC721, Ownable {
     }
   }
 
+  function mint(address to, uint256 amount) external virtual onlyOwner {
+    require(nextTokenId + amount - 1 < 889, "Out of range");
+    uint256 nextId = nextTokenId;
+    for (uint256 i = 0; i < amount; i++) {
+      _mint(to, nextId++);
+    }
+    nextTokenId = nextId;
+  }
+
   function getRemaining(uint256 typeIndex) external view returns (uint256) {
     return _remaining[typeIndex];
   }

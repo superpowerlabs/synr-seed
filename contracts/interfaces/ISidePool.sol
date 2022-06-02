@@ -5,13 +5,11 @@ pragma solidity 0.8.11;
 // (c) 2022+ SuperPower Labs Inc.
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "./ISideUser.sol";
 
-interface ISidePool {
-  event DepositSaved(address indexed user, uint16 indexed mainIndex);
-
-  event DepositUnlocked(address indexed user, uint16 indexed mainIndex);
-
+interface ISidePool is ISideUser {
   event RewardsCollected(address indexed user, uint256 indexed rewards);
+  event OracleUpdated(address oracle);
 
   event PoolInitiatedOrUpdated(
     uint32 rewardsFactor,
@@ -36,42 +34,6 @@ interface ISidePool {
   event PoolPaused(bool isPaused);
   event BridgeSet(address bridge);
   event BridgeRemoved(address bridge);
-
-  struct Deposit {
-    // @dev token type (0: sSYNR, 1: SYNR, 2: SYNR Pass)
-    uint8 tokenType;
-    // @dev locking period - from
-    uint32 lockedFrom;
-    // @dev locking period - until
-    uint32 lockedUntil;
-    // @dev token amount staked
-    // SYNR maxTokenSupply is 10 billion * 18 decimals = 1e28
-    // which is less type(uint96).max (~79e28)
-    uint96 tokenAmountOrID;
-    uint32 unlockedAt;
-    // @dev mainIndex Since the process is asyncronous, the same deposit can be at a different index
-    // on the main net and on the sidechain. This guarantees alignment
-    uint16 mainIndex;
-    // @dev pool token amount staked
-    uint128 tokenAmount; //
-    // @dev rewards ratio when staked
-    uint32 rewardsFactor;
-  }
-
-  /// @dev Data structure representing token holder using a pool
-  struct User {
-    // @dev Total passes staked
-    uint16 passAmount;
-    // @dev Total blueprints staked
-    uint16 blueprintAmount;
-    // @dev Total staked amount
-    uint128 tokenAmount;
-    // @dev when claimed rewards last time
-    uint32 lastRewardsAt;
-    Deposit[] deposits;
-    // @dev reserved for future custom tokens
-    mapping(uint8 => uint16) extraNftAmounts;
-  }
 
   struct Conf {
     uint16 maximumLockupTime;
@@ -124,24 +86,24 @@ interface ISidePool {
   // functions
 
   function initPool(
-    uint32 rewardsFactor_,
-    uint32 decayInterval_,
-    uint16 decayFactor_,
-    uint32 swapFactor_,
-    uint32 stakeFactor_,
-    uint16 taxPoints_,
-    uint16 burnRatio_,
-    uint8 coolDownDays_
+    uint32 rewardsFactor,
+    uint32 decayInterval,
+    uint16 decayFactor,
+    uint32 swapFactor,
+    uint32 stakeFactor,
+    uint16 taxPoints,
+    uint16 burnRatio,
+    uint8 coolDownDays
   ) external;
 
   function updateConf(
-    uint32 decayInterval_,
-    uint16 decayFactor_,
-    uint32 swapFactor_,
-    uint32 stakeFactor_,
-    uint16 taxPoints_,
-    uint16 burnRatio_,
-    uint8 coolDownDays_
+    uint32 decayInterval,
+    uint16 decayFactor,
+    uint32 swapFactor,
+    uint32 stakeFactor,
+    uint16 taxPoints,
+    uint16 burnRatio,
+    uint8 coolDownDays
   ) external;
 
   function updatePriceRatio(uint32 priceRatio_) external;
@@ -154,12 +116,12 @@ interface ISidePool {
   // CompilerError: Stack too deep when compiling inline assembly:
   // Variable value0 is 1 slot(s) too deep inside the stack.
   function updateNftConf(
-    uint32 sPSynrEquivalent_,
-    uint32 sPBoostFactor_,
-    uint32 sPBoostLimit_,
-    uint32 bPSynrEquivalent_,
-    uint32 bPBoostFactor_,
-    uint32 bPBoostLimit_
+    uint32 sPSynrEquivalent,
+    uint32 sPBoostFactor,
+    uint32 sPBoostLimit,
+    uint32 bPSynrEquivalent,
+    uint32 bPBoostFactor,
+    uint32 bPBoostLimit
   ) external;
 
   function getLockupTime(Deposit memory deposit) external view returns (uint256);

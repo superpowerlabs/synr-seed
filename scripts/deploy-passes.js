@@ -56,8 +56,15 @@ async function main() {
   const SynCityPasses = await ethers.getContractFactory("SynCityPasses");
   const nft = await SynCityPasses.deploy(validator);
   await nft.deployed();
+  // const nft = await deployUtils.attach("SynCityPasses");
 
-  await nft.setOperators(operators);
+  await deployUtils.Tx(nft.setOperators(operators), "Set operator");
+  // const nft = await deployUtils.attach("SynCityPasses");
+  for (let address of require("./testnetWallets")) {
+    await deployUtils.Tx(nft.mint(address, 5), "Passes to " + address);
+  }
+
+  // process.exit()
 
   console.log(`
 To verify the SYNR Pass source code:

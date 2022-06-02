@@ -55,6 +55,11 @@ const Helpers = {
   BN(num) {
     return ethers.BigNumber.from((num || 0).toString());
   },
+
+  async sleep(millis) {
+    // eslint-disable-next-line no-undef
+    return new Promise((resolve) => setTimeout(resolve, millis));
+  },
 };
 
 Helpers.S_SYNR_SWAP = 1;

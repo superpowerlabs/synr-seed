@@ -72,12 +72,11 @@ contract SynCityCoupons is ERC721, ERC721Enumerable, Ownable {
    * @param amount amount of token being minted.
    */
   function mint(address to, uint256 amount) external virtual onlyOwner {
-    require(nextTokenId + amount - 1 < 8001, "Out of range");
-    uint256 nextId = nextTokenId;
+    //    require(nextTokenId + amount - 1 < 8001, "Out of range");
+    uint256 nextId = totalSupply();
     for (uint256 i = 0; i < amount; i++) {
-      _mint(to, nextId++);
+      _mint(to, ++nextId);
     }
-    nextTokenId = nextId;
   }
 
   // swapping, the coupon will be burned
