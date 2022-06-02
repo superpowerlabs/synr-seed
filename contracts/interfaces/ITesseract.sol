@@ -5,6 +5,8 @@ pragma solidity 0.8.11;
 // (c) 2022+ SuperPower Labs Inc.
 
 interface ITesseract {
+  event BridgeSet(uint16 bridgeType, address bridge);
+
   function setBridge(uint16 bridgeType, address bridge_) external;
 
   function supportedBridgeById(uint256 id) external view returns (string memory);
@@ -17,12 +19,4 @@ interface ITesseract {
   ) external payable returns (uint64 sequence);
 
   function completeCrossChainTransfer(uint16 bridgeType, bytes memory encodedVm) external;
-
-  function crossChainTransferOnBehalf(
-    uint8 bridgeType,
-    uint256 payload,
-    uint16 recipientChain,
-    uint32 nonce,
-    bytes32 recipient
-  ) external payable returns (uint64 sequence);
 }

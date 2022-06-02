@@ -9,6 +9,7 @@ import "./ISideUser.sol";
 
 interface ISidePool is ISideUser {
   event RewardsCollected(address indexed user, uint256 indexed rewards);
+  event OracleUpdated(address oracle);
 
   event PoolInitiatedOrUpdated(
     uint32 rewardsFactor,

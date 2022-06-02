@@ -15,9 +15,9 @@ module.exports = {
   burnRatio: 7000,
   coolDownDays: 14,
   sPSynrEquivalent: 100000,
-  sPBoostFactor: 20600,
-  sPBoostLimit: 1000000,
+  sPBoostFactor: 13220,
+  sPBoostLimit: 200000,
   bPSynrEquivalent: 3000,
-  bPBoostFactor: 150,
-  bPBoostLimit: 1000,
+  bPBoostFactor: 13220,
+  bPBoostLimit: 6000,
 };
