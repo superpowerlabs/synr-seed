@@ -11,7 +11,7 @@ module.exports = {
   swapFactor: 2000,
   decayInterval: 604800,
   decayFactor: 9900,
-  taxPoints: 4000,
+  taxPoints: 800,
   burnRatio: 7000,
   coolDownDays: 14,
   sPSynrEquivalent: 100000,
