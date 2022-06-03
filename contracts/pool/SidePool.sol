@@ -263,18 +263,13 @@ abstract contract SidePool is
     if (deposit.tokenAmount == 0 || deposit.tokenType == S_SYNR_SWAP || deposit.unlockedAt != 0) {
       return 0;
     }
-    uint256 lockedUntil = uint256(deposit.lockedUntil);
-    if (uint256(users[user].lastRewardsAt) > lockedUntil) {
-      return 0;
-    }
-    uint256 when = lockedUntil > timestamp ? timestamp : lockedUntil;
     return
       uint256(deposit.tokenAmount)
         .mul(deposit.rewardsFactor)
         .div(10000)
         .mul(yieldWeight(deposit))
         .div(10000)
-        .mul(when.sub(users[user].lastRewardsAt))
+        .mul(timestamp.sub(users[user].lastRewardsAt))
         .div(365 days);
   }
 
