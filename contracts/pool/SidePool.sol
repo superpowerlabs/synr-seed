@@ -281,24 +281,22 @@ abstract contract SidePool is
     return rewards.mul(conf.taxPoints).div(10000);
   }
 
-  function passForBoostAmount(address user) public view override returns (uint256) {
-    uint256 passAmount;
-    for (uint256 i = 0; i < users[user].deposits.length; i++) {
-      if (users[user].deposits[i].tokenType == SYNR_PASS_STAKE_FOR_BOOST && users[user].deposits[i].unlockedAt == 0) {
-        passAmount++;
+  /**
+   * @param user address of the stakers
+   * @param isPass specifies it amount of passes or blueprints
+   * @return the amount being boost
+   */
+  function nftForBoostAmount(address user, bool isPass) public view override returns (uint256) {
+    uint256 nftAmount;
+    uint8 tokenType = isPass ? SYNR_PASS_STAKE_FOR_BOOST : BLUEPRINT_STAKE_FOR_BOOST;
+    if ((isPass && users[user].passAmount != 0) || (!isPass && users[user].blueprintAmount != 0)) {
+      for (uint256 i = 0; i < users[user].deposits.length; i++) {
+        if (users[user].deposits[i].tokenType == tokenType && users[user].deposits[i].unlockedAt == 0) {
+          nftAmount++;
+        }
       }
     }
-    return passAmount;
-  }
-
-  function blueprintForBoostAmount(address user) public view override returns (uint256) {
-    uint256 blueprintAmount;
-    for (uint256 i = 0; i < users[user].deposits.length; i++) {
-      if (users[user].deposits[i].tokenType == BLUEPRINT_STAKE_FOR_BOOST && users[user].deposits[i].unlockedAt == 0) {
-        blueprintAmount++;
-      }
-    }
-    return blueprintAmount;
+    return nftAmount;
   }
 
   /**
@@ -313,8 +311,8 @@ abstract contract SidePool is
     }
     uint256 baseAmount = uint256(user.stakedAmount);
     uint256 boostedAmount = baseAmount;
-    uint256 passAmount = passForBoostAmount(user_);
-    uint256 blueprintAmount = blueprintForBoostAmount(user_);
+    uint256 passAmount = nftForBoostAmount(user_, true);
+    uint256 blueprintAmount = nftForBoostAmount(user_, false);
     if (passAmount > 0) {
       // if a SYNR Pass can boost 15000 SYNR (i.e., nftConf.sPBoostLimit)
       // there is a potential limit that depends on how many pass you staked
