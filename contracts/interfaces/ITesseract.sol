@@ -6,6 +6,7 @@ pragma solidity 0.8.11;
 
 interface ITesseract {
   event BridgeSet(uint16 bridgeType, address bridge);
+  event CrossChainTransferStarted(address indexed recipient, uint256 payload);
 
   function setBridge(uint16 bridgeType, address bridge_) external;
 
