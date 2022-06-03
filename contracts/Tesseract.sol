@@ -59,6 +59,7 @@ contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, Ownabl
     } else {
       revert("Tesseract: unsupported bridge");
     }
+    emit CrossChainTransferStarted(_msgSender(), payload);
   }
 
   function completeCrossChainTransfer(uint16 bridgeType, bytes memory encodedVm) external override {
