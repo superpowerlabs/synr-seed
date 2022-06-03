@@ -140,9 +140,7 @@ interface ISidePool is ISideUser {
 
   function calculateTaxOnRewards(uint256 rewards) external view returns (uint256);
 
-  function passForBoostAmount(address user) external view returns (uint256);
-
-  function blueprintForBoostAmount(address user) external view returns (uint256);
+  function nftForBoostAmount(address user, bool isPass) external view returns (uint256);
 
   function boostWeight(address user) external view returns (uint256);
 
