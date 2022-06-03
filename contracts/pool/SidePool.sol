@@ -697,7 +697,9 @@ abstract contract SidePool is
     }
     if (what == 1) {
       penalties -= amount;
-      stakedToken.transfer(beneficiary, amount);
+      uint256 burnedAmount = amount.mul(conf.burnRatio).div(10000);
+      stakedToken.burn(burnedAmount);
+      stakedToken.transfer(beneficiary, amount.sub(burnedAmount));
     } else {
       taxes -= amount;
       rewardsToken.transfer(beneficiary, amount);

@@ -2,7 +2,8 @@
 pragma solidity 0.8.11;
 
 import "../pool/SeedPool.sol";
-import "hardhat/console.sol";
+
+//import "hardhat/console.sol";
 
 contract SeedPoolMock is SeedPool {
   function setBridge(address bridge_, bool active) external virtual override onlyOwner {

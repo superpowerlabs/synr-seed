@@ -4,7 +4,7 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "../interfaces/IERC20Receiver.sol";
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 contract TokenReceiver is IERC20Receiver, IERC721ReceiverUpgradeable {
   function onERC20Received(
