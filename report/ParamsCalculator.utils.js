@@ -232,7 +232,7 @@ describe("#Params Calculator", function () {
     await sideBridge.wormholeRegisterContract(2, bytes32Address(mainBridge.address));
   }
 
-  it.only("should verify balance between stakeFactor and swapFactor", async function () {
+  it("should verify balance between stakeFactor and swapFactor", async function () {
     const params = [
       // best choice
       // [100, 50000, 20000],

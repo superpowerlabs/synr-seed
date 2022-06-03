@@ -2,7 +2,8 @@
 pragma solidity 0.8.11;
 
 import "../pool/SidePool.sol";
-import "hardhat/console.sol";
+
+//import "hardhat/console.sol";
 
 contract SidePoolMock is SidePool {
   /// @custom:oz-upgrades-unsafe-allow constructor

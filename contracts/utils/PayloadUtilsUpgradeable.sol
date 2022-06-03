@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "../interfaces/IPayloadUtils.sol";
 import "./Constants.sol";
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 contract PayloadUtilsUpgradeable is IPayloadUtils, Constants {
   using SafeMathUpgradeable for uint256;

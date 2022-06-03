@@ -615,6 +615,11 @@ describe("#Integration test", function () {
     await mainPool.withdrawPenalties(tax, alice.address);
     const synrBalanceAfterPenalty = await synr.balanceOf(alice.address);
     expect(await synrBalanceAfterPenalty).equal(synrBalanceBeforePenalty.add(tax));
+
+    let treasuryBalanceBefore = await seed.balanceOf(treasury.address);
+    await seedPool.withdrawPenaltiesOrTaxes(0, treasury.address, 1);
+    let treasuryBalanceAfter = await seed.balanceOf(treasury.address);
+    expect(treasuryBalanceAfter.sub(treasuryBalanceBefore)).equal("3500000000000000000000");
   });
 
   it("should compare one deposit Vs many deposits", async function () {

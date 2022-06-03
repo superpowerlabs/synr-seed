@@ -5,7 +5,7 @@ pragma solidity 0.8.11;
 
 import "../bridge/SideWormholeBridge.sol";
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 contract SideWormholeBridgeMock is SideWormholeBridge {
   function wormholeCompleteTransfer(bytes memory encodedVm) public override {

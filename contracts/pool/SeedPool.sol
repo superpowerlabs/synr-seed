@@ -5,7 +5,8 @@ pragma solidity 0.8.11;
 // (c) 2022+ SuperPower Labs Inc.
 
 import "./SidePool.sol";
-import "hardhat/console.sol";
+
+//import "hardhat/console.sol";
 
 contract SeedPool is SidePool {
   using SafeMathUpgradeable for uint256;

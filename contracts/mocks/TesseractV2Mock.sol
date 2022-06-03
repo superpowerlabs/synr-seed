@@ -3,7 +3,7 @@ pragma solidity 0.8.11;
 
 import "../Tesseract.sol";
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 import "./ISomeOtherBridge.sol";
 
 contract TesseractV2Mock is Tesseract {

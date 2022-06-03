@@ -17,7 +17,7 @@ import "../interfaces/ISyndicateERC20.sol";
 import "../interfaces/ISyntheticSyndicateERC20.sol";
 import "../interfaces/IERC721Minimal.sol";
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
