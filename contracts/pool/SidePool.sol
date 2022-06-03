@@ -15,7 +15,7 @@ import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
 import "../interfaces/IERC721Minimal.sol";
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 abstract contract SidePool is
   PayloadUtilsUpgradeable,
