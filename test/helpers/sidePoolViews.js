@@ -9,7 +9,7 @@ const BN = (s, zeros = 0) => {
 
 function boostRewards(extraConf, rewards, stakedAmount, passAmountForBoost, blueprintAmountForBoost) {
   if (extraConf.sPBoostFactor > extraConf.bPBoostFactor) {
-    return boostRewardsByBetterBooster(
+    return boostRewardsByBestBooster(
       rewards,
       stakedAmount,
       passAmountForBoost,
@@ -20,7 +20,7 @@ function boostRewards(extraConf, rewards, stakedAmount, passAmountForBoost, blue
       extraConf.bPBoostLimit
     );
   } else {
-    return boostRewardsByBetterBooster(
+    return boostRewardsByBestBooster(
       rewards,
       stakedAmount,
       blueprintAmountForBoost,
@@ -33,7 +33,7 @@ function boostRewards(extraConf, rewards, stakedAmount, passAmountForBoost, blue
   }
 }
 
-function boostRewardsByBetterBooster(rewards, stakedAmount, amount1, boost1, limit1, amount2, boost2, limit2) {
+function boostRewardsByBestBooster(rewards, stakedAmount, amount1, boost1, limit1, amount2, boost2, limit2) {
   let boostableAmount = BN();
   let boosted = BN();
   if (amount1 > 0) {

@@ -85,7 +85,7 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
   ) public view returns (uint256) {
     if (extraConf.sPBoostFactor > extraConf.bPBoostFactor) {
       return
-        _boostRewardsByBetterBooster(
+        _boostRewardsByBestBooster(
           rewards,
           stakedAmount,
           passAmountForBoost,
@@ -97,7 +97,7 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
         );
     } else {
       return
-        _boostRewardsByBetterBooster(
+        _boostRewardsByBestBooster(
           rewards,
           stakedAmount,
           blueprintAmountForBoost,
@@ -110,7 +110,7 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
     }
   }
 
-  function _boostRewardsByBetterBooster(
+  function _boostRewardsByBestBooster(
     uint256 rewards,
     uint256 stakedAmount,
     uint256 amount1,
