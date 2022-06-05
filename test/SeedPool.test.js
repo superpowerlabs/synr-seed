@@ -25,7 +25,6 @@ const {
   swapFactor,
   stakeFactor,
   taxPoints,
-  burnRatio,
   coolDownDays,
   minimumLockupTime,
   earlyUnstakePenalty,
@@ -80,15 +79,7 @@ describe("#SeedPool", function () {
 
     if (initPool) {
       await pool.initPool(rewardsFactor, decayInterval, decayFactor, swapFactor, stakeFactor, taxPoints, coolDownDays);
-      await pool.updateExtraConf(
-        sPSynrEquivalent,
-        sPBoostFactor,
-        sPBoostLimit,
-        bPSynrEquivalent,
-        bPBoostFactor,
-        bPBoostLimit,
-        burnRatio
-      );
+      await pool.updateExtraConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit);
     }
 
     await seed.grantRole(await seed.MINTER_ROLE(), deployer.address);

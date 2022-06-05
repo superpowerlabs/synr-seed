@@ -30,7 +30,7 @@ interface ISideConf {
     uint32 bPBoostLimit;
     uint32 priceRatio;
     uint16 blueprintAmount;
-    uint16 burnRatio;
+    uint16 extra;
   }
 
   struct ExtraNftConf {

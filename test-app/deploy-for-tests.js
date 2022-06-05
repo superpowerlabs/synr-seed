@@ -21,7 +21,6 @@ const {
   swapFactor,
   stakeFactor,
   taxPoints,
-  burnRatio,
   coolDownDays,
   minimumLockupTime,
   earlyUnstakePenalty,

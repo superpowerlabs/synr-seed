@@ -2,8 +2,6 @@ const {expect} = require("chai");
 const {BN} = require("./helpers/utils");
 const {boostRewards} = require("./helpers/sidePoolViews");
 
-const {burnRatio} = require("./fixtures/parameters");
-
 const {initEthers} = require("../test/helpers");
 const {upgrades} = require("hardhat");
 
@@ -21,6 +19,7 @@ describe("#SidePoolViews", function () {
 
   beforeEach(async function () {
     sidePoolViews = await upgrades.deployProxy(SidePoolViews, []);
+    await sidePoolViews.deployed();
   });
 
   const extraConf = {
@@ -32,7 +31,7 @@ describe("#SidePoolViews", function () {
     bPBoostLimit: 6000,
     priceRatio: 1000,
     blueprintAmount: 0,
-    burnRatio,
+    extra: 0,
   };
 
   it("should verify that the functions in solidity and JS produce same results", async function () {
@@ -43,7 +42,6 @@ describe("#SidePoolViews", function () {
       let blueprintAmountForBoost = BN(12);
 
       let rewards2 = boostRewards(extraConf, rewards, stakedAmount, passAmountForBoost, blueprintAmountForBoost);
-
       let rewards3 = await sidePoolViews.boostRewards(
         extraConf,
         rewards,

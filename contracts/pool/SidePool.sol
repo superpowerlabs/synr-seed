@@ -165,8 +165,7 @@ abstract contract SidePool is
     uint32 sPBoostLimit_,
     uint32 bPSynrEquivalent_,
     uint32 bPBoostFactor_,
-    uint32 bPBoostLimit_,
-    uint16 burnRatio_
+    uint32 bPBoostLimit_
   ) external override onlyOwner whenActive {
     if (sPSynrEquivalent_ > 0) {
       extraConf.sPSynrEquivalent = sPSynrEquivalent_;
@@ -190,18 +189,7 @@ abstract contract SidePool is
       require(bPBoostLimit_ >= extraConf.bPSynrEquivalent, "SidePool: invalid boost limit");
       extraConf.bPBoostLimit = bPBoostLimit_;
     }
-    if (burnRatio_ > 0) {
-      extraConf.burnRatio = burnRatio_;
-    }
-    emit ExtraConfUpdated(
-      sPSynrEquivalent_,
-      sPBoostFactor_,
-      sPBoostLimit_,
-      bPSynrEquivalent_,
-      bPBoostFactor_,
-      bPBoostLimit_,
-      burnRatio_
-    );
+    emit ExtraConfUpdated(sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_, bPSynrEquivalent_, bPBoostFactor_, bPBoostLimit_);
   }
 
   function pausePool(bool paused) external onlyOwner {

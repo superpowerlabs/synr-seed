@@ -21,7 +21,6 @@ const {
   swapFactor,
   stakeFactor,
   taxPoints,
-  burnRatio,
   coolDownDays,
   minimumLockupTime,
   earlyUnstakePenalty,
@@ -97,7 +96,6 @@ async function main() {
         bPSynrEquivalent,
         bPBoostFactor,
         bPBoostLimit,
-        burnRatio,
         chainId === 1337
           ? {}
           : {

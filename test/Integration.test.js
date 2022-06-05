@@ -13,7 +13,6 @@ const {
   swapFactor,
   stakeFactor,
   taxPoints,
-  burnRatio,
   coolDownDays,
   minimumLockupTime,
   earlyUnstakePenalty,
@@ -199,8 +198,7 @@ describe("#Integration test", function () {
         sPBoostLimit,
         bPSynrEquivalent,
         bPBoostFactor,
-        bPBoostLimit,
-        burnRatio
+        bPBoostLimit
       );
     }
 

@@ -27,8 +27,7 @@ interface ISidePool is ISideUser, ISideConf {
     uint32 sPBoostLimit,
     uint32 bPSynrEquivalent,
     uint32 bPBoostFactor,
-    uint32 bPBoostLimit,
-    uint16 burnRatio
+    uint32 bPBoostLimit
   );
   event PoolPaused(bool isPaused);
   event BridgeSet(address bridge);
@@ -68,8 +67,7 @@ interface ISidePool is ISideUser, ISideConf {
     uint32 sPBoostLimit,
     uint32 bPSynrEquivalent,
     uint32 bPBoostFactor,
-    uint32 bPBoostLimit,
-    uint16 burnRatio
+    uint32 bPBoostLimit
   ) external;
 
   function shouldUpdateRatio() external view returns (bool);

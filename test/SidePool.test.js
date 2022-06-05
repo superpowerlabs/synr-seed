@@ -20,7 +20,6 @@ const {
   swapFactor,
   stakeFactor,
   taxPoints,
-  burnRatio,
   coolDownDays,
   minimumLockupTime,
   earlyUnstakePenalty,
@@ -84,8 +83,7 @@ describe("#SidePool", function () {
         sPBoostLimit,
         bPSynrEquivalent,
         bPBoostFactor,
-        bPBoostLimit,
-        burnRatio
+        bPBoostLimit
       );
     }
   }
@@ -222,18 +220,18 @@ describe("#SidePool", function () {
     it("should update the NFT conf", async function () {
       await assertThrowsMessage(sidePool.updateExtraConf(11, 22, 33, 44, 55, 66, 77, 2), "too many arguments");
 
-      await assertThrowsMessage(sidePool.updateExtraConf(11, 22, 33, 44, 55, 66, 77), "SidePool: negative boost not allowed");
+      await assertThrowsMessage(sidePool.updateExtraConf(11, 22, 33, 44, 55, 66), "SidePool: negative boost not allowed");
 
-      await assertThrowsMessage(sidePool.updateExtraConf(1000, 22000, 33, 44, 55, 66, 77), "SidePool: invalid boost limit");
+      await assertThrowsMessage(sidePool.updateExtraConf(1000, 22000, 33, 44, 55, 66), "SidePool: invalid boost limit");
 
       await assertThrowsMessage(
-        sidePool.updateExtraConf(1000, 12000, 2000, 44, 55, 66, 77),
+        sidePool.updateExtraConf(1000, 12000, 2000, 44, 55, 66),
         "SidePool: negative boost not allowed"
       );
 
-      await assertThrowsMessage(sidePool.updateExtraConf(1000, 22000, 2000, 44, 15500, 1, 77), "SidePool: invalid boost limit");
+      await assertThrowsMessage(sidePool.updateExtraConf(1000, 22000, 2000, 44, 15500, 1), "SidePool: invalid boost limit");
 
-      await sidePool.updateExtraConf(1000, 22000, 2000, 44, 15500, 100, 77);
+      await sidePool.updateExtraConf(1000, 22000, 2000, 44, 15500, 100);
       const updated = await getExtraConf(sidePool);
 
       expect(updated.sPBoostLimit).equal(2000);
