@@ -218,8 +218,7 @@ describe("#Params Calculator", function () {
       sPBoostLimit_,
       bPSynrEquivalent_,
       bPBoostFactor_,
-      bPBoostLimit_,
-      burnRatio
+      bPBoostLimit_
     );
 
     sideTesseract = await upgrades.deployProxy(Tesseract);
@@ -344,10 +343,12 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+  it.only("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
     // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
 
     // best from previous it:
+
+    this.timeout(100000);
 
     const params = [
       // [
@@ -356,11 +357,12 @@ describe("#Params Calculator", function () {
       //   1000000, //sPBoostLimit
       // ],
       // SYNR PASS
-      // [100000, 13220, 200000],
+      [100000, 20000, 200000],
+      [100000, 19220, 200000],
+      [100000, 18220, 200000],
 
       // blueprints (the calculations works the same)
-      [10000, 13220, 20000],
-      // [100000, 2660, 1000000],
+      // [3000, 13220, 6000],
     ];
 
     let report = [
