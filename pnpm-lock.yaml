@@ -3,7 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@ethersproject/bytes': ^5.6.1
   '@ethersproject/contracts': ^5.6.0
-  '@ndujalabs/wormhole-tunnel': ^0.3.3
+  '@ndujalabs/wormhole-tunnel': ^0.3.5
   '@nomiclabs/hardhat-ethers': ^2.0.5
   '@nomiclabs/hardhat-etherscan': ^3.0.3
   '@nomiclabs/hardhat-waffle': ^2.0.3
@@ -35,7 +35,7 @@ specifiers:
 devDependencies:
   '@ethersproject/bytes': 5.6.1
   '@ethersproject/contracts': 5.6.0
-  '@ndujalabs/wormhole-tunnel': 0.3.3
+  '@ndujalabs/wormhole-tunnel': 0.3.5
   '@nomiclabs/hardhat-ethers': 2.0.5_ethers@5.6.2+hardhat@2.9.3
   '@nomiclabs/hardhat-etherscan': 3.0.3_hardhat@2.9.3
   '@nomiclabs/hardhat-waffle': 2.0.3_dzzkavv5od5m4cbnatjkeuuaba
@@ -596,8 +596,11 @@ packages:
       tweetnacl-util: 0.15.1
     dev: true
 
-  /@ndujalabs/wormhole-tunnel/0.3.3:
-    resolution: {integrity: sha512-VFjU0i8zXcWBun8H8KdIPzgLjp1QpcGarUAUeGMY8h+PaZ9BwQ/t0WWGF9dY99VIP4uPzRxc7vNPgv6dzC3hyA==}
+  /@ndujalabs/wormhole-tunnel/0.3.5:
+    resolution: {integrity: sha512-NrWGmSC0tNoD/VlpGXehXnXVQvc3AjKE4cAZiG1y8txqk5RrZ2FShxfnwIwzrXhFEEdO15/GjcyyVy1x6/WoKQ==}
+    dependencies:
+      '@openzeppelin/contracts': 4.5.0
+      '@openzeppelin/contracts-upgradeable': 4.5.2
     dev: true
 
   /@noble/hashes/1.0.0:

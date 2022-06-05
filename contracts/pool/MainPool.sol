@@ -35,12 +35,6 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
 
   mapping(address => bool) public bridges;
 
-  TVL public tvl;
-
-  // set the storage to manage future changes
-  // keeping the contract upgradeable
-  ExtraConf public extraConf;
-
   modifier onlyBridge() {
     require(bridges[_msgSender()], "MainPool: forbidden");
     _;
@@ -64,6 +58,8 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     pass = IERC721Minimal(pass_);
   }
 
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+
   function _updateTvl(
     uint256 tokenType,
     uint256 tokenAmount,
@@ -71,20 +67,18 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
   ) internal {
     if (increase) {
       if (tokenType == SYNR_STAKE) {
-        tvl.synrAmount += uint96(tokenAmount);
+        conf.synrAmount += uint96(tokenAmount);
       } else if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-        tvl.passAmount++;
+        conf.passAmount++;
       }
     } else {
       if (tokenType == SYNR_STAKE) {
-        tvl.synrAmount = uint96(uint256(tvl.synrAmount).sub(tokenAmount));
+        conf.synrAmount = uint96(uint256(conf.synrAmount).sub(tokenAmount));
       } else {
-        tvl.passAmount--;
+        conf.passAmount--;
       }
     }
   }
-
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
   function setBridge(address bridge_, bool active) external override onlyOwner {
     require(bridge_.isContract(), "SeedPool: bridge_ not a contract");
@@ -101,10 +95,15 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     require(sSynr.isOperatorInRole(address(this), 0x0004_0000), "MainPool: contract cannot receive sSYNR");
     require(conf.maximumLockupTime == 0, "MainPool: already initiated");
     conf = Conf({
+      status: 1,
       minimumLockupTime: minimumLockupTime_,
       maximumLockupTime: 365,
       earlyUnstakePenalty: earlyUnstakePenalty_,
-      status: 1
+      passAmount: 0,
+      synrAmount: 0,
+      reserved1: 0,
+      reserved2: 0,
+      reserved3: 0
     });
     emit PoolInitiated(minimumLockupTime_, earlyUnstakePenalty_);
   }

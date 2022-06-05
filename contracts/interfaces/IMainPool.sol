@@ -13,27 +13,17 @@ interface IMainPool is IMainUser {
   event BridgeRemoved(address bridge);
 
   struct Conf {
+    uint8 status;
     uint16 minimumLockupTime;
     uint16 maximumLockupTime;
     uint16 earlyUnstakePenalty;
-    uint8 status;
-  }
-
-  struct ExtraConf {
+    // TVL
+    uint16 passAmount;
+    uint96 synrAmount;
     // reserved for future variables
     uint32 reserved1;
     uint32 reserved2;
-    uint32 reserved3;
-    uint32 reserved4;
-    uint32 reserved5;
-    uint32 reserved6;
-    uint32 reserved7;
-    uint32 reserved8;
-  }
-
-  struct TVL {
-    uint16 passAmount;
-    uint96 synrAmount;
+    uint24 reserved3;
   }
 
   function setBridge(address bridge_, bool active) external;

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.11;
+
 interface ISideUser {
   event DepositSaved(address indexed user, uint16 indexed mainIndex);
 
@@ -22,7 +25,7 @@ interface ISideUser {
     // on the main net and on the sidechain. This guarantees alignment
     uint16 mainIndex;
     // @dev pool token amount staked
-    uint128 tokenAmount; //
+    uint128 generator; //
     // @dev rewards ratio when staked
     uint32 rewardsFactor;
     // for two words,
@@ -39,12 +42,14 @@ interface ISideUser {
   struct User {
     // @dev Total passes staked
     uint16 passAmount;
+    uint16 passAmountForBoost;
     // @dev Total blueprints staked
     uint16 blueprintAmount;
+    uint16 blueprintAmountForBoost;
     // @dev Total staked SYNR
     uint96 stakedAmount;
-    // @dev Total locked SEED
-    uint128 tokenAmount;
+    // @dev SEED generator:
+    uint128 generator;
     // @dev when claimed rewards last time
     uint32 lastRewardsAt;
     Deposit[] deposits;

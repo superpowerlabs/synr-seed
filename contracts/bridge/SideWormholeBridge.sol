@@ -31,8 +31,6 @@ contract SideWormholeBridge is WormholeBridge {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    require(tokenType != S_SYNR_SWAP, "SideWormholeBridge: sSYNR swaps cannot be bridged back");
-    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SideWormholeBridge: blueprints unstake does not require bridge");
     SeedPool(pool).unstakeViaBridge(sender, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     uint64 sequence = _wormholeTransferWithValue(payload, recipientChain, recipient, nonce, msg.value);
     return sequence;

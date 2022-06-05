@@ -23,8 +23,12 @@ contract SeedPool is SidePool {
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  function initialize(address seedToken_, address blueprint_) public initializer {
-    __SidePool_init(seedToken_, seedToken_, blueprint_);
+  function initialize(
+    address seedToken_,
+    address blueprint_,
+    address poolViews_
+  ) public initializer {
+    __SidePool_init(seedToken_, seedToken_, blueprint_, poolViews_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
@@ -43,6 +47,8 @@ contract SeedPool is SidePool {
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) external virtual override {
+    require(tokenType >= BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
+    require(users[_msgSender()].blueprintAmount < 30, "SeedPool: at most 30 blueprint can be staked");
     uint16 mainIndex = _mainIndexForBlueprint[_msgSender()];
     if (mainIndex == 0) {
       mainIndex = type(uint16).max;
@@ -50,18 +56,11 @@ contract SeedPool is SidePool {
       mainIndex -= 1;
     }
     _mainIndexForBlueprint[_msgSender()] = mainIndex;
-    require(tokenType >= BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
-    require(users[_msgSender()].blueprintAmount < 30, "SeedPool: at most 30 blueprint can be staked");
     _stake(_msgSender(), tokenType, block.timestamp, block.timestamp.add(lockupTime * 1 days), mainIndex, tokenAmountOrID);
   }
 
   function unstake(Deposit memory deposit) external override {
-    require(
-      deposit.tokenType == S_SYNR_SWAP ||
-        deposit.tokenType == BLUEPRINT_STAKE_FOR_BOOST ||
-        deposit.tokenType == BLUEPRINT_STAKE_FOR_SEEDS,
-      "SeedPool: invalid tokenType"
-    );
+    require(deposit.tokenType == S_SYNR_SWAP || deposit.tokenType >= BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: invalid tokenType");
     _unstakeDeposit(deposit);
   }
 
@@ -85,12 +84,7 @@ contract SeedPool is SidePool {
     uint256 mainIndex,
     uint256 tokenAmountOrID
   ) external onlyBridge {
+    require(tokenType != S_SYNR_SWAP && tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SeedPool: unsupported token");
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
-
-  // to upgrade in testnet
-
-  //  uint256[50] private __gap;
-  //
-  //  mapping(address => uint16) internal _mainIndexForBlueprint;
 }

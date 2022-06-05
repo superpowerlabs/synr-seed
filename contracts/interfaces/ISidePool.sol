@@ -4,11 +4,10 @@ pragma solidity 0.8.11;
 // Author: Francesco Sullo <francesco@sullo.co>
 // (c) 2022+ SuperPower Labs Inc.
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./ISideUser.sol";
+import "./ISideConf.sol";
 
-interface ISidePool is ISideUser {
-  event RewardsCollected(address indexed user, uint256 indexed rewards);
+interface ISidePool is ISideUser, ISideConf {
   event OracleUpdated(address oracle);
 
   event PoolInitiatedOrUpdated(
@@ -18,72 +17,22 @@ interface ISidePool is ISideUser {
     uint32 swapFactor,
     uint32 stakeFactor,
     uint16 taxPoints,
-    uint16 burnRatio,
     uint8 coolDownDays
   );
 
   event PriceRatioUpdated(uint32 priceRatio);
-  event NftConfUpdated(
+  event ExtraConfUpdated(
     uint32 sPSynrEquivalent,
     uint32 sPBoostFactor,
     uint32 sPBoostLimit,
     uint32 bPSynrEquivalent,
     uint32 bPBoostFactor,
-    uint32 bPBoostLimit
+    uint32 bPBoostLimit,
+    uint16 burnRatio
   );
   event PoolPaused(bool isPaused);
   event BridgeSet(address bridge);
   event BridgeRemoved(address bridge);
-
-  struct Conf {
-    uint16 maximumLockupTime;
-    uint32 poolInitAt; // the moment that the pool start operating, i.e., when initPool is first launched
-    uint32 rewardsFactor; // initial ratio, decaying every decayInterval of a decayFactor
-    uint32 decayInterval; // ex. 7 * 24 * 3600, 7 days
-    uint16 decayFactor; // ex. 9850 >> decays of 1.5% every 7 days
-    uint32 lastRatioUpdateAt;
-    uint32 swapFactor;
-    uint32 stakeFactor;
-    uint16 taxPoints; // ex 250 = 2.5%
-    uint16 burnRatio;
-    uint32 priceRatio;
-    uint8 coolDownDays; // cool down period for
-    uint8 status;
-  }
-
-  struct ExtraConf {
-    // reserved for future variables
-    uint32 reserved1;
-    uint32 reserved2;
-    uint32 reserved3;
-    uint32 reserved4;
-    uint32 reserved5;
-    uint32 reserved6;
-    uint32 reserved7;
-    uint32 reserved8;
-  }
-
-  struct TVL {
-    uint16 blueprintAmount;
-    uint96 stakedTokenAmount;
-  }
-
-  struct NftConf {
-    uint32 sPSynrEquivalent; // 100,000
-    uint32 sPBoostFactor; // 12500 > 112.5% > +12.5% of boost
-    uint32 sPBoostLimit;
-    uint32 bPSynrEquivalent;
-    uint32 bPBoostFactor;
-    uint32 bPBoostLimit;
-  }
-
-  struct ExtraNftConf {
-    IERC721 token;
-    uint16 boostFactor; // 12500 > 112.5% > +12.5% of boost
-    uint32 boostLimit;
-  }
-
-  // functions
 
   function initPool(
     uint32 rewardsFactor,
@@ -92,7 +41,6 @@ interface ISidePool is ISideUser {
     uint32 swapFactor,
     uint32 stakeFactor,
     uint16 taxPoints,
-    uint16 burnRatio,
     uint8 coolDownDays
   ) external;
 
@@ -102,7 +50,6 @@ interface ISidePool is ISideUser {
     uint32 swapFactor,
     uint32 stakeFactor,
     uint16 taxPoints,
-    uint16 burnRatio,
     uint8 coolDownDays
   ) external;
 
@@ -115,34 +62,19 @@ interface ISidePool is ISideUser {
   // Split configuration in two struct to avoid following error calling initPool
   // CompilerError: Stack too deep when compiling inline assembly:
   // Variable value0 is 1 slot(s) too deep inside the stack.
-  function updateNftConf(
+  function updateExtraConf(
     uint32 sPSynrEquivalent,
     uint32 sPBoostFactor,
     uint32 sPBoostLimit,
     uint32 bPSynrEquivalent,
     uint32 bPBoostFactor,
-    uint32 bPBoostLimit
+    uint32 bPBoostLimit,
+    uint16 burnRatio
   ) external;
-
-  function getLockupTime(Deposit memory deposit) external view returns (uint256);
-
-  function yieldWeight(Deposit memory deposit) external view returns (uint256);
 
   function shouldUpdateRatio() external view returns (bool);
 
   function updateRatio() external;
-
-  function calculateUntaxedRewards(
-    address user,
-    uint256 depositIndex,
-    uint256 timestamp
-  ) external view returns (uint256);
-
-  function calculateTaxOnRewards(uint256 rewards) external view returns (uint256);
-
-  function nftForBoostAmount(address user, bool isPass) external view returns (uint256);
-
-  function boostWeight(address user) external view returns (uint256);
 
   function collectRewards() external;
 
@@ -154,23 +86,9 @@ interface ISidePool is ISideUser {
 
   function getDepositsLength(address user) external view returns (uint256);
 
-  function canUnstakeWithoutTax(address user, uint256 mainIndex) external view returns (bool);
-
   function getDepositIndexByMainIndex(address user, uint256 mainIndex) external view returns (uint256, bool);
 
-  function getVestedPercentage(
-    uint256 when,
-    uint256 lockedFrom,
-    uint256 lockedUntil
-  ) external view returns (uint256);
-
-  function unstakeIfSSynr(uint256 depositIndex) external;
-
-  function withdrawPenaltiesOrTaxes(
-    uint256 amount,
-    address beneficiary,
-    uint256 what
-  ) external;
+  function withdrawTaxes(uint256 amount, address beneficiary) external;
 
   function stake(
     uint256 tokenType,

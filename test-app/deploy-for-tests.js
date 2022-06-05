@@ -85,7 +85,7 @@ async function main() {
     "Init SeedPool"
   );
   await deployUtils.Tx(
-    sidePool.updateNftConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit, {
+    sidePool.updateExtraConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit, {
       gasLimit: 60000,
     }),
     "Init NFT Conf"

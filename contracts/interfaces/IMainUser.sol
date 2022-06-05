@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.11;
+
 interface IMainUser {
   event DepositSaved(address indexed user, uint16 indexed mainIndex);
   event DepositUnlocked(address indexed user, uint16 indexed mainIndex);

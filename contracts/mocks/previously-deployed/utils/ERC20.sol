@@ -163,7 +163,6 @@ contract ERC20 is IERC20 {
     uint256 amount
   ) public virtual override returns (bool) {
     _transfer(sender, recipient, amount);
-    //    console.log("_allowances[sender][msg.sender] %s", _allowances[sender][msg.sender]);
     _approve(sender, msg.sender, _allowances[sender][msg.sender] - amount);
     return true;
   }

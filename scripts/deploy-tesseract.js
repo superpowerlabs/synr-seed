@@ -53,24 +53,57 @@ async function main() {
     );
     // pool = await deployUtils.attach("MainPool");
     await deployUtils.Tx(
-      sSynr.connect(owner).updateRole(pool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER(), {gasLimit: 60000}),
+      sSynr
+        .connect(owner)
+        .updateRole(pool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER(), chainId === 1337 ? {} : {gasLimit: 60000}),
       "Whitelisting the pool"
     );
-    await deployUtils.Tx(pool.initPool(minimumLockupTime, earlyUnstakePenalty, {gasLimit: 70000}), "Init main pool");
+    await deployUtils.Tx(
+      pool.initPool(minimumLockupTime, earlyUnstakePenalty, chainId === 1337 ? {} : {gasLimit: 70000}),
+      "Init main pool"
+    );
   } else {
     const seed = await deployUtils.attach("SeedToken");
-    pool = await deployUtils.deployProxy("SeedPool", deployed[chainId].SeedToken, deployed[chainId].SynCityCoupons);
+    const poolViews = await deployUtils.deployProxy("SidePoolViews");
+    pool = await deployUtils.deployProxy(
+      "SeedPool",
+      deployed[chainId].SeedToken,
+      deployed[chainId].SynCityCoupons,
+      poolViews.address
+    );
 
     await deployUtils.Tx(
-      pool.initPool(rewardsFactor, decayInterval, decayFactor, swapFactor, stakeFactor, taxPoints, burnRatio, coolDownDays, {
-        gasLimit: 90000,
-      }),
+      pool.initPool(
+        rewardsFactor,
+        decayInterval,
+        decayFactor,
+        swapFactor,
+        stakeFactor,
+        taxPoints,
+        coolDownDays,
+        chainId === 1337
+          ? {}
+          : {
+              gasLimit: 90000,
+            }
+      ),
       "Init SeedPool"
     );
     await deployUtils.Tx(
-      pool.updateNftConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit, {
-        gasLimit: 60000,
-      }),
+      pool.updateExtraConf(
+        sPSynrEquivalent,
+        sPBoostFactor,
+        sPBoostLimit,
+        bPSynrEquivalent,
+        bPBoostFactor,
+        bPBoostLimit,
+        burnRatio,
+        chainId === 1337
+          ? {}
+          : {
+              gasLimit: 60000,
+            }
+      ),
       "Init NFT Conf"
     );
     await deployUtils.Tx(
