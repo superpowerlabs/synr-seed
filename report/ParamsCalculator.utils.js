@@ -345,7 +345,7 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it.only("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+  it("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
     // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
 
     // best from previous it:
@@ -421,15 +421,10 @@ describe("#Params Calculator", function () {
 
         await increaseBlockTimestampBy(366 * 24 * 3600);
 
-        console.log(">>> bob");
         await unstake(bob);
-        console.log(">>> bob2");
         await unstake(bob, 1);
-        console.log(">>> alice");
         await unstake(alice);
-        console.log(">>> mark");
         await unstake(mark);
-        console.log(">>> mark2");
         await unstake(mark, 1);
 
         const noBoostNoSeed = await seed.balanceOf(alice.address);
@@ -439,10 +434,6 @@ describe("#Params Calculator", function () {
         row.push(formatBN(noBoostNoSeed));
         row.push(formatBN(forSeed));
         row.push(formatBN(forBoost));
-
-        console.log(formatBN(noBoostNoSeed));
-        console.log(formatBN(forSeed));
-        console.log(formatBN(forBoost));
 
         let boost = threeDecimals(parseFloat(formatBN(forBoost)) / parseFloat(formatBN(noBoostNoSeed)));
         row.push(boost);
@@ -456,163 +447,10 @@ describe("#Params Calculator", function () {
       }
     }
     await fs.ensureDir(path.resolve(__dirname, "../tmp"));
-    // report.sort((a, b) => {
-    //   a = a[8];
-    //   b = b[8];
-    //   return a > b ? 1 : a < b ? -1 : 0;
-    // });
     report = report.map((e) => e.join("\t")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report2.csv"), report);
     console.info(getJSONFromCSV(report));
 
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report2.csv"));
   });
-
-  // it("should verify the balance between blueprint boost and pass boost", async function () {
-  //   const params = [
-  //     [
-  //       100000, //sPBoostFactor
-  //       1000000, //sPBoostLimit
-  //       Math.floor(100000 / 20), //bPBoostFactor
-  //       1000000, //bPBoostLimit
-  //     ],
-  //     [
-  //       100000, //sPBoostFactor
-  //       1000000, //sPBoostLimit
-  //       Math.floor(100000 / 10), //bPBoostFactor
-  //       50000, //bPBoostLimit
-  //     ],
-  //     // [500000, 200000, Math.floor(500000 / 20), 200000],
-  //     // [200000, 500000, Math.floor(200000 / 20), 500000],
-  //   ];
-  //
-  //   let report = [
-  //     [
-  //       "SYNR amount",
-  //       "lockupTime",
-  //       "sPBoostFactor",
-  //       "sPBoostLimit",
-  //       "bPBoostFactor",
-  //       "bPBoostLimit",
-  //       "Final Boost for Pass without SYNR",
-  //       "Final Boost for Blueprints without SYNR",
-  //       "Ratio",
-  //     ],
-  //   ];
-  //
-  //   for (let k = 92; k < 380; k += 92) {
-  //     if (k > 365) {
-  //       k = 365;
-  //     }
-  //
-  //     for (let i = 0; i < params.length; i++) {
-  //       const tokenAmount = "100000";
-  //       const amount = ethers.utils.parseEther(tokenAmount);
-  //       let [sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit] = params[i];
-  //       const row = [tokenAmount, k, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit];
-  //       await initAndDeploy(100, 8300, 100000, sPBoostFactor, sPBoostLimit, undefined, bPBoostFactor, bPBoostLimit);
-  //
-  //       // approve SYNR spend no boost
-  //       await synr.connect(bob).approve(mainPool.address, amount);
-  //       // console.log(amount.toString());
-  //       let payload = await serializeInput(SYNR_STAKE, k, amount);
-  //       await mainTesseract.connect(bob).crossChainTransfer(1, payload, 4, 1);
-  //
-  //       let deposit = await mainPool.getDepositByIndex(bob.address, 0);
-  //       let finalPayload = await fromMainDepositToTransferPayload(deposit);
-  //       await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(bob.address, finalPayload));
-  //
-  //       //approve and transfer SYNR and boost for mark
-  //       await synr.connect(mark).approve(mainPool.address, amount);
-  //       payload = await serializeInput(SYNR_STAKE, k, amount);
-  //       await mainTesseract.connect(mark).crossChainTransfer(1, payload, 4, 1);
-  //
-  //       deposit = await mainPool.getDepositByIndex(mark.address, 0);
-  //       finalPayload = await fromMainDepositToTransferPayload(deposit);
-  //       await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(mark.address, finalPayload));
-  //
-  //       let payloadPass = await serializeInput(
-  //         SYNR_PASS_STAKE_FOR_BOOST,
-  //         k, // 1 year
-  //         tokenId3
-  //       );
-  //       await pass.connect(mark).approve(mainPool.address, tokenId3);
-  //       await mainTesseract.connect(mark).crossChainTransfer(1, payloadPass, 4, 1);
-  //
-  //       deposit = await mainPool.getDepositByIndex(mark.address, 1);
-  //       finalPayload = await fromMainDepositToTransferPayload(deposit);
-  //       await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(mark.address, finalPayload));
-  //
-  //       //approve and transfer blueprint on bsc for user 4
-  //       await synr.connect(frank).approve(mainPool.address, amount);
-  //       payload = await serializeInput(SYNR_STAKE, k, amount);
-  //       await mainTesseract.connect(frank).crossChainTransfer(1, payload, 4, 1);
-  //
-  //       deposit = await mainPool.getDepositByIndex(frank.address, 0);
-  //       finalPayload = await fromMainDepositToTransferPayload(deposit);
-  //       await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(frank.address, finalPayload));
-  //
-  //       await blueprint.connect(frank).approve(seedPool.address, 5);
-  //       await seedPool.connect(frank).stake(BLUEPRINT_STAKE_FOR_BOOST, k, 5);
-  //
-  //       await increaseBlockTimestampBy(366 * 24 * 3600);
-  //
-  //       // unstake SEED and SYNR
-  //       let seedDeposit = await seedPool.getDepositByIndex(bob.address, 0);
-  //       let seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-  //
-  //       await sideTesseract.connect(bob).crossChainTransfer(1, seedPayload, 2, 1);
-  //
-  //       let seedFromSYNR = ethers.utils
-  //         .formatEther((await seed.balanceOf(bob.address)).toString())
-  //         .toString()
-  //         .split(".")[0];
-  //
-  //       //unstake from mark
-  //       seedDeposit = await seedPool.getDepositByIndex(mark.address, 0);
-  //       seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-  //       await sideTesseract.connect(mark).crossChainTransfer(1, seedPayload, 2, 1);
-  //       await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(mark.address, seedPayload));
-  //
-  //       seedDeposit = await seedPool.getDepositByIndex(mark.address, 1);
-  //       seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-  //
-  //       await sideTesseract.connect(mark).crossChainTransfer(1, seedPayload, 2, 1);
-  //       await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(mark.address, seedPayload));
-  //
-  //       let balanceAfterBoostPass = ethers.utils
-  //         .formatEther((await seed.balanceOf(mark.address)).toString())
-  //         .toString()
-  //         .split(".")[0];
-  //       row.push(balanceAfterBoostPass - seedFromSYNR);
-  //
-  //       // unstake from frank
-  //       seedDeposit = await seedPool.getDepositByIndex(frank.address, 0);
-  //       seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-  //       await sideTesseract.connect(frank).crossChainTransfer(1, seedPayload, 2, 1);
-  //       await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(frank.address, seedPayload));
-  //
-  //       let balanceAfterBoostBlueprint = ethers.utils
-  //         .formatEther((await seed.balanceOf(frank.address)).toString())
-  //         .toString()
-  //         .split(".")[0];
-  //
-  //       row.push(balanceAfterBoostBlueprint - seedFromSYNR);
-  //
-  //       row.push(parseInt(balanceAfterBoostBlueprint - seedFromSYNR) / parseInt(balanceAfterBoostPass - seedFromSYNR));
-  //       report.push(row);
-  //     }
-  //   }
-  //   await fs.ensureDir(path.resolve(__dirname, "../tmp"));
-  //   // report.sort((a, b) => {
-  //   //   a = a[7];
-  //   //   b = b[7];
-  //   //   return a > b ? 1 : a < b ? -1 : 0;
-  //   // });
-  //   report = report.map((e) => e.join("\t")).join("\n");
-  //   await fs.writeFile(path.resolve(__dirname, "../tmp/report3.csv"), report);
-  //   console.info(report);
-  //
-  //   console.info("Report saved in", path.resolve(__dirname, "../tmp/report3.csv"));
-  // });
 });
