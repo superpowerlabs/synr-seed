@@ -37,6 +37,11 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
     validator = validator_;
   }
 
+  function updatePool(address pool_) external onlyOwner {
+    require(pool_.isContract(), "WormholeBridge: pool_ not a contract");
+    pool = pool_;
+  }
+
   // must be overwritten
   function wormholeTransfer(
     // solhint-disable-next-line
