@@ -3,6 +3,7 @@ module.exports = {
   // conf
   minimumLockupTime: 7 * 16,
   earlyUnstakePenalty: 4000,
+  maximumLockupTime: 365,
 
   // SidePool
   // conf
@@ -20,7 +21,4 @@ module.exports = {
   bPSynrEquivalent: 2000,
   bPBoostFactor: 13000,
   bPBoostLimit: 12000,
-
-  // initial values
-  priceRatio: 10000,
 };

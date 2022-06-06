@@ -110,11 +110,9 @@ async function main() {
     );
   }
 
-  const tesseract = await deployUtils.deployProxy("Tesseract");
-
   const bridgeName = chainId < 6 ? "MainWormholeBridge" : "SideWormholeBridge";
   const bridge = await deployUtils.attach(bridgeName);
-
+  await deployUtils.Tx(bridge.updatePool(pool.address), "Update pool in bridge");
   await deployUtils.Tx(pool.setBridge(bridge.address, true), "Set bridge in pool");
 }
 

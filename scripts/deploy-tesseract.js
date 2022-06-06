@@ -70,6 +70,7 @@ async function main() {
       deployed[chainId].SynCityCoupons,
       poolViews.address
     );
+    // pool = await deployUtils.attach("SeedPool");
 
     await deployUtils.Tx(
       pool.initPool(
@@ -83,7 +84,7 @@ async function main() {
         chainId === 1337
           ? {}
           : {
-              gasLimit: 90000,
+              gasLimit: 120000,
             }
       ),
       "Init SeedPool"
@@ -99,10 +100,10 @@ async function main() {
         chainId === 1337
           ? {}
           : {
-              gasLimit: 60000,
+              gasLimit: 90000,
             }
       ),
-      "Init NFT Conf"
+      "Init ExtraConf"
     );
     await deployUtils.Tx(
       seed.grantRole(await seed.MINTER_ROLE(), pool.address),

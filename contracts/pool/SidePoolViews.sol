@@ -48,11 +48,10 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
     return
       uint256(deposit.generator)
         .mul(deposit.rewardsFactor)
-        .div(10000)
         .mul(yieldWeight(conf, deposit))
-        .div(10000)
         .mul(timestamp.sub(lastRewardsAt))
-        .div(365 days);
+        .div(uint256(deposit.lockedUntil).sub(deposit.lockedFrom))
+        .div(10000 * 10000);
   }
 
   function calculateTaxOnRewards(Conf memory conf, uint256 rewards) public view override returns (uint256) {
