@@ -359,12 +359,12 @@ describe("#Params Calculator", function () {
       //   1000000, //sPBoostLimit
       // ],
       // SYNR PASS
-      [100000, 20000, 200000],
+      // [100000, 20000, 200000],
       // [100000, 19220, 200000],
       // [100000, 18220, 200000],
 
       // blueprints (the calculations works the same)
-      [3000, 13220, 6000],
+      [2000, 13220, 12000],
     ];
 
     let report = [
@@ -379,7 +379,7 @@ describe("#Params Calculator", function () {
         "SEEDPassSeed",
         "SEEDPassBoost",
         "Boost",
-        "Ratio",
+        "Boost/For seed",
       ],
     ];
 
