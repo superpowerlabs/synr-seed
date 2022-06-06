@@ -1,6 +1,25 @@
 const {ethers} = require("ethers");
 const {tokenTypes} = require(".");
 
+const {
+  rewardsFactor,
+  decayInterval,
+  decayFactor,
+  swapFactor,
+  stakeFactor,
+  taxPoints,
+  coolDownDays,
+  minimumLockupTime,
+  earlyUnstakePenalty,
+  sPSynrEquivalent,
+  sPBoostFactor,
+  sPBoostLimit,
+  bPSynrEquivalent,
+  bPBoostFactor,
+  bPBoostLimit,
+  priceRatio,
+} = require("../fixtures/parameters");
+
 const DAY = 24 * 3600;
 
 const BN = (s, zeros = 0) => {
@@ -32,6 +51,8 @@ function untaxedPendingRewards(extraConf, user, timestamp) {
 function canUnstakeWithoutTax(deposit, blockTimestamp) {
   return deposit.lockedUntil > 0 && blockTimestamp > deposit.lockedUntil;
 }
+
+function getGenerator(synrAmount) {}
 
 module.exports = {
   pendingRewards,

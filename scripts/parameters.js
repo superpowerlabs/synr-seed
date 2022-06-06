@@ -8,7 +8,7 @@ module.exports = {
   // conf
   rewardsFactor: 17000,
   stakeFactor: 530,
-  swapFactor: 2000,
+  swapFactor: 1380,
   decayInterval: 604800,
   decayFactor: 9900,
   taxPoints: 800,

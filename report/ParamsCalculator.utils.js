@@ -242,15 +242,17 @@ describe("#Params Calculator", function () {
     await sideBridge.wormholeRegisterContract(2, bytes32Address(mainBridge.address));
   }
 
-  it("should verify balance between stakeFactor and swapFactor", async function () {
+  it.only("should verify balance between stakeFactor and swapFactor", async function () {
     const params = [
-      [520, 2000, 17000],
+      [530, 680, 17000],
+      [530, 620, 17000],
+      [530, 580, 17000],
       //
       // BEST | ratio sSYNR/SYNR = 1.20%
-      [530, 2000, 17000],
+      [530, 530, 17000],
       //
       //
-      [540, 2000, 17000],
+      // [540, 2000, 17000],
     ];
 
     let report = [
@@ -343,7 +345,7 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it.only("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+  it("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
     // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
 
     // best from previous it:
@@ -358,8 +360,8 @@ describe("#Params Calculator", function () {
       // ],
       // SYNR PASS
       [100000, 20000, 200000],
-      [100000, 19220, 200000],
-      [100000, 18220, 200000],
+      // [100000, 19220, 200000],
+      // [100000, 18220, 200000],
 
       // blueprints (the calculations works the same)
       // [3000, 13220, 6000],
@@ -384,7 +386,7 @@ describe("#Params Calculator", function () {
     const k = 365;
     for (let i = 0; i < params.length; i++) {
       let [sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_] = params[i];
-      for (let w = 5; w < 6; w++) {
+      for (let w = 1; w < 11; w++) {
         const tokenAmount = ((sPBoostLimit_ * w) / 10).toString();
         const amount = ethers.utils.parseEther(tokenAmount);
         const row = [tokenAmount, k, sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_, tokenAmount];
