@@ -1,7 +1,7 @@
 module.exports = {
   // MainPool
   // conf
-  minimumLockupTime: 7,
+  minimumLockupTime: 7 * 16,
   earlyUnstakePenalty: 4000,
 
   // SidePool
@@ -15,11 +15,10 @@ module.exports = {
   burnRatio: 7000,
   coolDownDays: 14,
   sPSynrEquivalent: 100000,
-  // with the new calculation of boost
   sPBoostFactor: 20000,
   sPBoostLimit: 200000,
   bPSynrEquivalent: 3000,
-  bPBoostFactor: 13220,
+  bPBoostFactor: 20000,
   bPBoostLimit: 6000,
 
   // initial values
