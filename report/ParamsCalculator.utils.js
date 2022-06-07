@@ -36,7 +36,6 @@ const {
   swapFactor,
   stakeFactor,
   taxPoints,
-  burnRatio,
   coolDownDays,
   minimumLockupTime,
   earlyUnstakePenalty,
@@ -81,6 +80,7 @@ describe("#Params Calculator", function () {
   let SeedToken, seed;
   let SynCityPasses, pass;
   let SeedPool, seedPool;
+  let SidePoolViews, sidePoolViews;
   let SynCityCouponsSimplified, blueprint;
   let tokenId1, tokenId3;
 
@@ -96,12 +96,29 @@ describe("#Params Calculator", function () {
     MainWormholeBridge = await ethers.getContractFactory("MainWormholeBridgeMock");
     SideWormholeBridge = await ethers.getContractFactory("SideWormholeBridgeMock");
     SeedPool = await ethers.getContractFactory("SeedPool");
+    SidePoolViews = await ethers.getContractFactory("SidePoolViews");
     MainPool = await ethers.getContractFactory("MainPool");
     SeedToken = await ethers.getContractFactory("SeedToken");
     WormholeMock = await ethers.getContractFactory("WormholeMock");
     SynCityPasses = await ethers.getContractFactory("SynCityPassesMock");
     SynCityCouponsSimplified = await ethers.getContractFactory("SynCityCoupons");
   });
+
+  async function stake(user, amount, index = 0, tokenType = SYNR_STAKE, k = 365) {
+    await synr.connect(user).approve(mainPool.address, amount);
+    let payload = await serializeInput(tokenType, k, amount);
+    await mainTesseract.connect(user).crossChainTransfer(1, payload, 4, 1);
+    let deposit = await mainPool.getDepositByIndex(user.address, index);
+    let finalPayload = await fromMainDepositToTransferPayload(deposit);
+    await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, finalPayload));
+  }
+
+  async function unstake(user, index = 0) {
+    let seedDeposit = await seedPool.getDepositByIndex(user.address, index);
+    let seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
+    await sideTesseract.connect(user).crossChainTransfer(1, seedPayload, 2, 1);
+    await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, seedPayload));
+  }
 
   async function initAndDeploy(
     //[100, 8300] best choice
@@ -183,26 +200,19 @@ describe("#Params Calculator", function () {
     await blueprint.mint(mark.address, 1);
     await blueprint.mint(frank.address, 10);
 
-    seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address]);
+    sidePoolViews = await upgrades.deployProxy(SidePoolViews, []);
+
+    seedPool = await upgrades.deployProxy(SeedPool, [seed.address, blueprint.address, sidePoolViews.address]);
 
     await seedPool.deployed();
 
-    await seedPool.initPool(
-      rewardsFactor_,
-      decayInterval,
-      decayFactor,
-      swapFactor_,
-      stakeFactor_,
-      taxPoints,
-      burnRatio,
-      coolDownDays
-    );
+    await seedPool.initPool(rewardsFactor_, decayInterval, decayFactor, swapFactor_, stakeFactor_, taxPoints, coolDownDays);
     //
     // rewardsFactor_,
     // 7 * 24 * 3600,
     //     9800, swapFactor_, stakeFactor_, 800, 3000, 14);
 
-    await seedPool.updateNftConf(
+    await seedPool.updateExtraConf(
       sPSynrEquivalent_,
       sPBoostFactor_,
       sPBoostLimit_,
@@ -234,14 +244,15 @@ describe("#Params Calculator", function () {
 
   it("should verify balance between stakeFactor and swapFactor", async function () {
     const params = [
-      // best choice
-      // [100, 50000, 20000],
-      // [100, 2000, 800],
-      // this give a ratio SYNR>SEED of 1>20
-      // [5, 2000, 18000],
-      // [30, 2000, 3000],
-      // [2, 2000, 23000],
-      [400, 2000, 17000],
+      [530, 680, 17000],
+      [530, 620, 17000],
+      [530, 580, 17000],
+      //
+      // BEST | ratio sSYNR/SYNR = 1.20%
+      [530, 530, 17000],
+      //
+      //
+      // [540, 2000, 17000],
     ];
 
     let report = [
@@ -250,12 +261,11 @@ describe("#Params Calculator", function () {
         "stakeFactor",
         "swapFactor",
         "SYNR/sSYNR amount",
-        "SEED after staking SYNR",
-        "SEED after swapping sSYNR",
+        "Generator for SYNR",
+        "Generator for sSYNR",
         "Final SEED for SYNR",
         "Final SEED for sSYNR",
         "sSYNR/SYNR",
-        "APY",
       ],
     ];
 
@@ -278,44 +288,23 @@ describe("#Params Calculator", function () {
         rewardsFactor_
       );
 
-      // approve SYNR spend
-      await synr.connect(bob).approve(mainPool.address, amount);
-
-      // console.log(amount.toString());
-
-      let payload = await serializeInput(SYNR_STAKE, 365, amount);
-      await mainTesseract.connect(bob).crossChainTransfer(1, payload, 4, 1);
-
-      // approve sSYNR spend
       await sSynr.connect(alice).approve(mainPool.address, amount);
-      let payload2 = await serializeInput(S_SYNR_SWAP, 0, amount);
-      await mainTesseract.connect(alice).crossChainTransfer(1, payload2, 4, 1);
+      await stake(alice, amount, 0, S_SYNR_SWAP);
 
-      let deposit = await mainPool.getDepositByIndex(bob.address, 0);
-      let finalPayload = await fromMainDepositToTransferPayload(deposit);
+      await synr.connect(bob).approve(mainPool.address, amount);
+      await stake(bob, amount);
 
-      await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(bob.address, finalPayload));
+      let seedDeposit = await seedPool.getDepositByIndex(bob.address, 0);
+      let generatorFromSYNR = ethers.utils.formatEther(seedDeposit.generator.toString()).toString().split(".")[0];
+      row.push(generatorFromSYNR);
 
-      deposit = await mainPool.getDepositByIndex(alice.address, 0);
-      finalPayload = await fromMainDepositToTransferPayload(deposit);
-
-      await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(alice.address, finalPayload));
+      let seedDeposit2 = await seedPool.getDepositByIndex(alice.address, 0);
+      let generatorFromSSYNR = ethers.utils.formatEther(seedDeposit2.generator.toString()).toString().split(".")[0];
+      row.push(generatorFromSSYNR);
 
       await increaseBlockTimestampBy(365 * 24 * 3600);
 
-      // unstake SEED and SYNR
-      let seedDeposit = await seedPool.getDepositByIndex(bob.address, 0);
-      let seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-
-      let stakedSeedFromSYNR = ethers.utils.formatEther(seedDeposit.tokenAmount.toString()).toString().split(".")[0];
-      row.push(stakedSeedFromSYNR);
-
-      let seedDeposit2 = await seedPool.getDepositByIndex(alice.address, 0);
-
-      let stakedSeedFromSSYNR = ethers.utils.formatEther(seedDeposit2.tokenAmount.toString()).toString().split(".")[0];
-      row.push(stakedSeedFromSSYNR);
-
-      await sideTesseract.connect(bob).crossChainTransfer(1, seedPayload, 2, 1);
+      await unstake(bob);
 
       let seedFromSYNR = ethers.utils
         .formatEther((await seed.balanceOf(bob.address)).toString())
@@ -330,9 +319,9 @@ describe("#Params Calculator", function () {
         .formatEther((await seed.balanceOf(alice.address)).toString())
         .toString()
         .split(".")[0];
+
       row.push(seedFromSSYNR);
       row.push(parseInt(seedFromSSYNR) / parseInt(seedFromSYNR));
-      row.push((100 * parseInt(seedFromSYNR)) / parseInt(stakedSeedFromSYNR)); // APY
 
       report.push(row);
     }
@@ -356,10 +345,12 @@ describe("#Params Calculator", function () {
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report.csv"));
   });
 
-  it("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
+  it.only("should verify balance between sPSynrEquivalent, sPBoostFactor and sPBoostLimit", async function () {
     // 1 SYNR Pass ~= 2 ETH ~= $5,800 ~= 100,000 $SYNR
 
     // best from previous it:
+
+    this.timeout(100000);
 
     const params = [
       // [
@@ -368,11 +359,12 @@ describe("#Params Calculator", function () {
       //   1000000, //sPBoostLimit
       // ],
       // SYNR PASS
-      // [100000, 13220, 200000],
+      // [100000, 20000, 200000],
+      // [100000, 19220, 200000],
+      // [100000, 18220, 200000],
 
       // blueprints (the calculations works the same)
-      [10000, 13220, 20000],
-      // [100000, 2660, 1000000],
+      [2000, 13220, 12000],
     ];
 
     let report = [
@@ -387,7 +379,7 @@ describe("#Params Calculator", function () {
         "SEEDPassSeed",
         "SEEDPassBoost",
         "Boost",
-        "Ratio",
+        "Boost/For seed",
       ],
     ];
 
@@ -400,19 +392,9 @@ describe("#Params Calculator", function () {
         const row = [tokenAmount, k, sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_, tokenAmount];
         await initAndDeploy(undefined, undefined, sPSynrEquivalent_, sPBoostFactor_, sPBoostLimit_);
 
-        async function stakeSYNR(user, amount, index = 0) {
-          await synr.connect(user).approve(mainPool.address, amount);
-          let payload = await serializeInput(SYNR_STAKE, k, amount);
-          await mainTesseract.connect(user).crossChainTransfer(1, payload, 4, 1);
-          let deposit = await mainPool.getDepositByIndex(user.address, index);
-          let finalPayload = await fromMainDepositToTransferPayload(deposit);
-          await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, finalPayload));
-          // console.log(formatBN((await seedPool.getDepositByIndex(user.address, 0)).tokenAmount))
-        }
-
-        await stakeSYNR(bob, amount);
-        await stakeSYNR(alice, amount);
-        await stakeSYNR(mark, amount);
+        await stake(bob, amount);
+        await stake(alice, amount);
+        await stake(mark, amount);
 
         // mark stake a SYNR Pass for boost
         let payloadPass = await serializeInput(
@@ -442,13 +424,6 @@ describe("#Params Calculator", function () {
 
         await increaseBlockTimestampBy(366 * 24 * 3600);
 
-        async function unstake(user, index = 0) {
-          let seedDeposit = await seedPool.getDepositByIndex(user.address, index);
-          let seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-          await sideTesseract.connect(user).crossChainTransfer(1, seedPayload, 2, 1);
-          await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, seedPayload));
-        }
-
         await unstake(bob);
         await unstake(bob, 1);
         await unstake(alice);
@@ -475,163 +450,10 @@ describe("#Params Calculator", function () {
       }
     }
     await fs.ensureDir(path.resolve(__dirname, "../tmp"));
-    // report.sort((a, b) => {
-    //   a = a[8];
-    //   b = b[8];
-    //   return a > b ? 1 : a < b ? -1 : 0;
-    // });
     report = report.map((e) => e.join("\t")).join("\n");
     await fs.writeFile(path.resolve(__dirname, "../tmp/report2.csv"), report);
     console.info(getJSONFromCSV(report));
 
     console.info("Report saved in", path.resolve(__dirname, "../tmp/report2.csv"));
   });
-
-  // it("should verify the balance between blueprint boost and pass boost", async function () {
-  //   const params = [
-  //     [
-  //       100000, //sPBoostFactor
-  //       1000000, //sPBoostLimit
-  //       Math.floor(100000 / 20), //bPBoostFactor
-  //       1000000, //bPBoostLimit
-  //     ],
-  //     [
-  //       100000, //sPBoostFactor
-  //       1000000, //sPBoostLimit
-  //       Math.floor(100000 / 10), //bPBoostFactor
-  //       50000, //bPBoostLimit
-  //     ],
-  //     // [500000, 200000, Math.floor(500000 / 20), 200000],
-  //     // [200000, 500000, Math.floor(200000 / 20), 500000],
-  //   ];
-  //
-  //   let report = [
-  //     [
-  //       "SYNR amount",
-  //       "lockupTime",
-  //       "sPBoostFactor",
-  //       "sPBoostLimit",
-  //       "bPBoostFactor",
-  //       "bPBoostLimit",
-  //       "Final Boost for Pass without SYNR",
-  //       "Final Boost for Blueprints without SYNR",
-  //       "Ratio",
-  //     ],
-  //   ];
-  //
-  //   for (let k = 92; k < 380; k += 92) {
-  //     if (k > 365) {
-  //       k = 365;
-  //     }
-  //
-  //     for (let i = 0; i < params.length; i++) {
-  //       const tokenAmount = "100000";
-  //       const amount = ethers.utils.parseEther(tokenAmount);
-  //       let [sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit] = params[i];
-  //       const row = [tokenAmount, k, sPBoostFactor, sPBoostLimit, bPBoostFactor, bPBoostLimit];
-  //       await initAndDeploy(100, 8300, 100000, sPBoostFactor, sPBoostLimit, undefined, bPBoostFactor, bPBoostLimit);
-  //
-  //       // approve SYNR spend no boost
-  //       await synr.connect(bob).approve(mainPool.address, amount);
-  //       // console.log(amount.toString());
-  //       let payload = await serializeInput(SYNR_STAKE, k, amount);
-  //       await mainTesseract.connect(bob).crossChainTransfer(1, payload, 4, 1);
-  //
-  //       let deposit = await mainPool.getDepositByIndex(bob.address, 0);
-  //       let finalPayload = await fromMainDepositToTransferPayload(deposit);
-  //       await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(bob.address, finalPayload));
-  //
-  //       //approve and transfer SYNR and boost for mark
-  //       await synr.connect(mark).approve(mainPool.address, amount);
-  //       payload = await serializeInput(SYNR_STAKE, k, amount);
-  //       await mainTesseract.connect(mark).crossChainTransfer(1, payload, 4, 1);
-  //
-  //       deposit = await mainPool.getDepositByIndex(mark.address, 0);
-  //       finalPayload = await fromMainDepositToTransferPayload(deposit);
-  //       await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(mark.address, finalPayload));
-  //
-  //       let payloadPass = await serializeInput(
-  //         SYNR_PASS_STAKE_FOR_BOOST,
-  //         k, // 1 year
-  //         tokenId3
-  //       );
-  //       await pass.connect(mark).approve(mainPool.address, tokenId3);
-  //       await mainTesseract.connect(mark).crossChainTransfer(1, payloadPass, 4, 1);
-  //
-  //       deposit = await mainPool.getDepositByIndex(mark.address, 1);
-  //       finalPayload = await fromMainDepositToTransferPayload(deposit);
-  //       await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(mark.address, finalPayload));
-  //
-  //       //approve and transfer blueprint on bsc for user 4
-  //       await synr.connect(frank).approve(mainPool.address, amount);
-  //       payload = await serializeInput(SYNR_STAKE, k, amount);
-  //       await mainTesseract.connect(frank).crossChainTransfer(1, payload, 4, 1);
-  //
-  //       deposit = await mainPool.getDepositByIndex(frank.address, 0);
-  //       finalPayload = await fromMainDepositToTransferPayload(deposit);
-  //       await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(frank.address, finalPayload));
-  //
-  //       await blueprint.connect(frank).approve(seedPool.address, 5);
-  //       await seedPool.connect(frank).stake(BLUEPRINT_STAKE_FOR_BOOST, k, 5);
-  //
-  //       await increaseBlockTimestampBy(366 * 24 * 3600);
-  //
-  //       // unstake SEED and SYNR
-  //       let seedDeposit = await seedPool.getDepositByIndex(bob.address, 0);
-  //       let seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-  //
-  //       await sideTesseract.connect(bob).crossChainTransfer(1, seedPayload, 2, 1);
-  //
-  //       let seedFromSYNR = ethers.utils
-  //         .formatEther((await seed.balanceOf(bob.address)).toString())
-  //         .toString()
-  //         .split(".")[0];
-  //
-  //       //unstake from mark
-  //       seedDeposit = await seedPool.getDepositByIndex(mark.address, 0);
-  //       seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-  //       await sideTesseract.connect(mark).crossChainTransfer(1, seedPayload, 2, 1);
-  //       await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(mark.address, seedPayload));
-  //
-  //       seedDeposit = await seedPool.getDepositByIndex(mark.address, 1);
-  //       seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-  //
-  //       await sideTesseract.connect(mark).crossChainTransfer(1, seedPayload, 2, 1);
-  //       await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(mark.address, seedPayload));
-  //
-  //       let balanceAfterBoostPass = ethers.utils
-  //         .formatEther((await seed.balanceOf(mark.address)).toString())
-  //         .toString()
-  //         .split(".")[0];
-  //       row.push(balanceAfterBoostPass - seedFromSYNR);
-  //
-  //       // unstake from frank
-  //       seedDeposit = await seedPool.getDepositByIndex(frank.address, 0);
-  //       seedPayload = await fromSideDepositToTransferPayload(seedDeposit);
-  //       await sideTesseract.connect(frank).crossChainTransfer(1, seedPayload, 2, 1);
-  //       await mainTesseract.completeCrossChainTransfer(1, mockEncodedVm(frank.address, seedPayload));
-  //
-  //       let balanceAfterBoostBlueprint = ethers.utils
-  //         .formatEther((await seed.balanceOf(frank.address)).toString())
-  //         .toString()
-  //         .split(".")[0];
-  //
-  //       row.push(balanceAfterBoostBlueprint - seedFromSYNR);
-  //
-  //       row.push(parseInt(balanceAfterBoostBlueprint - seedFromSYNR) / parseInt(balanceAfterBoostPass - seedFromSYNR));
-  //       report.push(row);
-  //     }
-  //   }
-  //   await fs.ensureDir(path.resolve(__dirname, "../tmp"));
-  //   // report.sort((a, b) => {
-  //   //   a = a[7];
-  //   //   b = b[7];
-  //   //   return a > b ? 1 : a < b ? -1 : 0;
-  //   // });
-  //   report = report.map((e) => e.join("\t")).join("\n");
-  //   await fs.writeFile(path.resolve(__dirname, "../tmp/report3.csv"), report);
-  //   console.info(report);
-  //
-  //   console.info("Report saved in", path.resolve(__dirname, "../tmp/report3.csv"));
-  // });
 });

@@ -12,17 +12,36 @@ const DeployUtils = require("./lib/DeployUtils");
 const {upgrades} = require("hardhat");
 let deployUtils;
 
+const {
+  rewardsFactor,
+  decayInterval,
+  decayFactor,
+  swapFactor,
+  stakeFactor,
+  taxPoints,
+  coolDownDays,
+  minimumLockupTime,
+  earlyUnstakePenalty,
+  sPSynrEquivalent,
+  sPBoostFactor,
+  sPBoostLimit,
+  bPSynrEquivalent,
+  bPBoostFactor,
+  bPBoostLimit,
+} = require("./parameters");
+
 async function main() {
   deployUtils = new DeployUtils(ethers);
   const {Tx} = deployUtils;
   const chainId = await deployUtils.currentChainId();
   const seedAddress = deployed[chainId].SeedToken;
   const blueprintAddress = deployed[chainId].SynCityCoupons;
+  const poolViewsAddress = deployed[chainId].SidePoolViews;
 
   const SeedPool = await ethers.getContractFactory("SeedPool");
 
   console.log("Deploying SeedPool");
-  const seedPool = await upgrades.deployProxy(SeedPool, [seedAddress, blueprintAddress]);
+  const seedPool = await upgrades.deployProxy(SeedPool, [seedAddress, blueprintAddress, poolViewsAddress]);
   await seedPool.deployed();
 
   console.log("SeedPool deployed at", seedPool.address);
@@ -30,9 +49,39 @@ async function main() {
 
   console.log(await deployUtils.verifyCodeInstructions("SeedPool", chainId, "SeedPool", "pool"));
 
-  await Tx(seedPool.initPool(1000, 7 * 24 * 3600, 9800, 1000, 100, 800, 3000, 10), "Init pool"); //, {gasLimit: 85000});
-  await Tx(seedPool.updateNftConf(100000, 100000, 1000000, 3000, 150, 1000, {gasLimit: 60000}), "updateNftConf");
-
+  await deployUtils.Tx(
+    seedPool.initPool(
+      rewardsFactor,
+      decayInterval,
+      decayFactor,
+      swapFactor,
+      stakeFactor,
+      taxPoints,
+      coolDownDays,
+      chainId === 1337
+        ? {}
+        : {
+            gasLimit: 90000,
+          }
+    ),
+    "Init SeedPool"
+  );
+  await deployUtils.Tx(
+    seedPool.updateExtraConf(
+      sPSynrEquivalent,
+      sPBoostFactor,
+      sPBoostLimit,
+      bPSynrEquivalent,
+      bPBoostFactor,
+      bPBoostLimit,
+      chainId === 1337
+        ? {}
+        : {
+            gasLimit: 60000,
+          }
+    ),
+    "Init NFT Conf"
+  );
   const SeedToken = await ethers.getContractFactory("SeedToken");
   const seed = await SeedToken.attach(seedAddress);
 

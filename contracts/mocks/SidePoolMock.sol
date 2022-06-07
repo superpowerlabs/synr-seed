@@ -12,9 +12,10 @@ contract SidePoolMock is SidePool {
   function initialize(
     address seed_,
     address seed2_,
-    address blueprint_
+    address blueprint_,
+    address poolViews_
   ) public initializer {
-    __SidePool_init(seed_, seed2_, blueprint_);
+    __SidePool_init(seed_, seed2_, blueprint_, poolViews_);
   }
 
   function stake(
@@ -24,7 +25,7 @@ contract SidePoolMock is SidePool {
     uint256 tokenAmountOrID
   ) external virtual override {
     require(
-      tokenType == BLUEPRINT_STAKE_FOR_BOOST || (tokenType == BLUEPRINT_STAKE_FOR_SEEDS && nftConf.bPSynrEquivalent != 0),
+      tokenType == BLUEPRINT_STAKE_FOR_BOOST || (tokenType == BLUEPRINT_STAKE_FOR_SEEDS && extraConf.bPSynrEquivalent != 0),
       "SidePool: stake not allowed"
     );
     _stake(_msgSender(), tokenType, block.timestamp, 0, type(uint16).max, tokenAmountOrID);

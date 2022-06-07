@@ -1,4 +1,4 @@
-const {assert} = require("chai");
+const {assert, expect} = require("chai");
 const ethers = require("ethers");
 const {hexZeroPad} = require("@ethersproject/bytes");
 
@@ -52,22 +52,35 @@ const Helpers = {
     return new Int32Array(vaaBytes);
   },
 
-  BN(num) {
-    return ethers.BigNumber.from((num || 0).toString());
+  BN(s, zeros = 0) {
+    return ethers.BigNumber.from((s || 0).toString() + "0".repeat(zeros));
   },
 
   async sleep(millis) {
     // eslint-disable-next-line no-undef
     return new Promise((resolve) => setTimeout(resolve, millis));
   },
+
+  expectEqualAsEther(a, b) {
+    a = ethers.utils.formatEther(a.toString()).split(".")[0];
+    b = ethers.utils.formatEther(b.toString()).split(".")[0];
+    expect(a).equal(b);
+  },
 };
 
-Helpers.S_SYNR_SWAP = 1;
-Helpers.SYNR_STAKE = 2;
-Helpers.SYNR_PASS_STAKE_FOR_BOOST = 3;
-Helpers.SYNR_PASS_STAKE_FOR_SEEDS = 4;
-Helpers.BLUEPRINT_STAKE_FOR_BOOST = 5;
-Helpers.BLUEPRINT_STAKE_FOR_SEEDS = 6;
-Helpers.SEED_SWAP = 7;
+Helpers.tokenTypes = {
+  S_SYNR_SWAP: 1,
+  SYNR_STAKE: 2,
+  SYNR_PASS_STAKE_FOR_BOOST: 3,
+  SYNR_PASS_STAKE_FOR_SEEDS: 4,
+  BLUEPRINT_STAKE_FOR_BOOST: 5,
+  BLUEPRINT_STAKE_FOR_SEEDS: 6,
+  SEED_SWAP: 7,
+};
+
+// for compatibility with previous tests
+for (let key in Helpers.tokenTypes) {
+  Helpers[key] = Helpers.tokenTypes[key];
+}
 
 module.exports = Helpers;

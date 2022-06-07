@@ -70,7 +70,6 @@ async function main() {
       deployed[chainId].SynCityCoupons,
       poolViews.address
     );
-    // pool = await deployUtils.attach("SeedPool");
 
     await deployUtils.Tx(
       pool.initPool(
@@ -84,7 +83,7 @@ async function main() {
         chainId === 1337
           ? {}
           : {
-              gasLimit: 120000,
+              gasLimit: 90000,
             }
       ),
       "Init SeedPool"
@@ -100,10 +99,10 @@ async function main() {
         chainId === 1337
           ? {}
           : {
-              gasLimit: 90000,
+              gasLimit: 60000,
             }
       ),
-      "Init ExtraConf"
+      "Init NFT Conf"
     );
     await deployUtils.Tx(
       seed.grantRole(await seed.MINTER_ROLE(), pool.address),
@@ -111,13 +110,10 @@ async function main() {
     );
   }
 
-  const tesseract = await deployUtils.deployProxy("Tesseract");
-
   const bridgeName = chainId < 6 ? "MainWormholeBridge" : "SideWormholeBridge";
-  const bridge = await deployUtils.deployProxy(bridgeName, tesseract.address, pool.address);
-
+  const bridge = await deployUtils.attach(bridgeName);
+  await deployUtils.Tx(bridge.updatePool(pool.address), "Update pool in bridge");
   await deployUtils.Tx(pool.setBridge(bridge.address, true), "Set bridge in pool");
-  await deployUtils.Tx(tesseract.setBridge(1, bridge.address), "Set bridge in tesseract");
 }
 
 main()
