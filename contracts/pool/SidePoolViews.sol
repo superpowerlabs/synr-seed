@@ -28,7 +28,7 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
-  function getLockupTime(Deposit memory deposit) public view override returns (uint256) {
+  function getLockupTime(Deposit memory deposit) public pure override returns (uint256) {
     return uint256(deposit.lockedUntil).sub(deposit.lockedFrom);
   }
 
@@ -42,19 +42,27 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
     uint256 timestamp,
     uint256 lastRewardsAt
   ) public view override returns (uint256) {
-    if (deposit.generator == 0 || deposit.tokenType == S_SYNR_SWAP || deposit.unlockedAt != 0) {
+    if (
+      deposit.tokenType == S_SYNR_SWAP ||
+      deposit.generator == 0 ||
+      deposit.unlockedAt != 0 ||
+      lastRewardsAt >= deposit.lockedUntil
+    ) {
       return 0;
+    }
+    if (timestamp > deposit.lockedUntil) {
+      timestamp = deposit.lockedUntil;
     }
     return
       uint256(deposit.generator)
         .mul(deposit.rewardsFactor)
         .mul(yieldWeight(conf, deposit))
         .mul(timestamp.sub(lastRewardsAt))
-        .div(uint256(deposit.lockedUntil).sub(deposit.lockedFrom))
+        .div(365 * 1 days)
         .div(10000 * 10000);
   }
 
-  function calculateTaxOnRewards(Conf memory conf, uint256 rewards) public view override returns (uint256) {
+  function calculateTaxOnRewards(Conf memory conf, uint256 rewards) public pure override returns (uint256) {
     return rewards.mul(conf.taxPoints).div(10000);
   }
 
@@ -118,7 +126,7 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
     uint256 amount2,
     uint256 boost2,
     uint256 limit2
-  ) internal view returns (uint256) {
+  ) internal pure returns (uint256) {
     uint256 boostableAmount;
     uint256 boosted;
     if (amount1 > 0) {

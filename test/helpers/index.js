@@ -66,6 +66,10 @@ const Helpers = {
     b = ethers.utils.formatEther(b.toString()).split(".")[0];
     expect(a).equal(b);
   },
+
+  getInt(val) {
+    return parseInt(ethers.utils.formatEther(val.toString()));
+  },
 };
 
 Helpers.tokenTypes = {

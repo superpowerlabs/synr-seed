@@ -50,7 +50,6 @@ contract SideWormholeBridge is WormholeBridge {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SideWormholeBridge: no blueprint allowed here");
     SeedPool(pool).stakeViaBridge(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
@@ -71,7 +70,6 @@ that assures that the data are correct.
     uint256 tokenAmountOrID,
     bytes memory signature
   ) external override {
-    require(tokenType < BLUEPRINT_STAKE_FOR_BOOST, "SideWormholeBridge: no blueprint allowed here");
     require(
       isSignedByValidator(encodeForSignature(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID), signature),
       "SideWormholeBridge: invalid signature"
