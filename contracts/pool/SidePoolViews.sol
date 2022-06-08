@@ -71,7 +71,6 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
       return 10000;
     }
     uint256 vestedTime = when.sub(lockedFrom);
-    // 300 > 3%
     return vestedTime.mul(10000).div(lockupTime);
   }
 
@@ -82,6 +81,7 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
     uint256 passAmountForBoost,
     uint256 blueprintAmountForBoost
   ) public view returns (uint256) {
+    // this split is to avoid a too deep stack issue
     if (extraConf.sPBoostFactor > extraConf.bPBoostFactor) {
       return
         _boostRewardsByBestBooster(

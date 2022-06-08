@@ -33,7 +33,7 @@ async function main() {
 
   abi("MainPool", "pool");
   abi("SeedPool", "pool");
-  // abi("FarmingPool", "pool");
+  abi("SidePoolViews", "pool");
 
   await fs.writeFile(path.resolve(__dirname, "../export/ABIs.json"), JSON.stringify(ABIs, null, 2));
 }
