@@ -87,16 +87,8 @@ function getLockupTime(deposit) {
 }
 
 function calculateUntaxedRewards(conf, deposit, timestamp, lastRewardsAt) {
-  if (
-    deposit.generator === 0 ||
-    deposit.tokenType === tokenTypes.S_SYNR_SWAP ||
-    deposit.unlockedAt !== 0 ||
-    BN(lastRewardsAt).gte(deposit.lockedUntil)
-  ) {
+  if (deposit.generator === 0 || deposit.tokenType === tokenTypes.S_SYNR_SWAP || deposit.unlockedAt !== 0) {
     return 0;
-  }
-  if (timestamp > deposit.lockedUntil) {
-    timestamp = deposit.lockedUntil;
   }
   return BN(deposit.generator)
     .mul(deposit.rewardsFactor)

@@ -42,17 +42,22 @@ contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgra
     uint256 timestamp,
     uint256 lastRewardsAt
   ) public view override returns (uint256) {
-    if (
-      deposit.tokenType == S_SYNR_SWAP ||
-      deposit.generator == 0 ||
-      deposit.unlockedAt != 0 ||
-      lastRewardsAt >= deposit.lockedUntil
-    ) {
+    if (deposit.tokenType == S_SYNR_SWAP || deposit.generator == 0 || deposit.unlockedAt != 0) {
       return 0;
     }
-    if (timestamp > deposit.lockedUntil) {
-      timestamp = deposit.lockedUntil;
-    }
+    // The following version can be used if we prefer not to allow the user
+    // to continue to get rewards, after the lockup time is passed:
+    //    if (
+    //      deposit.tokenType == S_SYNR_SWAP ||
+    //      deposit.generator == 0 ||
+    //      deposit.unlockedAt != 0 ||
+    //      lastRewardsAt >= deposit.lockedUntil
+    //    ) {
+    //      return 0;
+    //    }
+    //    if (timestamp > deposit.lockedUntil) {
+    //      timestamp = deposit.lockedUntil;
+    //    }
     return
       uint256(deposit.generator)
         .mul(deposit.rewardsFactor)

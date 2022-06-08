@@ -261,20 +261,9 @@ describe("#SidePoolViews", function () {
       expect(ratio).equal(expected[j + 1]);
     }
 
-    // now with rewards after 2 years. Results should not change
-    for (let i = conf.minimumLockupTime, j = 0; i < conf.maximumLockupTime; i += 7, j += 2) {
-      let deposit = getDeposit(tokenTypes.SYNR_STAKE, timestamp, timestamp + i * DAY, amount);
-      let rewards = calculateUntaxedRewards(conf, deposit, timestamp + 666 * DAY, timestamp);
-      expect(getInt(rewards)).equal(expected[j]);
-      let ratio = parseInt((100 * getInt(rewards)) / getInt(deposit.generator));
-      expect(ratio).equal(expected[j + 1]);
-    }
-
-    // now checking that rewards after lockupTime are zero
-    for (let i = conf.minimumLockupTime, j = 0; i < conf.maximumLockupTime; i += 7, j += 2) {
-      let deposit = getDeposit(tokenTypes.SYNR_STAKE, timestamp, timestamp + i * DAY, amount);
-      let rewards = calculateUntaxedRewards(conf, deposit, timestamp + i * DAY, timestamp + i * DAY);
-      expect(getInt(rewards)).equal(0);
-    }
+    // now with rewards after 2 years. Results should be equal
+    let deposit = getDeposit(tokenTypes.SYNR_STAKE, timestamp, timestamp + conf.minimumLockupTime * DAY, amount);
+    let rewards = calculateUntaxedRewards(conf, deposit, timestamp + 666 * DAY, timestamp);
+    expect(getInt(rewards)).equal(2148400);
   });
 });

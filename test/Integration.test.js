@@ -627,8 +627,8 @@ describe("#Integration test", function () {
     let balanceBob = await seed.balanceOf(bob.address);
     let balanceFred = await seed.balanceOf(fred.address);
 
-    expect(getInt(balanceBob)).equal(1657839);
-    expect(getInt(balanceFred)).equal(1657839);
+    expect(getInt(balanceBob)).equal(1657841);
+    expect(getInt(balanceFred)).equal(1657840);
 
     await unstake(bob, 0);
     for (let i = 0; i < 10; i++) {
@@ -638,9 +638,9 @@ describe("#Integration test", function () {
     balanceBob = await seed.balanceOf(bob.address);
     balanceFred = await seed.balanceOf(fred.address);
 
-    expect(getInt(balanceBob)).equal(1657839);
+    expect(getInt(balanceBob)).equal(1657841);
     // this is just 1 more that
-    expect(getInt(balanceFred)).equal(1657839);
+    expect(getInt(balanceFred)).equal(1657841);
   });
 
   it("should verify final SEED for many lockup times", async function () {
@@ -657,17 +657,18 @@ describe("#Integration test", function () {
     expect(getInt(user.deposits[0].generator)).equal(530000);
 
     let rewards0 = await pendingRewards(conf2, user, await getTimestamp());
+    let rewards = await seedPool.pendingRewards(bob.address);
+    expect(getInt(rewards)).equal(getInt(rewards0));
 
-    // be sure that being late does not produces more rewards
+    // not unstaking will produce more rewards
     await increaseBlockTimestampBy(lockupTime * 24 * 3600);
 
-    let rewards = await seedPool.pendingRewards(bob.address);
-    expect(rewards).equal(rewards0);
+    rewards = await seedPool.pendingRewards(bob.address);
     // const ratioRewardsGenerator =
-    expect(rewards).equal("16200703634995814307458");
+    expect(getInt(rewards)).equal(32401);
 
     await unstake(bob);
-    expect(await seed.balanceOf(bob.address)).equal(rewards);
+    expect(getInt(await seed.balanceOf(bob.address))).equal(getInt(rewards));
 
     await initAndDeploy(true);
 
@@ -676,10 +677,10 @@ describe("#Integration test", function () {
     await stake(bob, amount, 0, undefined, lockupTime);
     await increaseBlockTimestampBy(lockupTime * 24 * 3600);
     await unstake(bob);
-    expect(await seed.balanceOf(bob.address)).equal("416030142937172374429224");
+    expect(getInt(await seed.balanceOf(bob.address))).equal(416030);
   });
 
-  it("should verify that it does not get rewards after lockup time has passed", async function () {
+  it("should verify that it does get rewards after lockup time has passed", async function () {
     const amount = ethers.utils.parseEther("10000");
 
     await stakeSYNR(bob, amount.mul(10));
@@ -688,13 +689,13 @@ describe("#Integration test", function () {
 
     await seedPool.connect(bob).collectRewards();
     let balanceBob = await seed.balanceOf(bob.address);
-    expect(getInt(balanceBob)).equal(1657839);
+    expect(getInt(balanceBob)).equal(1657840);
 
     await increaseBlockTimestampBy(365 * 24 * 3600);
 
     await seedPool.connect(bob).collectRewards();
     balanceBob = await seed.balanceOf(bob.address);
-    expect(getInt(balanceBob)).equal(1657839);
+    expect(getInt(balanceBob)).equal(1657840 * 2);
 
     await initAndDeploy(true);
 
@@ -717,7 +718,7 @@ describe("#Integration test", function () {
 
     balanceBob = await seed.balanceOf(bob.address);
 
-    expect(getInt(balanceBob)).equal(1657839);
+    expect(getInt(balanceBob)).equal(1953071);
   });
 
   it("should verify SYNR and SYNR equivalent produce same results", async function () {
@@ -840,7 +841,7 @@ describe("#Integration test", function () {
 
     unboosted = await seed.balanceOf(fundOwner.address);
 
-    expect(unboosted).equal(rewards0);
+    expect(getInt(unboosted)).equal(getInt(rewards0));
 
     await initAndDeploy();
 
