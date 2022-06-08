@@ -51,9 +51,9 @@ contract MainWormholeBridge is WormholeBridge {
 During the debugging on the testnet, we experienced some cases where the
 bridge protocol could not complete the process. It is a sporadic event,
 but if it happens, funds will be locked in the contract on the starting
-chain and will be lost. This emergency function must be executed by an
-operator, receiving the details about the transaction from a validator
-that assures that the data are correct.
+chain and will be lost. This emergency function can be executed by any
+user who got a valid signature from a validator to assure that the data
+is correct.
 */
   function completeTransferIfBridgeFails(
     address to,
