@@ -104,10 +104,7 @@ async function main() {
       ),
       "Init NFT Conf"
     );
-    await deployUtils.Tx(
-      seed.grantRole(await seed.MINTER_ROLE(), pool.address),
-      "Granting the pool minting role for SeedToken"
-    );
+    await deployUtils.Tx(seed.setMinter(pool.address, true), "Granting the pool minting role for SeedToken");
   }
 
   const bridgeName = chainId < 6 ? "MainWormholeBridge" : "SideWormholeBridge";

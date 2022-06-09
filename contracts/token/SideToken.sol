@@ -1,29 +1,43 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.11;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 
-contract SideToken is ERC20, ERC20Burnable, AccessControl {
+contract SideToken is Initializable, OwnableUpgradeable, ERC20Upgradeable, ERC20BurnableUpgradeable {
+  using AddressUpgradeable for address;
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-  bool public allowancePaused = true;
+  bool public allowancePaused;
+  mapping(address => bool) public minters;
 
-  constructor(string memory name, string memory symbol) ERC20(name, symbol) {
-    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+  modifier onlyMinter() {
+    require(minters[_msgSender()], "SideToken: not a minter");
+    _;
   }
 
-  /**
-   * @param to address to mint the token.
-   * @param amount amount to be minted.
-   */
-  function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
+  // solhint-disable-next-line
+  function __SideToken_init(string memory name, string memory symbol) internal initializer {
+    __ERC20_init(name, symbol);
+    __Ownable_init();
+    allowancePaused = true;
+  }
+
+  function mint(address to, uint256 amount) public onlyMinter {
     _mint(to, amount);
   }
 
-  function unpauseAllowance() external onlyRole(DEFAULT_ADMIN_ROLE) {
-    // after un-pausing the allowance it cannot be paused again
+  function setMinter(address minter, bool enabled) external virtual onlyOwner {
+    require(minter.isContract(), "SideToken: minter is not a contract");
+    minters[minter] = enabled;
+  }
+
+  function unpauseAllowance() external onlyOwner {
+    // after un-pausing, the allowance cannot be paused again
     allowancePaused = false;
   }
 

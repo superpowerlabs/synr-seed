@@ -2,9 +2,9 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./SideToken.sol";
+import "../token/SideToken.sol";
 
-contract SeedToken is SideToken, UUPSUpgradeable {
+contract SeedTokenMock is SideToken, UUPSUpgradeable {
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
@@ -13,4 +13,9 @@ contract SeedToken is SideToken, UUPSUpgradeable {
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+
+  function setMinter(address minter, bool enabled) external virtual override onlyOwner {
+    //    require(minter.isContract(), "SideToken: minter is not a contract");
+    minters[minter] = enabled;
+  }
 }
