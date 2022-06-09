@@ -10,7 +10,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Burnable
 
 contract SideToken is Initializable, OwnableUpgradeable, ERC20Upgradeable, ERC20BurnableUpgradeable {
   using AddressUpgradeable for address;
-  bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
   bool public allowancePaused;
   mapping(address => bool) public minters;
