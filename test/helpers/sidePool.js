@@ -52,10 +52,37 @@ function canUnstakeWithoutTax(deposit, blockTimestamp) {
   return deposit.lockedUntil > 0 && blockTimestamp > deposit.lockedUntil;
 }
 
+function calculateTokenAmount(conf, extraConf, amount, tokenType) {
+  return BN(amount)
+    .mul(tokenType === tokenTypes.S_SYNR_SWAP ? conf.swapFactor : conf.stakeFactor)
+    .mul(extraConf.priceRatio)
+    .div(1000000);
+}
+
+function getStakedAndLockedAmount(conf, extraConf, tokenType, tokenAmountOrID) {
+  let stakedAmount = BN();
+  let generator = BN();
+  if (tokenType === tokenTypes.S_SYNR_SWAP) {
+    generator = calculateTokenAmount(conf, extraConf, tokenAmountOrID, tokenType);
+  } else if (tokenType === tokenTypes.SYNR_STAKE) {
+    generator = calculateTokenAmount(conf, extraConf, tokenAmountOrID, tokenType);
+    stakedAmount = BN(tokenAmountOrID);
+  } else if (tokenType === tokenTypes.SYNR_PASS_STAKE_FOR_SEEDS) {
+    stakedAmount = BN(extraConf.sPSynrEquivalent).mul(1e18);
+    generator = calculateTokenAmount(conf, extraConf, stakedAmount, tokenType);
+  } else if (tokenType === tokenTypes.BLUEPRINT_STAKE_FOR_SEEDS) {
+    stakedAmount = BN(extraConf.bPSynrEquivalent).mul(1e18);
+    generator = calculateTokenAmount(conf, extraConf, stakedAmount, tokenType);
+  }
+  return stakedAmount, generator;
+}
+
 function getGenerator(synrAmount) {}
 
 module.exports = {
   pendingRewards,
   untaxedPendingRewards,
   canUnstakeWithoutTax,
+  getStakedAndLockedAmount,
+  calculateTokenAmount,
 };

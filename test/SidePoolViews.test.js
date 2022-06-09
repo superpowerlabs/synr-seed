@@ -1,8 +1,9 @@
 const {expect} = require("chai");
-const {BN} = require("./helpers/utils");
-const {boostRewards} = require("./helpers/sidePoolViews");
+const {BN, DAY} = require("./helpers/utils");
+const {boostRewards, calculateUntaxedRewards} = require("./helpers/sidePoolViews");
+const {getStakedAndLockedAmount} = require("./helpers/sidePool");
 
-const {initEthers} = require("../test/helpers");
+const {initEthers, tokenTypes, getTimestamp, getInt} = require("../test/helpers");
 const {upgrades} = require("hardhat");
 
 describe("#SidePoolViews", function () {
@@ -193,5 +194,76 @@ describe("#SidePoolViews", function () {
       );
       expect(boostedRewards).equal("10814400000000000000000000");
     }
+  });
+
+  function getConf() {
+    return {
+      rewardsFactor: 17000,
+      decayInterval: 604800,
+      decayFactor: 9900,
+      minimumLockupTime: 112,
+      maximumLockupTime: 365,
+      poolInitAt: 1654720653,
+      lastRatioUpdateAt: 1654720653,
+      swapFactor: 2000,
+      stakeFactor: 530,
+      taxPoints: 800,
+      coolDownDays: 14,
+      status: 1,
+      blueprintAmount: 0,
+      sPSynrEquivalent: 100000,
+      sPBoostFactor: 13220,
+      sPBoostLimit: 200000,
+      bPSynrEquivalent: 3000,
+      bPBoostFactor: 13220,
+      bPBoostLimit: 6000,
+      priceRatio: 10000,
+    };
+  }
+
+  function getDeposit(tokenType, lockedFrom, lockedUntil, stakedAmount) {
+    const conf = getConf();
+    return {
+      tokenType,
+      lockedFrom,
+      lockedUntil,
+      stakedAmount: BN(stakedAmount),
+      tokenID: 0,
+      unlockedAt: 0,
+      mainIndex: 0,
+      generator: getStakedAndLockedAmount(conf, conf, tokenType, stakedAmount),
+      rewardsFactor: 17000,
+      extra1: 0,
+      extra2: 0,
+      extra3: 0,
+      extra4: 0,
+    };
+  }
+
+  it("should verify that the rewards are correct", async function () {
+    let conf = getConf();
+    let amount = BN(100000, 18);
+    const expected = [
+      361292, 68, 389513, 73, 418397, 78, 447912, 84, 478122, 90, 508995, 96, 540532, 101, 572692, 108, 605554, 114, 639080,
+      120, 673269, 127, 708122, 133, 743590, 140, 779768, 147, 816609, 154, 854114, 161, 892227, 168, 931058, 175, 970552, 183,
+      1010709, 190, 1051530, 198, 1092951, 206, 1135097, 214, 1177907, 222, 1221380, 230, 1265517, 238, 1310245, 247, 1355707,
+      255, 1401833, 264, 1448622, 273, 1495996, 282, 1544110, 291, 1592889, 300, 1642330, 309, 1692435, 319, 1743116, 328,
+      1794547, 338,
+    ];
+
+    let timestamp = await getTimestamp();
+
+    for (let i = conf.minimumLockupTime, j = 0; i < conf.maximumLockupTime; i += 7, j += 2) {
+      let deposit = getDeposit(tokenTypes.SYNR_STAKE, timestamp, timestamp + i * DAY, amount);
+      let rewards = calculateUntaxedRewards(conf, deposit, timestamp + i * DAY, timestamp);
+      expect(getInt(rewards)).equal(expected[j]);
+      let ratio = parseInt((100 * getInt(rewards)) / getInt(deposit.generator));
+      expect(ratio).equal(expected[j + 1]);
+    }
+
+    // now with rewards after 2 years. Results should be equal
+    let deposit = getDeposit(tokenTypes.SYNR_STAKE, timestamp, timestamp + conf.minimumLockupTime * DAY, amount);
+    let rewards = calculateUntaxedRewards(conf, deposit, timestamp + 666 * DAY, timestamp);
+    expect(getInt(rewards)).equal(2148400);
   });
 });

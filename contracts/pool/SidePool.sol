@@ -16,7 +16,7 @@ import "../token/SideToken.sol";
 import "../interfaces/IERC721Minimal.sol";
 import "../interfaces/ISidePoolViews.sol";
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 abstract contract SidePool is
   PayloadUtilsUpgradeable,
@@ -230,7 +230,7 @@ abstract contract SidePool is
     uint256 nftAmount,
     uint256 limit,
     uint256 factor
-  ) internal view returns (uint256, uint256) {
+  ) internal pure returns (uint256, uint256) {
     limit = uint256(nftAmount).mul(limit).mul(1e18);
     if (limit < amount) {
       amount = limit;

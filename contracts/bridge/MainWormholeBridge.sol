@@ -43,7 +43,6 @@ contract MainWormholeBridge is WormholeBridge {
       uint256 mainIndex,
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
-    require(tokenType > S_SYNR_SWAP, "MainWormholeBridge: sSYNR can't be unstaked");
     MainPool(pool).unstake(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 
@@ -64,7 +63,6 @@ is correct.
     uint256 tokenAmountOrID,
     bytes memory signature
   ) external override {
-    require(tokenType > S_SYNR_SWAP, "MainWormholeBridge: sSYNR can't be unstaked");
     require(
       isSignedByValidator(encodeForSignature(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID), signature),
       "MainWormholeBridge: invalid signature"
