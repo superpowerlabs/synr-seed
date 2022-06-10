@@ -37,15 +37,21 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const network = chainId === 97 ? "bsc_testnet" : "localhost";
+  const network = chainId === 97 ? "bsc_testnet" : chainId === 43113 ? "fuji" : "localhost";
 
   console.log("Current chain ID", await currentChainId());
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
-  const nft = await SynCityCoupons.deploy(8000);
-  await nft.deployed();
+  // const SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
+  // const nft = await SynCityCoupons.deploy(8000);
+  // await nft.deployed();
+  //
+  const nft = await deployUtils.attach("SynCityCoupons");
+
+  for (let address of require("./testnetWallets")) {
+    await deployUtils.Tx(nft.mint(address, 5, {gasLimit: 800000}), "Blueprint to " + address);
+  }
 
   // await nft.setMarketplace(process.env.BINANCE_ADDRESS)
 

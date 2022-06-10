@@ -71,7 +71,6 @@ async function main() {
       poolViews.address
     );
     // pool = await deployUtils.attach("SeedPool");
-
     await deployUtils.Tx(
       pool.initPool(
         rewardsFactor,
@@ -105,10 +104,7 @@ async function main() {
       ),
       "Init ExtraConf"
     );
-    await deployUtils.Tx(
-      seed.grantRole(await seed.MINTER_ROLE(), pool.address),
-      "Granting the pool minting role for SeedToken"
-    );
+    await deployUtils.Tx(seed.setMinter(pool.address, true), "Granting the pool minting role for SeedToken");
   }
 
   const tesseract = await deployUtils.deployProxy("Tesseract");

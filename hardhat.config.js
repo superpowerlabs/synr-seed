@@ -49,7 +49,7 @@ module.exports = {
     },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      gasLimit: 6000000,
+      // gasLimit: 6000000,
       accounts: [envJson.testnet.privateKey],
     },
     goerli: {
@@ -70,6 +70,18 @@ module.exports = {
       // gasPrice: 20000000000,
       gasLimit: 6000000,
       accounts: [envJson.testnet.privateKey],
+    },
+    fuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43113,
+      accounts: [envJson.testnet.privateKey],
+    },
+    avalance: {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43114,
+      accounts: [envJson.mainnet.privateKey],
     },
   },
   gasReporter: {
