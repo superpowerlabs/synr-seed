@@ -59,9 +59,10 @@ async function main() {
   await deployUtils.Tx(nft.setOperators(operators), "Set operator");
 
   // const nft = await deployUtils.attach("SynCityPasses");
-  // for (let address of require("./testnetWallets")) {
-  //   await deployUtils.Tx(nft.mint(address, 5), "Passes to " + address);
-  // }
+
+  for (let address of require("./testnetWallets")) {
+    await deployUtils.Tx(nft.mint(address, 5, {gasLimit: 400000}), "Passes to " + address);
+  }
 
   // process.exit()
 

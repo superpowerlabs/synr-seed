@@ -73,6 +73,18 @@ module.exports = {
       gasLimit: 6000000,
       accounts: [process.env.FOR_TESTNET],
     },
+    fuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43113,
+      accounts: [process.env.FOR_TESTNET],
+    },
+    avalance: {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43114,
+      accounts: [process.env.FOR_TESTNET],
+    },
   },
   gasReporter: {
     currency: "USD",
