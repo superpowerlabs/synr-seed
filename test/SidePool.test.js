@@ -64,7 +64,7 @@ describe("#SidePool", function () {
   });
 
   async function initAndDeploy(initPool) {
-    seed = await SeedToken.deploy();
+    seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
     blueprint = await SynCityCoupons.deploy(8000);

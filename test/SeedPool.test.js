@@ -7,6 +7,7 @@ const {
   increaseBlockTimestampBy,
   bytes32Address,
   BLUEPRINT_STAKE_FOR_BOOST,
+  BLUEPRINT_STAKE_FOR_SEEDS,
   SEED_SWAP,
   SYNR_STAKE,
 } = require("./helpers");
@@ -56,7 +57,7 @@ describe("#SeedPool", function () {
   before(async function () {
     initEthers(ethers);
     [deployer, user0, user1, user2, bridge] = await ethers.getSigners();
-    SeedToken = await ethers.getContractFactory("SeedToken");
+    SeedToken = await ethers.getContractFactory("SeedTokenMock");
     WeedToken = await ethers.getContractFactory("WeedToken");
     SeedPool = await ethers.getContractFactory("SeedPoolMock");
     SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
@@ -64,7 +65,7 @@ describe("#SeedPool", function () {
   });
 
   async function initAndDeploy(initPool) {
-    seed = await SeedToken.deploy();
+    seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
     weed = await WeedToken.deploy();
@@ -82,7 +83,9 @@ describe("#SeedPool", function () {
       await pool.updateExtraConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit);
     }
 
-    await seed.grantRole(await seed.MINTER_ROLE(), deployer.address);
+    // await seed.setMinter(pool.address, true);
+
+    await seed.setMinter(deployer.address, true);
     await seed.mint(user0.address, ethers.utils.parseEther(user0sSeeds));
     await blueprint.mint(user0.address, user0sBlueprint);
   }
@@ -209,8 +212,12 @@ describe("#SeedPool", function () {
       await blueprint.connect(user0).approve(pool.address, 6);
       await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 4);
       await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 5);
-      await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, 6);
+      await pool.connect(user0).stake(BLUEPRINT_STAKE_FOR_SEEDS, 0, 6);
       let deposit = await pool.getDepositByIndex(user0.address, 0);
+
+      await assertThrowsMessage(pool.connect(user0).unstake(deposit), "SideToken: not a minter");
+      await seed.setMinter(pool.address, true);
+
       expect(await pool.connect(user0).unstake(deposit))
         .emit(pool, "DepositUnlocked")
         .withArgs(user0.address, 0);

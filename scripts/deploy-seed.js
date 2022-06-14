@@ -7,7 +7,9 @@ let deployUtils;
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
-  await deployUtils.deployProxy("SeedToken");
+  const seed = await deployUtils.deployProxy("SeedToken");
+  // const seed = await deployUtils.attach("SeedToken");
+  // await deployUtils.Tx(seed.unpauseAllowance(), "Unpause allowance");
 }
 
 main()
