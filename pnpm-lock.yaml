@@ -11,7 +11,7 @@ specifiers:
   '@openzeppelin/contracts-upgradeable': ^4.5.2
   '@openzeppelin/hardhat-upgrades': ^1.17.0
   chai: ^4.3.6
-  cryptoenv: 0.1.2
+  cryptoenv: ^0.1.3
   csv-parse: ^5.0.4
   dotenv: ^16.0.0
   ethereum-waffle: ^3.4.4
@@ -44,7 +44,7 @@ devDependencies:
   '@openzeppelin/contracts-upgradeable': 4.5.2
   '@openzeppelin/hardhat-upgrades': 1.17.0_ycmkfmk7ioq37phgrm6irkae5a
   chai: 4.3.6
-  cryptoenv: 0.1.2
+  cryptoenv: 0.1.3
   csv-parse: 5.0.4
   dotenv: 16.0.0
   ethereum-waffle: 3.4.4_typescript@4.6.3
@@ -3004,8 +3004,8 @@ packages:
       randomfill: 1.0.4
     dev: true
 
-  /cryptoenv/0.1.2:
-    resolution: {integrity: sha512-yHSoY8TupWwlebwWjAdiFEHuvjUHYolRAn2DSdNviuh9RMNjkLPIascWcl6sLof29VzNchAJ9w94DCK4QmgMbg==}
+  /cryptoenv/0.1.3:
+    resolution: {integrity: sha512-EmuWRfyrOJIhBFHHy0g/A1ynWMd2nP3+y3tOPTEEPXAgaaA+VydeNCn/1sfs5YsRxoeluzjDFf8MpneT7O3E1Q==}
     hasBin: true
     requiresBuild: true
     dependencies:

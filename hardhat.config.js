@@ -1,7 +1,6 @@
 const {requirePath} = require("require-or-mock");
 // if missed, it sets up a mock
 requirePath(".env");
-requirePath(".env.json");
 
 require("dotenv").config();
 require("cryptoenv").parse();
@@ -16,8 +15,6 @@ require("solidity-coverage");
 if (process.env.GAS_REPORT === "yes") {
   require("hardhat-gas-reporter");
 }
-
-const envJson = require("./.env.json");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
