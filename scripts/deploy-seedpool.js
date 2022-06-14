@@ -86,7 +86,7 @@ async function main() {
   const seed = await SeedToken.attach(seedAddress);
 
   await Tx(
-    seed.grantRole(await seed.MINTER_ROLE(), seedPool.address, {
+    seed.setMinter(seedPool.address, true, {
       gasLimit: 66340,
     }),
     "Give the pool minting permissions on Seed"

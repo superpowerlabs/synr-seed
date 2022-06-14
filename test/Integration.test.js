@@ -175,7 +175,7 @@ describe("#Integration test", function () {
 
     await mainTesseract.setBridge(1, mainBridge.address);
 
-    seed = await SeedToken.deploy();
+    seed = await upgrades.deployProxy(SeedToken, []);
     await seed.deployed();
 
     blueprint = await SynCityCoupons.deploy(8000);
@@ -213,7 +213,7 @@ describe("#Integration test", function () {
     await seedPool.setBridge(sideBridge.address, true);
     await sideTesseract.setBridge(1, sideBridge.address);
 
-    await seed.grantRole(await seed.MINTER_ROLE(), seedPool.address);
+    await seed.setMinter(seedPool.address, true);
 
     wormhole = await WormholeMock.deploy();
     await mainBridge.wormholeInit(2, wormhole.address);
