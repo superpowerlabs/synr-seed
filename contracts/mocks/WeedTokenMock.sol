@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.11;
 
-import "../token/SideToken.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "../token/SideToken.sol";
 
 contract WeedTokenMock is SideToken, UUPSUpgradeable {
   /// @custom:oz-upgrades-unsafe-allow constructor
