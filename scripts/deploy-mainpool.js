@@ -5,9 +5,9 @@
 // Runtime Environment's members available in the global scope.
 require("dotenv").config();
 const hre = require("hardhat");
-const requireOrMock = require("require-or-mock");
+
 const ethers = hre.ethers;
-const deployed = requireOrMock("export/deployed.json");
+const deployed = require("../export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
 const {upgrades} = require("hardhat");
 let deployUtils;
@@ -21,14 +21,17 @@ async function main() {
   const sSynrAddress = deployed[chainId].SyntheticSyndicateERC20;
   const synrPassAddress = deployed[chainId].SynCityPasses;
 
-  const MainPool = await ethers.getContractFactory("MainPool");
+  // const MainPool = await ethers.getContractFactory("MainPool");
 
   console.log("Deploying MainPool");
-  const mainPool = await upgrades.deployProxy(MainPool, [synrAddress, sSynrAddress, synrPassAddress]);
-  await mainPool.deployed();
-  //
-  // const MainPool = await ethers.getContractFactory("MainPool");
-  // const mainPool = await MainPool.attach("0x906B067e392e2c5f9E4f101f36C0b8CdA4885EBf");
+  // const mainPool = await upgrades.deployProxy(MainPool, [synrAddress, sSynrAddress, synrPassAddress]);
+  // await mainPool.deployed();
+
+  const mainPool = await deployUtils.attach("MainPool");
+
+  await deployUtils.Tx(mainPool.updatePass(synrPassAddress));
+
+  process.exit();
 
   console.log("MainPool deployed at", mainPool.address);
 

@@ -5,9 +5,9 @@
 // Runtime Environment's members available in the global scope.
 require("dotenv").config();
 const hre = require("hardhat");
-const requireOrMock = require("require-or-mock");
+
 const ethers = hre.ethers;
-const deployed = requireOrMock("export/deployed.json");
+const deployed = require("../export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
 const wormholeConfig = require("./lib/wormholeConfig");
 const {bytes32Address} = require("../test/helpers");
@@ -71,7 +71,6 @@ async function main() {
       poolViews.address
     );
     // pool = await deployUtils.attach("SeedPool");
-
     await deployUtils.Tx(
       pool.initPool(
         rewardsFactor,
@@ -105,10 +104,7 @@ async function main() {
       ),
       "Init ExtraConf"
     );
-    await deployUtils.Tx(
-      seed.grantRole(await seed.MINTER_ROLE(), pool.address),
-      "Granting the pool minting role for SeedToken"
-    );
+    await deployUtils.Tx(seed.setMinter(pool.address, true), "Granting the pool minting role for SeedToken");
   }
 
   const tesseract = await deployUtils.deployProxy("Tesseract");

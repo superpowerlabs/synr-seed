@@ -3,13 +3,13 @@ const fs = require("fs-extra");
 const {Contract} = require("@ethersproject/contracts");
 const abi = require("ethereumjs-abi");
 const {deployProxyImpl} = require("@openzeppelin/hardhat-upgrades/dist/utils");
-const requireOrMock = require("require-or-mock");
+
 let deployedJson;
 
 if (process.env.NODE_ENV === "test") {
-  deployedJson = requireOrMock("export/deployedForTest.json");
+  deployedJson = require("../../export/deployedForTest.json");
 } else {
-  deployedJson = requireOrMock("export/deployed.json");
+  deployedJson = require("../../export/deployed.json");
 }
 
 const oZChainName = {
@@ -29,6 +29,8 @@ const chainName = {
   1337: "localhost",
   31337: "hardhat",
   80001: "mumbai",
+  41224: "avalance",
+  43113: "fuji",
 };
 
 const scanner = {
@@ -38,6 +40,8 @@ const scanner = {
   5: "goerli.etherscan.io",
   56: "bscscan.com",
   97: "testnet.bscscan.com",
+  41224: "snowtrace.io",
+  43113: "testnet.snowtrace.io",
 };
 
 class DeployUtils {

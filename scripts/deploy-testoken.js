@@ -4,15 +4,11 @@
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 require("dotenv").config();
-const {assert} = require("chai");
 const hre = require("hardhat");
-const fs = require("fs-extra");
-const path = require("path");
-
 const ethers = hre.ethers;
-
 const DeployUtils = require("./lib/DeployUtils");
 let deployUtils;
+const testnetWallets = require("./testnetWallets");
 
 async function currentChainId() {
   return (await ethers.provider.getNetwork()).chainId;
@@ -28,43 +24,32 @@ async function main() {
   // await hre.run('compile');
 
   const chainId = await currentChainId();
-  if (chainId === 56) {
+  if (chainId === 1 || chainId === 56) {
     console.error("This script is for test and development only");
     process.exit();
   }
-  const isLocalNode = /1337$/.test(chainId);
-  const [deployer] = await ethers.getSigners();
 
-  console.log("Deploying contracts with the account:", deployer.address);
+  if (chainId < 6) {
+    let pass = await deployUtils.attach("SynCityPasses");
+    for (let address of testnetWallets) {
+      await deployUtils.Tx(pass.mint(address, 4), "Passes to " + address);
+    }
 
-  const network = chainId === 97 ? "bsc_testnet" : chainId === 43113 ? "fuji" : "localhost";
+    const sSynr = await deployUtils.attach("SyntheticSyndicateERC20");
+    for (let address of testnetWallets) {
+      await deployUtils.Tx(sSynr.mint(address, ethers.utils.parseEther("200000")), "sSYNR to " + address);
+    }
 
-  console.log("Current chain ID", await currentChainId());
-
-  console.log("Account balance:", (await deployer.getBalance()).toString());
-
-  // const SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
-  // const nft = await SynCityCoupons.deploy(8000);
-  // await nft.deployed();
-  //
-  const nft = await deployUtils.attach("SynCityCoupons");
-
-  for (let address of require("./testnetWallets")) {
-    await deployUtils.Tx(nft.mint(address, 5, {gasLimit: 800000}), "Blueprint to " + address);
+    const synr = await deployUtils.attach("SyndicateERC20");
+    for (let address of testnetWallets) {
+      await deployUtils.Tx(synr.mint(address, ethers.utils.parseEther("200000")), "SYNR to " + address);
+    }
+  } else {
+    let blueprint = await deployUtils.attach("SynCityCoupons");
+    for (let address of testnetWallets) {
+      await deployUtils.Tx(blueprint.mint(address, 8), "Passes to " + address);
+    }
   }
-
-  // await nft.setMarketplace(process.env.BINANCE_ADDRESS)
-
-  console.log(`
-To verify SynCityCoupons source code:
-    
-  npx hardhat verify --show-stack-traces \\
-      --network ${network} \\
-      ${nft.address}  \\
-      8000
-`);
-
-  await deployUtils.saveDeployed(chainId, ["SynCityCoupons"], [nft.address]);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

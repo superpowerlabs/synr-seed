@@ -5,9 +5,9 @@
 // Runtime Environment's members available in the global scope.
 require("dotenv").config();
 const hre = require("hardhat");
-const requireOrMock = require("require-or-mock");
+
 const ethers = hre.ethers;
-const deployed = requireOrMock("export/deployed.json");
+const deployed = require("../export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
 let deployUtils;
 
