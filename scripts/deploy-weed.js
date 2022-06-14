@@ -7,7 +7,8 @@ let deployUtils;
 
 async function main() {
   deployUtils = new DeployUtils(ethers);
-  const seed = await deployUtils.deploy("WeedToken");
+  const weed = await deployUtils.deploy("WeedToken");
+  await deployUtils.Tx(weed.unpauseAllowance(), "Unpause allowance");
 }
 
 main()

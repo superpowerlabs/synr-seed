@@ -53,15 +53,15 @@ async function main() {
   assert.isTrue(validator.length === 42);
   // assert.isTrue(operator.length === 42)
 
-  // const SynCityPasses = await ethers.getContractFactory("SynCityPasses");
-  // const nft = await SynCityPasses.deploy(validator);
-  // await nft.deployed();
-  // await deployUtils.Tx(nft.setOperators(operators), "Set operator");
+  const SynCityPasses = await ethers.getContractFactory("SynCityPasses");
+  const nft = await SynCityPasses.deploy(validator);
+  await nft.deployed();
+  await deployUtils.Tx(nft.setOperators(operators), "Set operator");
 
-  const nft = await deployUtils.attach("SynCityPasses");
-  for (let address of require("./testnetWallets")) {
-    await deployUtils.Tx(nft.mint(address, 5), "Passes to " + address);
-  }
+  // const nft = await deployUtils.attach("SynCityPasses");
+  // for (let address of require("./testnetWallets")) {
+  //   await deployUtils.Tx(nft.mint(address, 5), "Passes to " + address);
+  // }
 
   // process.exit()
 
