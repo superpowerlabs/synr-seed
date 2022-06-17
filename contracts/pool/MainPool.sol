@@ -43,12 +43,12 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  // solhint-disable-next-line
   function initialize(
     address synr_,
     address sSynr_,
     address pass_
   ) public initializer {
+    // solhint-disable-next-line
     __Ownable_init();
     require(synr_.isContract(), "synr_ not a contract");
     require(sSynr_.isContract(), "sSynr_ not a contract");
