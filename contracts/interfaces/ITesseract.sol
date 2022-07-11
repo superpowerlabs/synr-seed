@@ -6,6 +6,7 @@ pragma solidity 0.8.11;
 
 interface ITesseract {
   event BridgeSet(uint16 bridgeType, address bridge);
+  event ImplementationUpgraded();
 
   function setBridge(uint16 bridgeType, address bridge_) external;
 

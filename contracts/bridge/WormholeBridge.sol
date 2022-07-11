@@ -14,6 +14,8 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using ECDSAUpgradeable for bytes32;
 
+  event ImplementationUpgraded();
+
   Tesseract public tesseract;
   address public pool;
   address public validator;
