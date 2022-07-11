@@ -11,11 +11,11 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./interfaces/IWormholeBridge.sol";
 import "./interfaces/ITesseract.sol";
-import "./utils/PayloadUtilsUpgradeable.sol";
+import "./utils/PayloadUtils.sol";
 
 //import "hardhat/console.sol";
 
-contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract Tesseract is ITesseract, Initializable, PayloadUtils, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 

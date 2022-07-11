@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "../token/TokenReceiver.sol";
-import "../utils/PayloadUtilsUpgradeable.sol";
+import "../utils/PayloadUtils.sol";
 import "../interfaces/IMainPool.sol";
 import "../interfaces/ISyndicateERC20.sol";
 import "../interfaces/ISyntheticSyndicateERC20.sol";
@@ -19,7 +19,7 @@ import "../interfaces/IERC721Minimal.sol";
 
 //import "hardhat/console.sol";
 
-contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract MainPool is IMainPool, PayloadUtils, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
