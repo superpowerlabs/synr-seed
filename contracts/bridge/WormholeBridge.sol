@@ -113,4 +113,8 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
     }
     return id;
   }
+
+  function withdrawProceeds(address payable to) public onlyOwner {
+    to.transfer(address(this).balance);
+  }
 }
