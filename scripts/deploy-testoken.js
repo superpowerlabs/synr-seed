@@ -47,7 +47,7 @@ async function main() {
   } else {
     let blueprint = await deployUtils.attach("SynCityCoupons");
     for (let address of testnetWallets) {
-      await deployUtils.Tx(blueprint.mint(address, 8), "Passes to " + address);
+      await deployUtils.Tx(blueprint.mint(address, 8), "Blueprints to " + address);
     }
   }
 }
