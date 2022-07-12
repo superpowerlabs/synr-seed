@@ -10,15 +10,24 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "../token/TokenReceiver.sol";
-import "../utils/PayloadUtils.sol";
+import "../utils/Constants.sol";
 import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
 import "../interfaces/IERC721Minimal.sol";
 import "../interfaces/ISidePoolViews.sol";
+import "../utils/Versionable.sol";
 
 //import "hardhat/console.sol";
 
-abstract contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+abstract contract SidePool is
+  ISidePool,
+  Versionable,
+  Constants,
+  TokenReceiver,
+  Initializable,
+  OwnableUpgradeable,
+  UUPSUpgradeable
+{
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
 
@@ -188,10 +197,6 @@ abstract contract SidePool is PayloadUtils, ISidePool, TokenReceiver, Initializa
   function pausePool(bool paused) external onlyOwner {
     conf.status = paused ? 2 : 1;
     emit PoolPaused(paused);
-  }
-
-  function version() external pure virtual override returns (uint256) {
-    return 1;
   }
 
   function _updateLastRatioUpdateAt() internal {

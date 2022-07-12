@@ -62,4 +62,21 @@ interface IMainPool is IMainUser {
   ) external;
 
   function pausePool(bool paused) external;
+
+  function validateInput(
+    uint256 tokenType,
+    uint256 lockupTime,
+    uint256 tokenAmountOrID
+  ) external pure returns (bool);
+
+  function deserializeInput(uint256 payload)
+    external
+    pure
+    returns (
+      uint256 tokenType,
+      uint256 lockupTime,
+      uint256 tokenAmountOrID
+    );
+
+  function getIndexFromPayload(uint256 payload) external pure returns (uint256);
 }
