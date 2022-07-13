@@ -4,6 +4,7 @@ pragma solidity 0.8.11;
 // Authors: Francesco Sullo <francesco@sullo.co>
 
 import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
@@ -12,6 +13,7 @@ import "../Tesseract.sol";
 contract WormholeBridge is WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using ECDSAUpgradeable for bytes32;
+  using SafeMathUpgradeable for uint256;
 
   Tesseract public tesseract;
   address public pool;
@@ -109,6 +111,24 @@ contract WormholeBridge is WormholeTunnelUpgradeable {
     public
     pure
     override
+    returns (
+      uint256 tokenType,
+      uint256 lockedFrom,
+      uint256 lockedUntil,
+      uint256 mainIndex,
+      uint256 tokenAmountOrID
+    )
+  {
+    tokenType = payload.mod(100);
+    lockedFrom = payload.div(100).mod(1e10);
+    lockedUntil = payload.div(1e12).mod(1e10);
+    mainIndex = payload.div(1e22).mod(1e5);
+    tokenAmountOrID = payload.div(1e27);
+  }
+
+  function deserializeDeposit(uint256 payload)
+    public
+    pure
     returns (
       uint256 tokenType,
       uint256 lockedFrom,

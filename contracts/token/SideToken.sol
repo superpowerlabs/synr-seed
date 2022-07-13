@@ -7,8 +7,9 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "../utils/Versionable.sol";
 
-contract SideToken is Initializable, OwnableUpgradeable, ERC20Upgradeable, ERC20BurnableUpgradeable {
+contract SideToken is Versionable, Initializable, OwnableUpgradeable, ERC20Upgradeable, ERC20BurnableUpgradeable {
   using AddressUpgradeable for address;
 
   bool public allowancePaused;

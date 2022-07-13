@@ -17,9 +17,11 @@ import "../interfaces/ISyntheticSyndicateERC20.sol";
 import "../interfaces/IERC721Minimal.sol";
 import "../utils/Constants.sol";
 
+import "../utils/Versionable.sol";
+
 //import "hardhat/console.sol";
 
-contract MainPool is IMainPool, Constants, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract MainPool is IMainPool, Versionable, Constants, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -106,10 +108,6 @@ contract MainPool is IMainPool, Constants, TokenReceiver, Initializable, Ownable
       reserved3: 0
     });
     emit PoolInitiated(minimumLockupTime_, earlyUnstakePenalty_);
-  }
-
-  function version() external pure virtual override returns (uint256) {
-    return 1;
   }
 
   function pausePool(bool paused) external onlyOwner {
@@ -428,15 +426,15 @@ contract MainPool is IMainPool, Constants, TokenReceiver, Initializable, Ownable
     uint256 lockupTime,
     uint256 tokenAmountOrID
   ) public pure override returns (bool) {
-    require(tokenType < 100, "MainPool: invalid token type");
+    require(tokenType < BLUEPRINT_STAKE_FOR_SEEDS + 1, "PayloadUtils: invalid token type");
     if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
-      require(tokenAmountOrID < 889, "MainPool: Not a Mobland SYNR Pass token ID");
+      require(tokenAmountOrID < 889, "PayloadUtils: Not a Mobland SYNR Pass token ID");
     } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
-      require(tokenAmountOrID < 8001, "MainPool: Not a Blueprint token ID");
+      require(tokenAmountOrID < 8001, "PayloadUtils: Not a Blueprint token ID");
     } else {
-      require(tokenAmountOrID < 1e28, "MainPool: tokenAmountOrID out of range");
+      require(tokenAmountOrID < 1e28, "PayloadUtils: tokenAmountOrID out of range");
     }
-    require(lockupTime < 1e3, "MainPool: lockedTime out of range");
+    require(lockupTime < 1e3, "PayloadUtils: lockedTime out of range");
     return true;
   }
 

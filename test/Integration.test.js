@@ -471,6 +471,23 @@ describe("#Integration test", function () {
     await seedPool.withdrawTaxes(0, treasury.address);
     expect(await seedPool.taxes()).equal(0);
     await assertThrowsMessage(seedPool.withdrawTaxes(10, treasury.address), "SidePool: amount not available");
+
+    deposit = {
+      tokenType: SYNR_STAKE,
+      lockedFrom: await getTimestamp(),
+      lockedUntil: (await getTimestamp()) + 3600000,
+      tokenAmountOrID: ethers.utils.parseEther("1000"),
+      mainIndex: 0,
+    };
+
+    payload = await fromMainDepositToTransferPayload(deposit);
+    const [tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID] = await mainBridge.deserializeDeposit(payload);
+
+    expect(tokenType).equal(deposit.tokenType);
+    expect(lockedFrom).equal(deposit.lockedFrom);
+    expect(lockedUntil).equal(deposit.lockedUntil);
+    expect(mainIndex).equal(deposit.mainIndex);
+    expect(tokenAmountOrID).equal(deposit.tokenAmountOrID);
   });
 
   it("should verify the boost Vs equivalent", async function () {
