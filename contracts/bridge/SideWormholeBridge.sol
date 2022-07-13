@@ -14,7 +14,9 @@ contract SideWormholeBridge is WormholeBridge {
     __WormholeBridge_init(tesseract_, pool_);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+    emit ImplementationUpgraded();
+  }
 
   // UNSTAKE starts on the side chain and completes on the main chain
   function wormholeTransfer(

@@ -12,5 +12,7 @@ contract WeedToken is SideToken, UUPSUpgradeable {
     __SideToken_init("Mobland Weed Token", "WEED");
   }
 
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+    emit ImplementationUpgraded();
+  }
 }

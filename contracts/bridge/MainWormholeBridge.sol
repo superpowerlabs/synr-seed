@@ -14,7 +14,9 @@ contract MainWormholeBridge is WormholeBridge {
     __WormholeBridge_init(tesseract_, pool_);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+    emit ImplementationUpgraded();
+  }
 
   // STAKE/BURN starts on the main chain and completes on the side chain
   function wormholeTransfer(
