@@ -110,25 +110,6 @@ contract WormholeBridge is WormholeTunnelUpgradeable {
   function deserializeDeposit(uint256 payload)
     public
     pure
-    override
-    returns (
-      uint256 tokenType,
-      uint256 lockedFrom,
-      uint256 lockedUntil,
-      uint256 mainIndex,
-      uint256 tokenAmountOrID
-    )
-  {
-    tokenType = payload.mod(100);
-    lockedFrom = payload.div(100).mod(1e10);
-    lockedUntil = payload.div(1e12).mod(1e10);
-    mainIndex = payload.div(1e22).mod(1e5);
-    tokenAmountOrID = payload.div(1e27);
-  }
-
-  function deserializeDeposit(uint256 payload)
-    public
-    pure
     returns (
       uint256 tokenType,
       uint256 lockedFrom,
