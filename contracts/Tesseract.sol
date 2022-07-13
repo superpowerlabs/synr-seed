@@ -68,4 +68,8 @@ contract Tesseract is ITesseract, Initializable, PayloadUtilsUpgradeable, Ownabl
       revert("Tesseract: unsupported bridge");
     }
   }
+
+  function withdrawProceeds(address payable to) public onlyOwner {
+    to.transfer(address(this).balance);
+  }
 }
