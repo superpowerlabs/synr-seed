@@ -203,10 +203,6 @@ abstract contract SidePool is
     return 1;
   }
 
-  function _updateLastRatioUpdateAt() internal {
-    conf.lastRatioUpdateAt = uint32(block.timestamp);
-  }
-
   function shouldUpdateRatio() public view override returns (bool) {
     return
       block.timestamp.sub(conf.poolInitAt).div(conf.decayInterval) >
