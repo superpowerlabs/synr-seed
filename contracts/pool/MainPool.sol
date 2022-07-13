@@ -11,11 +11,11 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "../token/TokenReceiver.sol";
-import "../utils/Constants.sol";
 import "../interfaces/IMainPool.sol";
 import "../interfaces/ISyndicateERC20.sol";
 import "../interfaces/ISyntheticSyndicateERC20.sol";
 import "../interfaces/IERC721Minimal.sol";
+import "../utils/Constants.sol";
 import "../utils/Versionable.sol";
 
 //import "hardhat/console.sol";

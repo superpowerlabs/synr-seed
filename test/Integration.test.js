@@ -223,6 +223,23 @@ describe("#Integration test", function () {
 
     await sideBridge.wormholeInit(4, wormhole.address);
     await sideBridge.wormholeRegisterContract(2, bytes32Address(mainBridge.address));
+
+    const deposit = {
+      tokenType: SYNR_STAKE,
+      lockedFrom: await getTimestamp(),
+      lockedUntil: (await getTimestamp()) + 3600000,
+      tokenAmountOrID: ethers.utils.parseEther("1000"),
+      mainIndex: 0,
+    };
+
+    const payload = await fromMainDepositToTransferPayload(deposit);
+    const [tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID] = await mainBridge.deserializeDeposit(payload);
+
+    expect(tokenType).equal(deposit.tokenType);
+    expect(lockedFrom).equal(deposit.lockedFrom);
+    expect(lockedUntil).equal(deposit.lockedUntil);
+    expect(mainIndex).equal(deposit.mainIndex);
+    expect(tokenAmountOrID).equal(deposit.tokenAmountOrID);
   }
 
   async function configure() {}

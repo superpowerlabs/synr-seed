@@ -19,6 +19,10 @@ import "../utils/Versionable.sol";
 
 //import "hardhat/console.sol";
 
+import "../utils/Versionable.sol";
+
+//import "hardhat/console.sol";
+
 abstract contract SidePool is
   ISidePool,
   Versionable,
@@ -199,10 +203,6 @@ abstract contract SidePool is
   function pausePool(bool paused) external onlyOwner {
     conf.status = paused ? 2 : 1;
     emit PoolPaused(paused);
-  }
-
-  function version() external pure virtual override returns (uint256) {
-    return 1;
   }
 
   function shouldUpdateRatio() public view override returns (bool) {
