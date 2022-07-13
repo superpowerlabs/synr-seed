@@ -14,6 +14,8 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using ECDSAUpgradeable for bytes32;
 
+  event ImplementationUpgraded();
+
   Tesseract public tesseract;
   address public pool;
   address public validator;
@@ -95,7 +97,7 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
       keccak256(
         abi.encodePacked(
           "\x19\x01", // EIP-191
-          getChainId(),
+          block.chainid,
           to,
           tokenType,
           lockedFrom,
@@ -104,14 +106,6 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
           tokenAmountOrID
         )
       );
-  }
-
-  function getChainId() public view returns (uint256) {
-    uint256 id;
-    assembly {
-      id := chainid()
-    }
-    return id;
   }
 
   function withdrawProceeds(address payable to) public onlyOwner {

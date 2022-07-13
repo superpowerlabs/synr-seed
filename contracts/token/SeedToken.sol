@@ -12,5 +12,7 @@ contract SeedToken is SideToken, UUPSUpgradeable {
     __SideToken_init("Mobland Seed Token", "SEED");
   }
 
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+    emit ImplementationUpgraded();
+  }
 }
