@@ -6,9 +6,9 @@
 require("dotenv").config();
 const {expect} = require("chai");
 const hre = require("hardhat");
-const requireOrMock = require("require-or-mock");
+
 const ethers = hre.ethers;
-const deployed = requireOrMock("export/deployed.json");
+const deployed = require("../export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
 const wormholeConfig = require("./lib/wormholeConfig");
 const net = require("net");

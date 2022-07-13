@@ -11,6 +11,7 @@ interface IMainPool is IMainUser {
   event PoolPaused(bool isPaused);
   event BridgeSet(address bridge);
   event BridgeRemoved(address bridge);
+  event ImplementationUpgraded();
 
   struct Conf {
     uint8 status;

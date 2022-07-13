@@ -77,7 +77,9 @@ abstract contract SidePool is
     poolViews = ISidePoolViews(poolViews_);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+    emit ImplementationUpgraded();
+  }
 
   function initPool(
     uint32 rewardsFactor_,
@@ -199,8 +201,8 @@ abstract contract SidePool is
     emit PoolPaused(paused);
   }
 
-  function _updateLastRatioUpdateAt() internal {
-    conf.lastRatioUpdateAt = uint32(block.timestamp);
+  function version() external pure virtual override returns (uint256) {
+    return 1;
   }
 
   function shouldUpdateRatio() public view override returns (bool) {

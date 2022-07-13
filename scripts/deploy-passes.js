@@ -8,7 +8,7 @@ const {assert} = require("chai");
 const hre = require("hardhat");
 const fs = require("fs-extra");
 const path = require("path");
-const requireOrMock = require("require-or-mock");
+
 const ethers = hre.ethers;
 const DeployUtils = require("./lib/DeployUtils");
 let deployUtils;

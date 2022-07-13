@@ -44,12 +44,12 @@ contract MainPool is IMainPool, Versionable, Constants, TokenReceiver, Initializ
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
-  // solhint-disable-next-line
   function initialize(
     address synr_,
     address sSynr_,
     address pass_
   ) public initializer {
+    // solhint-disable-next-line
     __Ownable_init();
     require(synr_.isContract(), "synr_ not a contract");
     require(sSynr_.isContract(), "sSynr_ not a contract");
@@ -59,7 +59,9 @@ contract MainPool is IMainPool, Versionable, Constants, TokenReceiver, Initializ
     pass = IERC721Minimal(pass_);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+    emit ImplementationUpgraded();
+  }
 
   function _updateTvl(
     uint256 tokenType,

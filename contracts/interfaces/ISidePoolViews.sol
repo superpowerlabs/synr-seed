@@ -8,6 +8,8 @@ import "./ISideUser.sol";
 import "./ISideConf.sol";
 
 interface ISidePoolViews is ISideUser, ISideConf {
+  event ImplementationUpgraded();
+
   /**
    * @param deposit The deposit
    * @return the time it will be locked
