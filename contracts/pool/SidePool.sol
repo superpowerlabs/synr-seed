@@ -14,10 +14,11 @@ import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
 import "../interfaces/IERC721Minimal.sol";
 import "../interfaces/ISidePoolViews.sol";
+import "../utils/Constants.sol";
 
 //import "hardhat/console.sol";
 
-abstract contract SidePool is ISidePool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+abstract contract SidePool is ISidePool, Constants, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using SafeMathUpgradeable for uint256;
   using AddressUpgradeable for address;
 

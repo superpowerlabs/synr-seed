@@ -15,10 +15,11 @@ import "../interfaces/IMainPool.sol";
 import "../interfaces/ISyndicateERC20.sol";
 import "../interfaces/ISyntheticSyndicateERC20.sol";
 import "../interfaces/IERC721Minimal.sol";
+import "../utils/Constants.sol";
 
 //import "hardhat/console.sol";
 
-contract MainPool is IMainPool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract MainPool is IMainPool, Constants, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
