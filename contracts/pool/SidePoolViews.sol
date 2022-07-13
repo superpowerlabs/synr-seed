@@ -12,10 +12,11 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../interfaces/ISidePoolViews.sol";
 import "../utils/Constants.sol";
 import "../mocks/previously-deployed/utils/Ownable.sol";
+import "../utils/Versionable.sol";
 
 //import "hardhat/console.sol";
 
-contract SidePoolViews is ISidePoolViews, Constants, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using SafeMathUpgradeable for uint256;
 
   /// @custom:oz-upgrades-unsafe-allow constructor

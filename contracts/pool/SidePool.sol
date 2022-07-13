@@ -10,17 +10,19 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "../token/TokenReceiver.sol";
-import "../utils/PayloadUtilsUpgradeable.sol";
+import "../utils/Constants.sol";
 import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
 import "../interfaces/IERC721Minimal.sol";
 import "../interfaces/ISidePoolViews.sol";
+import "../utils/Versionable.sol";
 
 //import "hardhat/console.sol";
 
 abstract contract SidePool is
-  PayloadUtilsUpgradeable,
   ISidePool,
+  Versionable,
+  Constants,
   TokenReceiver,
   Initializable,
   OwnableUpgradeable,
