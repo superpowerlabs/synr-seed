@@ -8,9 +8,8 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 import "../Tesseract.sol";
-import "../utils/PayloadUtils.sol";
 
-contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
+contract WormholeBridge is WormholeTunnelUpgradeable {
   using AddressUpgradeable for address;
   using ECDSAUpgradeable for bytes32;
 
@@ -95,7 +94,7 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
       keccak256(
         abi.encodePacked(
           "\x19\x01", // EIP-191
-          getChainId(),
+          block.chainid,
           to,
           tokenType,
           lockedFrom,
@@ -106,11 +105,22 @@ contract WormholeBridge is PayloadUtils, WormholeTunnelUpgradeable {
       );
   }
 
-  function getChainId() public view returns (uint256) {
-    uint256 id;
-    assembly {
-      id := chainid()
-    }
-    return id;
+  function deserializeDeposit(uint256 payload)
+    public
+    pure
+    override
+    returns (
+      uint256 tokenType,
+      uint256 lockedFrom,
+      uint256 lockedUntil,
+      uint256 mainIndex,
+      uint256 tokenAmountOrID
+    )
+  {
+    tokenType = payload.mod(100);
+    lockedFrom = payload.div(100).mod(1e10);
+    lockedUntil = payload.div(1e12).mod(1e10);
+    mainIndex = payload.div(1e22).mod(1e5);
+    tokenAmountOrID = payload.div(1e27);
   }
 }

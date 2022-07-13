@@ -13,4 +13,15 @@ interface IWormholeBridge {
   ) external payable returns (uint64 sequence);
 
   function wormholeCompleteTransfer(bytes memory encodedVm) external;
+
+  function deserializeDeposit(uint256 payload)
+    external
+    pure
+    returns (
+      uint256 tokenType,
+      uint256 lockedFrom,
+      uint256 lockedUntil,
+      uint256 mainIndex,
+      uint256 tokenAmountOrID
+    );
 }

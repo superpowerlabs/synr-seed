@@ -11,7 +11,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "../token/TokenReceiver.sol";
-import "../utils/PayloadUtilsUpgradeable.sol";
 import "../interfaces/IMainPool.sol";
 import "../interfaces/ISyndicateERC20.sol";
 import "../interfaces/ISyntheticSyndicateERC20.sol";
@@ -19,7 +18,7 @@ import "../interfaces/IERC721Minimal.sol";
 
 //import "hardhat/console.sol";
 
-contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract MainPool is IMainPool, TokenReceiver, Initializable, OwnableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using SafeMathUpgradeable for uint256;
 
@@ -421,6 +420,42 @@ contract MainPool is IMainPool, PayloadUtilsUpgradeable, TokenReceiver, Initiali
     uint256 tokenAmountOrID
   ) external virtual onlyBridge {
     _unstake(user, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+  }
+
+  function validateInput(
+    uint256 tokenType,
+    uint256 lockupTime,
+    uint256 tokenAmountOrID
+  ) public pure override returns (bool) {
+    require(tokenType < 100, "MainPool: invalid token type");
+    if (tokenType == SYNR_PASS_STAKE_FOR_BOOST || tokenType == SYNR_PASS_STAKE_FOR_SEEDS) {
+      require(tokenAmountOrID < 889, "MainPool: Not a Mobland SYNR Pass token ID");
+    } else if (tokenType == BLUEPRINT_STAKE_FOR_BOOST || tokenType == BLUEPRINT_STAKE_FOR_SEEDS) {
+      require(tokenAmountOrID < 8001, "MainPool: Not a Blueprint token ID");
+    } else {
+      require(tokenAmountOrID < 1e28, "MainPool: tokenAmountOrID out of range");
+    }
+    require(lockupTime < 1e3, "MainPool: lockedTime out of range");
+    return true;
+  }
+
+  function deserializeInput(uint256 payload)
+    public
+    pure
+    override
+    returns (
+      uint256 tokenType,
+      uint256 lockupTime,
+      uint256 tokenAmountOrID
+    )
+  {
+    tokenType = payload.mod(100);
+    lockupTime = payload.div(100).mod(1e3);
+    tokenAmountOrID = payload.div(1e5);
+  }
+
+  function getIndexFromPayload(uint256 payload) public pure override returns (uint256) {
+    return payload.div(1e22).mod(1e5);
   }
 
   //  uint256[50] private __gap;
