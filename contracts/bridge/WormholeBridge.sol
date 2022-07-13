@@ -15,6 +15,8 @@ contract WormholeBridge is WormholeTunnelUpgradeable {
   using ECDSAUpgradeable for bytes32;
   using SafeMathUpgradeable for uint256;
 
+  event ImplementationUpgraded();
+
   Tesseract public tesseract;
   address public pool;
   address public validator;
@@ -105,6 +107,10 @@ contract WormholeBridge is WormholeTunnelUpgradeable {
           tokenAmountOrID
         )
       );
+  }
+
+  function withdrawProceeds(address payable to) public onlyOwner {
+    to.transfer(address(this).balance);
   }
 
   function deserializeDeposit(uint256 payload)

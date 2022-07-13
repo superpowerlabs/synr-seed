@@ -27,7 +27,9 @@ contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable,
     __Ownable_init();
   }
 
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+    emit ImplementationUpgraded();
+  }
 
   function getLockupTime(Deposit memory deposit) public pure override returns (uint256) {
     return uint256(deposit.lockedUntil).sub(deposit.lockedFrom);

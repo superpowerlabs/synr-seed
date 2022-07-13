@@ -15,6 +15,7 @@ import "../interfaces/ISidePool.sol";
 import "../token/SideToken.sol";
 import "../interfaces/IERC721Minimal.sol";
 import "../interfaces/ISidePoolViews.sol";
+import "../utils/Versionable.sol";
 
 //import "hardhat/console.sol";
 
@@ -80,7 +81,9 @@ abstract contract SidePool is
     poolViews = ISidePoolViews(poolViews_);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+    emit ImplementationUpgraded();
+  }
 
   function initPool(
     uint32 rewardsFactor_,
@@ -200,10 +203,6 @@ abstract contract SidePool is
   function pausePool(bool paused) external onlyOwner {
     conf.status = paused ? 2 : 1;
     emit PoolPaused(paused);
-  }
-
-  function _updateLastRatioUpdateAt() internal {
-    conf.lastRatioUpdateAt = uint32(block.timestamp);
   }
 
   function shouldUpdateRatio() public view override returns (bool) {
