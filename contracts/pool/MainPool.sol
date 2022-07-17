@@ -60,7 +60,7 @@ contract MainPool is IMainPool, Versionable, Constants, TokenReceiver, Initializ
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
-    emit ImplementationUpgraded();
+    emit ImplementationUpgraded(newImplementation);
   }
 
   function _updateTvl(

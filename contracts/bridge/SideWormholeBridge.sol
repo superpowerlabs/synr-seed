@@ -15,7 +15,7 @@ contract SideWormholeBridge is WormholeBridge {
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
-    emit ImplementationUpgraded();
+    emit ImplementationUpgraded(newImplementation);
   }
 
   // UNSTAKE starts on the side chain and completes on the main chain

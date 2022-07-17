@@ -32,7 +32,7 @@ contract SeedPool is SidePool {
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
-    emit ImplementationUpgraded();
+    emit ImplementationUpgraded(newImplementation);
   }
 
   function setBridge(address bridge_, bool active) external virtual onlyOwner {
