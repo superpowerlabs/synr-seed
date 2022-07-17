@@ -15,7 +15,7 @@ contract MainWormholeBridge is WormholeBridge {
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
-    emit ImplementationUpgraded();
+    emit ImplementationUpgraded(newImplementation);
   }
 
   // STAKE/BURN starts on the main chain and completes on the side chain

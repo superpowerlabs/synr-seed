@@ -13,6 +13,6 @@ contract WeedToken is SideToken, UUPSUpgradeable {
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
-    emit ImplementationUpgraded();
+    emit ImplementationUpgraded(newImplementation);
   }
 }

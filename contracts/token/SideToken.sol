@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Burnable
 import "../utils/Versionable.sol";
 
 contract SideToken is Versionable, Initializable, OwnableUpgradeable, ERC20Upgradeable, ERC20BurnableUpgradeable {
-  event ImplementationUpgraded();
+  event ImplementationUpgraded(address newImplementation);
   using AddressUpgradeable for address;
 
   bool public allowancePaused;

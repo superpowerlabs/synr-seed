@@ -8,7 +8,7 @@ import "./ISideUser.sol";
 import "./ISideConf.sol";
 
 interface ISidePoolViews is ISideUser, ISideConf {
-  event ImplementationUpgraded();
+  event ImplementationUpgraded(address newImplementation);
 
   /**
    * @param deposit The deposit
