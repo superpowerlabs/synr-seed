@@ -35,7 +35,7 @@ contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable,
     return uint256(deposit.lockedUntil).sub(deposit.lockedFrom);
   }
 
-  function yieldWeight(Conf memory conf, Deposit memory deposit) public view override returns (uint256) {
+  function yieldWeight(Conf memory conf, Deposit memory deposit) public pure override returns (uint256) {
     return uint256(10000).add(getLockupTime(deposit).mul(10000).div(conf.maximumLockupTime).div(1 days));
   }
 
@@ -96,7 +96,7 @@ contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable,
     uint256 stakedAmount,
     uint256 passAmountForBoost,
     uint256 blueprintAmountForBoost
-  ) public view returns (uint256) {
+  ) public pure returns (uint256) {
     // this split is to avoid a too deep stack issue
     if (extraConf.sPBoostFactor > extraConf.bPBoostFactor) {
       return
