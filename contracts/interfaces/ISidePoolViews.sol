@@ -21,7 +21,7 @@ interface ISidePoolViews is ISideUser, ISideConf {
    * @param deposit The deposit
    * @return the weighted yield
    */
-  function yieldWeight(Conf memory conf, Deposit memory deposit) external view returns (uint256);
+  function yieldWeight(Conf memory conf, Deposit memory deposit) external pure returns (uint256);
 
   /**
    * @param conf The pool configuration
@@ -49,7 +49,7 @@ interface ISidePoolViews is ISideUser, ISideConf {
     uint256 stakedAmount,
     uint256 passAmountForBoost,
     uint256 blueprintAmountForBoost
-  ) external view returns (uint256);
+  ) external pure returns (uint256);
 
   /**
    * @notice gets Percentage Vested at a certain timestamp

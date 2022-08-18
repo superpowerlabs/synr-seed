@@ -10,6 +10,7 @@ contract BudToken is SideToken, UUPSUpgradeable {
 
   function initialize() public initializer {
     __SideToken_init("Mobland Bud Token", "BUD");
+    allowancePaused = false;
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {

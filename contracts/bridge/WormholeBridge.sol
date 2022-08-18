@@ -47,14 +47,10 @@ contract WormholeBridge is WormholeTunnelUpgradeable {
 
   // must be overwritten
   function wormholeTransfer(
-    // solhint-disable-next-line
-    uint256 payload,
-    // solhint-disable-next-line
-    uint16 recipientChain,
-    // solhint-disable-next-line
-    bytes32 recipient,
-    // solhint-disable-next-line
-    uint32 nonce
+    uint256,
+    uint16,
+    bytes32,
+    uint32
   ) public payable virtual override returns (uint64) {
     return uint64(0);
   }

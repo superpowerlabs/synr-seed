@@ -21,7 +21,7 @@ contract SidePoolMock is SidePool {
   function stake(
     uint256 tokenType,
     // solhint-disable-next-line
-    uint256 lockupTime,
+    uint256,
     uint256 tokenAmountOrID
   ) external virtual override {
     require(

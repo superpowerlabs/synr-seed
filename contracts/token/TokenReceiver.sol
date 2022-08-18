@@ -8,27 +8,19 @@ import "../interfaces/IERC20Receiver.sol";
 
 contract TokenReceiver is IERC20Receiver, IERC721ReceiverUpgradeable {
   function onERC20Received(
-    // solhint-disable-next-line
-    address _operator,
-    // solhint-disable-next-line
-    address _from,
-    // solhint-disable-next-line
-    uint256 _value,
-    // solhint-disable-next-line
-    bytes calldata _data
+    address,
+    address,
+    uint256,
+    bytes calldata
   ) external pure override returns (bytes4) {
     return this.onERC20Received.selector;
   }
 
   function onERC721Received(
-    // solhint-disable-next-line
-    address operator,
-    // solhint-disable-next-line
-    address from,
-    // solhint-disable-next-line
-    uint256 tokenId,
-    // solhint-disable-next-line
-    bytes calldata data
+    address,
+    address,
+    uint256,
+    bytes calldata
   ) public pure override returns (bytes4) {
     return this.onERC721Received.selector;
   }
