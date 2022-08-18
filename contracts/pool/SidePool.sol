@@ -300,14 +300,18 @@ abstract contract SidePool is
    * @param index index of the deposit being searched
    * @return the deposit
    */
-  function getDepositByIndex(address user, uint256 index) public view override returns (Deposit memory) {
-    require(users[user].deposits[index].lockedFrom > 0, "SidePool: deposit not found");
-    return users[user].deposits[index];
+  function getDepositByIndex(address user, uint256 index) external view override returns (Deposit memory) {
+    if (users[user].deposits.length <= index || users[user].deposits[index].lockedFrom == 0) {
+      Deposit memory deposit;
+      return deposit;
+    } else {
+      return users[user].deposits[index];
+    }
   }
 
   /**
    * @param user address of user
-   * @return the ammount of deposits a user has made
+   * @return the amount of deposits a user has made
    */
   function getDepositsLength(address user) public view override returns (uint256) {
     return users[user].deposits.length;

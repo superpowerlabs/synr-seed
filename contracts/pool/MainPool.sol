@@ -176,9 +176,13 @@ contract MainPool is IMainPool, Versionable, Constants, TokenReceiver, Initializ
    * @param index index of the deposit being searched
    * @return the deposit
    */
-  function getDepositByIndex(address user, uint256 index) public view override returns (Deposit memory) {
-    require(users[user].deposits[index].lockedFrom > 0, "MainPool: deposit not found");
-    return users[user].deposits[index];
+  function getDepositByIndex(address user, uint256 index) external view override returns (Deposit memory) {
+    if (users[user].deposits.length <= index || users[user].deposits[index].lockedFrom == 0) {
+      Deposit memory deposit;
+      return deposit;
+    } else {
+      return users[user].deposits[index];
+    }
   }
 
   /**
