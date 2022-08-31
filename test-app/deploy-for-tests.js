@@ -38,7 +38,7 @@ async function main() {
   const {Tx} = deployUtils;
   const chainId = await deployUtils.currentChainId();
 
-  let [, localTokenOwner, localSuperAdmin] = await ethers.getSigners();
+  let [deployer, localTokenOwner, localSuperAdmin] = await ethers.getSigners();
 
   const tokenOwner = localTokenOwner.address;
   const superAdmin = localSuperAdmin.address;
@@ -70,30 +70,25 @@ async function main() {
   await deployUtils.Tx(sSynr.updateRole(mainPool.address, await sSynr.ROLE_WHITE_LISTED_RECEIVER()), "Whitelisting the pool");
   await deployUtils.Tx(mainPool.initPool(minimumLockupTime, earlyUnstakePenalty, {gasLimit: 70000}), "Init main pool");
 
-  const seed = await deployUtils.deploy("SeedToken");
+  const seed = await deployUtils.deployProxy("SeedToken");
   const coupons = await deployUtils.deploy("SynCityCoupons", 8000);
   await coupons.deployed();
   await coupons.mint(tokenOwner, 1);
 
-  let sidePool = await deployUtils.deployProxy("SeedPool", seed.address, coupons.address);
+  let poolViews = await deployUtils.deployProxy("SidePoolViews");
+
+  let seedPool = await deployUtils.deployProxy("SeedPool", seed.address, coupons.address, poolViews.address);
 
   await deployUtils.Tx(
-    sidePool.initPool(rewardsFactor, decayInterval, decayFactor, swapFactor, stakeFactor, taxPoints, burnRatio, coolDownDays, {
-      gasLimit: 90000,
-    }),
+    seedPool.initPool(rewardsFactor, decayInterval, decayFactor, swapFactor, stakeFactor, taxPoints, coolDownDays),
     "Init SeedPool"
   );
   await deployUtils.Tx(
-    sidePool.updateExtraConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit, {
-      gasLimit: 60000,
-    }),
+    seedPool.updateExtraConf(sPSynrEquivalent, sPBoostFactor, sPBoostLimit, bPSynrEquivalent, bPBoostFactor, bPBoostLimit),
     "Init NFT Conf"
   );
 
-  await deployUtils.Tx(
-    seed.grantRole(await seed.MINTER_ROLE(), sidePool.address),
-    "Granting the pool minting role for SeedToken"
-  );
+  await deployUtils.Tx(seed.connect(deployer).setMinter(seedPool.address, true), "Give the pool minting permissions on Seed");
 
   // test cases
 
@@ -106,11 +101,11 @@ async function main() {
 
   let sideTesseract = await deployUtils.deployProxy("Tesseract");
   await sideTesseract.deployed();
-  let sideBridge = await deployUtils.deployProxy("SideWormholeBridge", sideTesseract.address, sidePool.address);
+  let sideBridge = await deployUtils.deployProxy("SideWormholeBridge", sideTesseract.address, seedPool.address);
 
   await sideBridge.deployed();
   await sideTesseract.setBridge(1, sideBridge.address);
-  await sidePool.setBridge(sideBridge.address, true);
+  await seedPool.setBridge(sideBridge.address, true);
 
   let wormhole = await deployUtils.deployProxy("WormholeMock");
   await wormhole.deployed();
@@ -152,8 +147,8 @@ async function main() {
     1
   );
 
-  await coupons.connect(localTokenOwner).approve(sidePool.address, 1);
-  await sidePool.connect(localTokenOwner).stake(5, 0, 1);
+  await coupons.connect(localTokenOwner).approve(seedPool.address, 1);
+  await seedPool.connect(localTokenOwner).stake(5, 0, 1);
 
   // console.log(await mainPool.getDepositsLength(tokenOwner));
   // console.log(await sidePool.getDepositsLength(tokenOwner));
