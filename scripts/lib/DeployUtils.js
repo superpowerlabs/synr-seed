@@ -3,13 +3,14 @@ const fs = require("fs-extra");
 const {Contract} = require("@ethersproject/contracts");
 const abi = require("ethereumjs-abi");
 const {deployProxyImpl} = require("@openzeppelin/hardhat-upgrades/dist/utils");
+const requireOrMock = require("require-or-mock");
 
 let deployedJson;
 
 if (process.env.NODE_ENV === "test") {
-  deployedJson = require("../../export/deployedForTest.json");
+  deployedJson = requireOrMock("export/deployedForTest.json");
 } else {
-  deployedJson = require("../../export/deployed.json");
+  deployedJson = requireOrMock("export/deployed.json");
 }
 
 const oZChainName = {
