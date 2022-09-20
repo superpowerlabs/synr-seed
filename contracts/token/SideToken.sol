@@ -13,7 +13,6 @@ contract SideToken is Versionable, Initializable, OwnableUpgradeable, ERC20Upgra
   event ImplementationUpgraded(address newImplementation);
   using AddressUpgradeable for address;
 
-  bool public allowancePaused;
   mapping(address => bool) public minters;
 
   modifier onlyMinter() {
@@ -25,7 +24,6 @@ contract SideToken is Versionable, Initializable, OwnableUpgradeable, ERC20Upgra
   function __SideToken_init(string memory name, string memory symbol) internal initializer {
     __ERC20_init(name, symbol);
     __Ownable_init();
-    allowancePaused = true;
   }
 
   function mint(address to, uint256 amount) public virtual onlyMinter {
@@ -37,23 +35,5 @@ contract SideToken is Versionable, Initializable, OwnableUpgradeable, ERC20Upgra
     minters[minter] = enabled;
   }
 
-  function unpauseAllowance() external onlyOwner {
-    // after un-pausing, the allowance cannot be paused again
-    allowancePaused = false;
-  }
-
-  function approve(address spender, uint256 amount) public virtual override returns (bool) {
-    require(!allowancePaused, "SideToken: allowance not active");
-    return super.approve(spender, amount);
-  }
-
-  function increaseAllowance(address spender, uint256 addedValue) public virtual override returns (bool) {
-    require(!allowancePaused, "SideToken: allowance not active");
-    return super.increaseAllowance(spender, addedValue);
-  }
-
-  function decreaseAllowance(address spender, uint256 subtractedValue) public virtual override returns (bool) {
-    require(!allowancePaused, "SideToken: allowance not active");
-    return super.decreaseAllowance(spender, subtractedValue);
-  }
+  uint256[50] private __gap;
 }

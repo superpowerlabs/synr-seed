@@ -11,4 +11,6 @@ contract Constants {
   uint8 public constant SYNR_PASS_STAKE_FOR_SEEDS = 4;
   uint8 public constant BLUEPRINT_STAKE_FOR_BOOST = 5;
   uint8 public constant BLUEPRINT_STAKE_FOR_SEEDS = 6;
+
+  uint256[50] private __gap;
 }

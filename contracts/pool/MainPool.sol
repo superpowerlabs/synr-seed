@@ -461,6 +461,4 @@ contract MainPool is IMainPool, Versionable, Constants, TokenReceiver, Initializ
   function getIndexFromPayload(uint256 payload) public pure override returns (uint256) {
     return payload.div(1e22).mod(1e5);
   }
-
-  //  uint256[50] private __gap;
 }

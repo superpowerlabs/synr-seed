@@ -1,16 +1,9 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 require("dotenv").config();
 const hre = require("hardhat");
 
 const ethers = hre.ethers;
 const deployed = require("../export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
-const wormholeConfig = require("./lib/wormholeConfig");
-const {bytes32Address} = require("../test/helpers");
 
 let deployUtils;
 

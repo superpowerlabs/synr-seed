@@ -11,7 +11,6 @@ contract WeedTokenMock is SideToken, UUPSUpgradeable {
   function initialize() public initializer {
     __SideToken_init("Mobland Weed Token", "WEED");
     minters[msg.sender] = true;
-    allowancePaused = false;
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
