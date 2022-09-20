@@ -11,7 +11,6 @@ contract BudTokenMock is SideToken, UUPSUpgradeable {
   function initialize() public initializer {
     __SideToken_init("Mobland Bud Token", "BUD");
     minters[msg.sender] = true;
-    allowancePaused = false;
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}

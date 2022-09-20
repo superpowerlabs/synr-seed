@@ -37,14 +37,14 @@ module.exports = {
     },
     ethereum: {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      accounts: [process.env.FOR_MAINNET],
+      accounts: [process.env.ETH_MAINNET],
       chainId: 1,
     },
     bsc: {
       url: "https://bsc-dataseed.binance.org",
       chainId: 56,
-      gasPrice: 20000000000,
-      accounts: [process.env.FOR_MAINNET],
+      // gasPrice: 20000000000,
+      accounts: [process.env.BNB_MAINNET],
     },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,

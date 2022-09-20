@@ -1,17 +1,10 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 require("dotenv").config();
-const {expect} = require("chai");
 const hre = require("hardhat");
 
 const ethers = hre.ethers;
 const deployed = require("../export/deployed.json");
 const DeployUtils = require("./lib/DeployUtils");
 const wormholeConfig = require("./lib/wormholeConfig");
-const net = require("net");
 let deployUtils;
 const {bytes32Address} = require("../test/helpers");
 
@@ -39,14 +32,14 @@ async function main() {
       bridge = await deployUtils.attach("SideWormholeBridge");
       otherContract = "MainWormholeBridge";
     }
-  } else if (chainId < 6) {
-    otherChain = chainId === 1 ? 56 : chainId === 5 ? 97 : 80001;
-    recipientChain = chainId === 1 || chainId === 5 ? 4 : 5;
+  } else if (chainId === 1) {
+    otherChain = 56;
+    recipientChain = 4;
     bridge = await deployUtils.attach("MainWormholeBridge");
     otherContract = "SideWormholeBridge";
-  } else {
-    otherChain = chainId === 56 ? 1 : chainId === 97 ? 5 : 3;
-    recipientChain = chainId === 56 || chainId === 97 ? 2 : 10001;
+  } else if (chainId === 56) {
+    otherChain = 1;
+    recipientChain = 2;
     bridge = await deployUtils.attach("SideWormholeBridge");
     otherContract = "MainWormholeBridge";
   }

@@ -362,11 +362,7 @@ describe("#Integration test", function () {
 
     // expect(await seed.balanceOf(fundOwner.address)).equal("964363846981227803145611364");
 
-    await seed.unpauseAllowance();
-
     await seed.connect(fundOwner).approve(operator.address, ethers.utils.parseEther("10"));
-
-    expect(await seed.allowance(fundOwner.address, operator.address)).equal(ethers.utils.parseEther("10"));
 
     expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(alice.address, finalPayload3)))
       .emit(sideTesseract, "DepositSaved")
