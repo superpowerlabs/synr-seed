@@ -369,6 +369,8 @@ describe("#Integration test", function () {
       .emit(sideTesseract, "DepositSaved")
       .withArgs(alice.address, 0);
 
+    await seedPool.patch(alice.address, 0);
+
     let aliceProfile = await seedPool.users(alice.address);
     expect(aliceProfile.passAmount).equal(0);
     expect(aliceProfile.passAmountForBoost).equal(0);
