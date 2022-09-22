@@ -111,6 +111,16 @@ contract MainPool is IMainPool, Versionable, Constants, TokenReceiver, Initializ
     emit PoolInitiated(minimumLockupTime_, earlyUnstakePenalty_);
   }
 
+  function updateConf(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external override onlyOwner {
+    if (minimumLockupTime_ != 0) {
+      conf.minimumLockupTime = minimumLockupTime_;
+    }
+    if (earlyUnstakePenalty_ != 0) {
+      conf.earlyUnstakePenalty = earlyUnstakePenalty_;
+    }
+    emit PoolConfUpdated(minimumLockupTime_, earlyUnstakePenalty_);
+  }
+
   function pausePool(bool paused) external onlyOwner {
     conf.status = paused ? 2 : 1;
     emit PoolPaused(paused);

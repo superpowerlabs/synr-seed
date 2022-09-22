@@ -35,7 +35,7 @@ interface ISidePoolViews is ISideUser, ISideConf {
     Deposit memory deposit,
     uint256 timestamp,
     uint256 lastRewardsAt
-  ) external view returns (uint256);
+  ) external pure returns (uint256);
 
   /**
    * @notice Calculates the tax for claiming reward

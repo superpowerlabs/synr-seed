@@ -44,7 +44,7 @@ contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable,
     Deposit memory deposit,
     uint256 timestamp,
     uint256 lastRewardsAt
-  ) public view override returns (uint256) {
+  ) public pure override returns (uint256) {
     if (deposit.tokenType == S_SYNR_SWAP || deposit.generator == 0 || deposit.unlockedAt != 0) {
       return 0;
     }

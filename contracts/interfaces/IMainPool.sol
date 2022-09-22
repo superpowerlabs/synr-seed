@@ -8,6 +8,7 @@ import "./IMainUser.sol";
 
 interface IMainPool is IMainUser {
   event PoolInitiated(uint16 minimumLockupTime, uint16 earlyUnstakePenalty);
+  event PoolConfUpdated(uint16 minimumLockupTime, uint16 earlyUnstakePenalty);
   event PoolPaused(bool isPaused);
   event BridgeSet(address bridge);
   event BridgeRemoved(address bridge);
@@ -34,6 +35,8 @@ interface IMainPool is IMainUser {
   function getDepositsLength(address user) external view returns (uint256);
 
   function initPool(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external;
+
+  function updateConf(uint16 minimumLockupTime_, uint16 earlyUnstakePenalty_) external;
 
   function getVestedPercentage(
     uint256 when,
