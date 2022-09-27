@@ -33,9 +33,11 @@ async function main() {
 
   let pool;
 
+  const isMainChain = chainId === 1 || chainId === 44787;
+
   console.log("Deploying contracts with the account:", owner.address, "to", network(chainId));
 
-  if (chainId < 6) {
+  if (isMainChain) {
     const sSynr = await deployUtils.attach("SyntheticSyndicateERC20");
     pool = await deployUtils.deployProxy(
       "MainPool",
@@ -102,7 +104,7 @@ async function main() {
 
   const tesseract = await deployUtils.deployProxy("Tesseract");
 
-  const bridgeName = chainId < 6 ? "MainWormholeBridge" : "SideWormholeBridge";
+  const bridgeName = isMainChain ? "MainWormholeBridge" : "SideWormholeBridge";
   const bridge = await deployUtils.deployProxy(bridgeName, tesseract.address, pool.address);
 
   await deployUtils.Tx(pool.setBridge(bridge.address, true), "Set bridge in pool");

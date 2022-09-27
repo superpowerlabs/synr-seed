@@ -17,8 +17,6 @@ import "../interfaces/IERC721Minimal.sol";
 import "../interfaces/ISidePoolViews.sol";
 import "../utils/Versionable.sol";
 
-//import "hardhat/console.sol";
-
 import "../utils/Versionable.sol";
 
 //import "hardhat/console.sol";
@@ -376,7 +374,7 @@ abstract contract SidePool is
       tokenID = tokenAmountOrID;
       blueprint.safeTransferFrom(user, address(this), tokenAmountOrID);
       extraConf.blueprintAmount++;
-    } else {
+    } else if (tokenType > SYNR_PASS_STAKE_FOR_BOOST - 1) {
       users[user].passAmount++;
       if (tokenType == SYNR_PASS_STAKE_FOR_BOOST) {
         users[user].passAmountForBoost++;

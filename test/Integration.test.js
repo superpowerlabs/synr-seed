@@ -248,7 +248,7 @@ describe("#Integration test", function () {
     await initAndDeploy();
   });
 
-  it("should manage the full flow", async function () {
+  it.only("should manage the full flow", async function () {
     const amount = ethers.utils.parseEther("10000");
     const amount2 = ethers.utils.parseEther("20000");
     const amount3 = ethers.utils.parseEther("5000");
@@ -314,6 +314,7 @@ describe("#Integration test", function () {
       .withArgs(alice.address, 0);
 
     let deposit3 = await getDeposit(mainPool, alice.address, 0);
+
     expect(deposit3.tokenAmountOrID).equal(amount3);
     expect(deposit3.tokenType).equal(S_SYNR_SWAP);
     expect(deposit3.otherChain).equal(4);
@@ -367,6 +368,17 @@ describe("#Integration test", function () {
     expect(await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(alice.address, finalPayload3)))
       .emit(sideTesseract, "DepositSaved")
       .withArgs(alice.address, 0);
+
+    await seedPool.patch(alice.address, 0);
+
+    let aliceProfile = await seedPool.users(alice.address);
+    expect(aliceProfile.passAmount).equal(0);
+    expect(aliceProfile.passAmountForBoost).equal(0);
+    expect(aliceProfile.blueprintAmount).equal(0);
+    expect(aliceProfile.blueprintAmountForBoost).equal(0);
+    expect(aliceProfile.stakedAmount).equal(0);
+
+    console.log(aliceProfile);
 
     await increaseBlockTimestampBy(20 * 24 * 3600);
 

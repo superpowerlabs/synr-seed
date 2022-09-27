@@ -3,7 +3,9 @@ const {requirePath} = require("require-or-mock");
 requirePath(".env");
 
 require("dotenv").config();
-require("cryptoenv").parse();
+require("cryptoenv").parse({
+  noLogsIfNoKeys: true,
+});
 
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
@@ -81,6 +83,11 @@ module.exports = {
       gasPrice: 225000000000,
       chainId: 43114,
       accounts: [process.env.FOR_TESTNET],
+    },
+    alfajores: {
+      url: "https://alfajores-forno.celo-testnet.org",
+      accounts: [process.env.FOR_TESTNET],
+      chainId: 44787,
     },
   },
   gasReporter: {

@@ -43,11 +43,11 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  // const SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
-  // const nft = await SynCityCoupons.deploy(8000);
-  // await nft.deployed();
+  const SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
+  const nft = await SynCityCoupons.deploy(8000);
+  await nft.deployed();
   //
-  const nft = await deployUtils.attach("SynCityCoupons");
+  // const nft = await deployUtils.attach("SynCityCoupons");
 
   for (let address of require("./testnetWallets")) {
     await deployUtils.Tx(nft.mint(address, 5, {gasLimit: 800000}), "Blueprint to " + address);

@@ -32,6 +32,7 @@ const chainName = {
   80001: "mumbai",
   41224: "avalance",
   43113: "fuji",
+  44787: "alfajores",
 };
 
 const scanner = {
@@ -43,6 +44,7 @@ const scanner = {
   97: "testnet.bscscan.com",
   41224: "snowtrace.io",
   43113: "testnet.snowtrace.io",
+  44787: "alfajores-blockscout.celo-testnet.org",
 };
 
 class DeployUtils {
