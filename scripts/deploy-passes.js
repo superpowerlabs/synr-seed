@@ -36,7 +36,7 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const network = chainId === 1 ? "ethereum" : chainId === 42 ? "kovan" : "localhost";
+  const network = chainId === 1 ? "ethereum" : chainId === 44787 ? "alfajores" : chainId === 42 ? "kovan" : "localhost";
 
   console.log("Current chain ID", await currentChainId());
 
@@ -60,9 +60,9 @@ async function main() {
 
   // const nft = await deployUtils.attach("SynCityPasses");
 
-  for (let address of require("./testnetWallets")) {
-    await deployUtils.Tx(nft.mint(address, 5, {gasLimit: 400000}), "Passes to " + address);
-  }
+  // for (let address of require("./testnetWallets")) {
+  //   await deployUtils.Tx(nft.mint(address, 5, {gasLimit: 400000}), "Passes to " + address);
+  // }
 
   // process.exit()
 

@@ -20,6 +20,7 @@ module.exports = {
     fantom: [10, 4002, "0x1BB3B4119b7BA9dfad76B0545fb3F531383c3bB7"],
     karura: [11, "", "0xE4eacc10990ba3308DdCC72d985f2a27D20c7d03"],
     acala: [12, "", "0x4377B49d559c0a9466477195C6AdC3D433e265c0"],
+    alfajores: [14, 44787, "0x88505117CA88e7dd2eC6EA1E13f0948db2D50D56"],
   },
   byChainId: {
     1: [2, "0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B"],
@@ -29,5 +30,6 @@ module.exports = {
     41224: [6, "0x54a8e5f9c4CbA08F9943965859F6c34eAF03E26c"],
     3: [10001, "0x210c5F5e2AF958B4defFe715Dc621b7a3BA888c5"],
     43113: [6, "0x7bbcE28e64B3F8b84d876Ab298393c38ad7aac4C"],
+    44787: [14, "0x88505117CA88e7dd2eC6EA1E13f0948db2D50D56"],
   },
 };

@@ -29,7 +29,7 @@ async function main() {
     process.exit();
   }
 
-  if (chainId < 6) {
+  if (chainId === 44787) {
     let pass = await deployUtils.attach("SynCityPasses");
     for (let address of testnetWallets) {
       await deployUtils.Tx(pass.mint(address, 4), "Passes to " + address);

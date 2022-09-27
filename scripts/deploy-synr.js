@@ -22,10 +22,10 @@ async function main() {
   const maxTotalSupply = process.env.MAX_TOTAL_SUPPLY || 10000000000;
 
   console.log("Deploying SyndicateERC20...");
-  const SYN = await ethers.getContractFactory("SyndicateERC20");
-  const syn = await SYN.deploy(tokenOwner, maxTotalSupply, superAdmin);
-  await syn.deployed();
-  console.log("SyndicateERC20 deployed at", syn.address);
+  const SYNR = await ethers.getContractFactory("SyndicateERC20");
+  const synr = await SYNR.deploy(tokenOwner, maxTotalSupply, superAdmin);
+  await synr.deployed();
+  console.log("SyndicateERC20 deployed at", synr.address);
 
   let notReallyDeployedYet = true;
   let features;
@@ -34,33 +34,33 @@ async function main() {
   while (notReallyDeployedYet) {
     try {
       features =
-        (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
-        (await syn.FEATURE_TRANSFERS()) +
-        (await syn.FEATURE_UNSAFE_TRANSFERS()) +
-        (await syn.FEATURE_DELEGATIONS()) +
-        (await syn.FEATURE_DELEGATIONS_ON_BEHALF());
+        (await synr.FEATURE_TRANSFERS_ON_BEHALF()) +
+        (await synr.FEATURE_TRANSFERS()) +
+        (await synr.FEATURE_UNSAFE_TRANSFERS()) +
+        (await synr.FEATURE_DELEGATIONS()) +
+        (await synr.FEATURE_DELEGATIONS_ON_BEHALF());
       notReallyDeployedYet = false;
     } catch (e) {
       await deployUtils.sleep(1000);
     }
   }
-  await (await syn.updateFeatures(features)).wait();
+  await (await synr.updateFeatures(features)).wait();
 
-  const network = chainId === 1 ? "ethereum" : chainId == 3 ? "ropsten" : "localhost";
+  const network = chainId === 1 ? "ethereum" : chainId === 44787 ? "alfajores" : "localhost";
 
   console.log(`
 To verify SyndicateERC20 source code:
     
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
-      ${syn.address} \\
+      ${synr.address} \\
       ${tokenOwner} \\
       ${maxTotalSupply} \\
       ${superAdmin} 
       
 `);
 
-  await deployUtils.saveDeployed(chainId, ["SyndicateERC20"], [syn.address]);
+  await deployUtils.saveDeployed(chainId, ["SyndicateERC20"], [synr.address]);
 }
 
 main()

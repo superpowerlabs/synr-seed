@@ -84,6 +84,11 @@ module.exports = {
       chainId: 43114,
       accounts: [process.env.FOR_TESTNET],
     },
+    alfajores: {
+      url: "https://alfajores-forno.celo-testnet.org",
+      accounts: [process.env.FOR_TESTNET],
+      chainId: 44787,
+    },
   },
   gasReporter: {
     currency: "USD",
