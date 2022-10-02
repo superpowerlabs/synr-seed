@@ -37,26 +37,14 @@ function boostRewardsByBestBooster(rewards, stakedAmount, amount1, boost1, limit
   let boostableAmount = BN();
   let boosted = BN();
   if (amount1 > 0) {
-    // console.log(">>>>>>");
-
     boostableAmount = BN(amount1).mul(limit1).mul(BN(1, 18));
-
-    // console.log("boostableAmount %s", boostableAmount);
-    // console.log("percentage %s", boostableAmount.mul(100).div(stakedAmount));
-
     if (stakedAmount.lt(boostableAmount)) {
       boostableAmount = stakedAmount;
     }
-    // console.log("rewards %s", rewards);
     let boostableRewards = rewards.mul(boostableAmount).div(stakedAmount);
-    // console.log("boostableRewards %s", boostableRewards);
     rewards = rewards.sub(boostableRewards);
-    // console.log("rewards %s", rewards);
     boosted = boostableRewards.mul(boost1).div(10000);
-    // console.log("boosted %s", boosted);
   }
-  // console.log("stakedAmount, boostableAmount %s %s", stakedAmount, boostableAmount);
-  // console.log("stakedAmount.sub(boostableAmount) %s", stakedAmount.sub(boostableAmount));
   if (amount2 > 0 && stakedAmount.sub(boostableAmount).gt(0)) {
     if (stakedAmount.sub(boostableAmount).lt(BN(amount2).mul(limit2).mul(BN(1, 18)))) {
       boostableAmount = stakedAmount.sub(boostableAmount);
@@ -64,17 +52,12 @@ function boostRewardsByBestBooster(rewards, stakedAmount, amount1, boost1, limit
       boostableAmount = BN(amount2).mul(limit2).mul(BN(1, 18));
     }
     let boostableRewards = rewards.mul(boostableAmount).div(stakedAmount);
-    // console.log("boostableRewards %s", boostableRewards);
     if (boostableRewards.gt(rewards)) {
       boostableRewards = rewards;
     }
-    // console.log("boostableRewards %s", boostableRewards);
     rewards = rewards.sub(boostableRewards);
-    // console.log("rewards %s", rewards);
     boosted = boosted.add(boostableRewards.mul(boost2).div(10000));
-    // console.log("boosted %s", boosted);
   }
-  // console.log("rewards %s", rewards.add(boosted));
   return rewards.add(boosted);
 }
 

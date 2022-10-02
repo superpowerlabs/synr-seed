@@ -5,10 +5,11 @@
 // Runtime Environment's members available in the global scope.
 require("dotenv").config();
 const hre = require("hardhat");
+const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const DeployUtils = require("./lib/DeployUtils");
 let deployUtils;
-const testnetWallets = require("./testnetWallets");
+const testnetWallets = requireOrMock("./testnetWallets", []);
 
 async function currentChainId() {
   return (await ethers.provider.getNetwork()).chainId;
