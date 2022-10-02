@@ -71,4 +71,3 @@ export
 /flattened
 package-lock.json
 .openzeppelin
-scripts/testnetWallets.js
