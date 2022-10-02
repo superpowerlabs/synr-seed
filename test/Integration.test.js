@@ -37,6 +37,7 @@ const {
   SYNR_PASS_STAKE_FOR_BOOST,
   SYNR_PASS_STAKE_FOR_SEEDS,
   BLUEPRINT_STAKE_FOR_BOOST,
+  BLUEPRINT_STAKE_FOR_SEEDS,
   BN,
   expectEqualAsEther,
 } = require("./helpers");
@@ -66,8 +67,8 @@ describe("#Integration test", function () {
   let SeedPool, seedPool;
   let SidePoolViews, sidePoolViews;
   let SynCityCoupons, blueprint;
-  let aliceTokenID;
-  let bobTokenID;
+  let aliceTokenID, aliceBPTokenID;
+  let bobTokenID, bobBPTokenID;
   let fundOwnerTokenID;
 
   let deployer, fundOwner, superAdmin, operator, validator, bob, alice, fred, treasury;
@@ -93,12 +94,25 @@ describe("#Integration test", function () {
   }
 
   async function stakePass(user, id, forBoost, index = 0) {
-    let payloadPass = await serializeInput(forBoost ? SYNR_PASS_STAKE_FOR_BOOST : SYNR_PASS_STAKE_FOR_SEEDS, 365, id);
+    let payloadPass = await serializeInput(
+      forBoost ? SYNR_PASS_STAKE_FOR_BOOST : SYNR_PASS_STAKE_FOR_SEEDS,
+      forBoost ? 0 : 365,
+      id
+    );
     await pass.connect(user).approve(mainPool.address, id);
     await mainTesseract.connect(user).crossChainTransfer(1, payloadPass, 4, 1);
     let deposit = await getDeposit(mainPool, user.address, index);
     let finalPayload = await fromMainDepositToTransferPayload(deposit);
     await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(user.address, finalPayload));
+  }
+
+  async function stakeBlueprint(user, id, forBoost) {
+    await blueprint.connect(user).approve(seedPool.address, id);
+    if (forBoost) {
+      await seedPool.connect(user).stake(BLUEPRINT_STAKE_FOR_BOOST, 0, id);
+    } else {
+      await seedPool.connect(user).stake(BLUEPRINT_STAKE_FOR_SEEDS, 365, id);
+    }
   }
 
   function getInt(val) {
@@ -180,9 +194,11 @@ describe("#Integration test", function () {
 
     blueprint = await SynCityCoupons.deploy(8000);
     await blueprint.deployed();
+    bobBPTokenID = 1;
     await blueprint.mint(bob.address, 2);
     await blueprint.mint(fred.address, 1);
     await blueprint.mint(fundOwner.address, 1);
+    aliceBPTokenID = 5;
     await blueprint.mint(alice.address, 10);
 
     sidePoolViews = await upgrades.deployProxy(SidePoolViews, []);
@@ -248,7 +264,7 @@ describe("#Integration test", function () {
     await initAndDeploy();
   });
 
-  it.only("should manage the full flow", async function () {
+  it("should manage the full flow", async function () {
     const amount = ethers.utils.parseEther("10000");
     const amount2 = ethers.utils.parseEther("20000");
     const amount3 = ethers.utils.parseEther("5000");
@@ -369,16 +385,16 @@ describe("#Integration test", function () {
       .emit(sideTesseract, "DepositSaved")
       .withArgs(alice.address, 0);
 
-    await seedPool.patch(alice.address, 0);
-
-    let aliceProfile = await seedPool.users(alice.address);
-    expect(aliceProfile.passAmount).equal(0);
-    expect(aliceProfile.passAmountForBoost).equal(0);
-    expect(aliceProfile.blueprintAmount).equal(0);
-    expect(aliceProfile.blueprintAmountForBoost).equal(0);
-    expect(aliceProfile.stakedAmount).equal(0);
-
-    console.log(aliceProfile);
+    // await seedPool.patch(alice.address, 0);
+    //
+    // let aliceProfile = await seedPool.users(alice.address);
+    // expect(aliceProfile.passAmount).equal(0);
+    // expect(aliceProfile.passAmountForBoost).equal(0);
+    // expect(aliceProfile.blueprintAmount).equal(0);
+    // expect(aliceProfile.blueprintAmountForBoost).equal(0);
+    // expect(aliceProfile.stakedAmount).equal(0);
+    //
+    // console.log(aliceProfile);
 
     await increaseBlockTimestampBy(20 * 24 * 3600);
 
@@ -498,27 +514,56 @@ describe("#Integration test", function () {
     expect(tokenAmountOrID).equal(deposit.tokenAmountOrID);
   });
 
-  it("should verify the boost Vs equivalent", async function () {
+  it("should verify the boost Vs equivalent for SYNR Pass", async function () {
     // like the synr equivalent
+    const stakedAmount0 = ethers.utils.parseEther("200000");
     const amount = ethers.utils.parseEther(sPSynrEquivalent.toString());
+    const stakedAmount = stakedAmount0.add(amount);
 
-    await stakeSYNR(alice, amount);
+    await stakeSYNR(alice, stakedAmount);
     await stakePass(alice, aliceTokenID, true, 1);
 
-    await stakePass(bob, bobTokenID);
-    await stakePass(bob, bobTokenID + 1, true, 1);
+    await stakeSYNR(bob, stakedAmount0);
+    await stakePass(bob, bobTokenID, false, 1);
+    await stakePass(bob, bobTokenID + 1, true, 2);
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
     await unstake(bob, 0);
     await unstake(bob, 1);
+    await unstake(bob, 2);
     await unstake(alice, 0);
     await unstake(alice, 1);
 
     const balanceBob = getInt(await seed.balanceOf(bob.address));
     const balanceAlice = getInt(await seed.balanceOf(alice.address));
 
-    expect(Math.abs(balanceBob - balanceAlice)).lt(2);
+    expect(Math.abs(balanceBob - balanceAlice)).lt(3);
+  });
+
+  it("should verify the boost Vs equivalent for Blueprints", async function () {
+    // like the synr equivalent
+    const stakedAmount0 = ethers.utils.parseEther("200000");
+    const amount = ethers.utils.parseEther(bPSynrEquivalent.toString());
+    const stakedAmount = stakedAmount0.add(amount);
+
+    await stakeSYNR(bob, stakedAmount0);
+    await stakeBlueprint(bob, bobBPTokenID, false);
+    await stakeBlueprint(bob, bobBPTokenID + 1, true);
+
+    await stakeSYNR(alice, stakedAmount);
+    await stakeBlueprint(alice, aliceBPTokenID, true);
+
+    await increaseBlockTimestampBy(366 * 24 * 3600);
+    await unstake(bob, 0);
+    await seedPool.connect(bob).unstake(await seedPool.getDepositByIndex(bob.address, 1));
+    await seedPool.connect(bob).unstake(await seedPool.getDepositByIndex(bob.address, 2));
+    await unstake(alice, 0);
+    await seedPool.connect(alice).unstake(await seedPool.getDepositByIndex(alice.address, 1));
+    const balanceBob = getInt(await seed.balanceOf(bob.address));
+    const balanceAlice = getInt(await seed.balanceOf(alice.address));
+
+    expect(Math.abs(balanceBob - balanceAlice)).lt(3);
   });
 
   it("should verify that collecting rewards by week or at the end sums almost to same amount", async function () {

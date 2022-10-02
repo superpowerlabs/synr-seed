@@ -16,9 +16,9 @@ module.exports = {
   sPSynrEquivalent: 100000,
   sPBoostFactor: 13220,
   sPBoostLimit: 200000,
-  bPSynrEquivalent: 3000,
+  bPSynrEquivalent: 2000,
   bPBoostFactor: 13220,
-  bPBoostLimit: 6000,
+  bPBoostLimit: 4000,
 
   // initial values
   priceRatio: 10000,
