@@ -514,9 +514,9 @@ describe("#Integration test", function () {
     expect(tokenAmountOrID).equal(deposit.tokenAmountOrID);
   });
 
-  it("should verify the boost Vs equivalent for SYNR Pass", async function () {
+  it.only("should verify the boost Vs equivalent for SYNR Pass", async function () {
     // like the synr equivalent
-    const stakedAmount0 = ethers.utils.parseEther("200000");
+    const stakedAmount0 = ethers.utils.parseEther("100000");
     const amount = ethers.utils.parseEther(sPSynrEquivalent.toString());
     const stakedAmount = stakedAmount0.add(amount);
 
