@@ -39,6 +39,7 @@ const {
   BLUEPRINT_STAKE_FOR_BOOST,
   BLUEPRINT_STAKE_FOR_SEEDS,
   BN,
+  cleanStruct,
   expectEqualAsEther,
 } = require("./helpers");
 
@@ -137,7 +138,7 @@ describe("#Integration test", function () {
     SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
   });
 
-  async function initAndDeploy(initSeedPool = true) {
+  async function initAndDeploy(initSeedPool = true, boostFactor) {
     const maxTotalSupply = 10000000000; // 10 billions
     synr = await SyndicateERC20.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
     await synr.deployed();
@@ -210,10 +211,10 @@ describe("#Integration test", function () {
       await seedPool.initPool(rewardsFactor, decayInterval, decayFactor, swapFactor, stakeFactor, taxPoints, coolDownDays);
       await seedPool.updateExtraConf(
         sPSynrEquivalent,
-        sPBoostFactor,
+        boostFactor || sPBoostFactor,
         sPBoostLimit,
         bPSynrEquivalent,
-        bPBoostFactor,
+        boostFactor || bPBoostFactor,
         bPBoostLimit
       );
     }
@@ -514,54 +515,70 @@ describe("#Integration test", function () {
     expect(tokenAmountOrID).equal(deposit.tokenAmountOrID);
   });
 
-  it.only("should verify the boost Vs equivalent for SYNR Pass", async function () {
+  it("should verify the boost Vs equivalent for SYNR Pass", async function () {
     // like the synr equivalent
-    const stakedAmount0 = ethers.utils.parseEther("100000");
-    const amount = ethers.utils.parseEther(sPSynrEquivalent.toString());
-    const stakedAmount = stakedAmount0.add(amount);
+    let balanceBob;
+    let balanceAlice;
+
+    // the loops helps us to find the right parameters when we change the equivalent
+
+    // for (let i = sPBoostFactor;; i+= 50) {
+
+    const stakedAmount = ethers.utils.parseEther(sPSynrEquivalent.toString());
 
     await stakeSYNR(alice, stakedAmount);
     await stakePass(alice, aliceTokenID, true, 1);
 
-    await stakeSYNR(bob, stakedAmount0);
+    await stakeSYNR(bob, stakedAmount);
     await stakePass(bob, bobTokenID, false, 1);
-    await stakePass(bob, bobTokenID + 1, true, 2);
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
     await unstake(bob, 0);
     await unstake(bob, 1);
-    await unstake(bob, 2);
     await unstake(alice, 0);
     await unstake(alice, 1);
+    balanceBob = getInt(await seed.balanceOf(bob.address));
+    balanceAlice = getInt(await seed.balanceOf(alice.address));
 
-    const balanceBob = getInt(await seed.balanceOf(bob.address));
-    const balanceAlice = getInt(await seed.balanceOf(alice.address));
+    // console.log(i);
+    // console.log("seeds", balanceBob)
+    // console.log("boost", balanceAlice)
+
+    //   if ( balanceBob < balanceAlice) {
+    //     break;
+    //   }
+    //   await initAndDeploy(undefined, i);
+    // }
 
     expect(Math.abs(balanceBob - balanceAlice)).lt(3);
   });
 
   it("should verify the boost Vs equivalent for Blueprints", async function () {
     // like the synr equivalent
-    const stakedAmount0 = ethers.utils.parseEther("200000");
-    const amount = ethers.utils.parseEther(bPSynrEquivalent.toString());
-    const stakedAmount = stakedAmount0.add(amount);
+    const stakedAmount = ethers.utils.parseEther(bPSynrEquivalent.toString());
 
-    await stakeSYNR(bob, stakedAmount0);
+    await stakeSYNR(bob, stakedAmount);
     await stakeBlueprint(bob, bobBPTokenID, false);
-    await stakeBlueprint(bob, bobBPTokenID + 1, true);
 
     await stakeSYNR(alice, stakedAmount);
     await stakeBlueprint(alice, aliceBPTokenID, true);
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
+
+    // console.log(await seedPool.users(bob.address))
+    // console.log(await seedPool.users(alice.address))
+
     await unstake(bob, 0);
     await seedPool.connect(bob).unstake(await seedPool.getDepositByIndex(bob.address, 1));
-    await seedPool.connect(bob).unstake(await seedPool.getDepositByIndex(bob.address, 2));
     await unstake(alice, 0);
     await seedPool.connect(alice).unstake(await seedPool.getDepositByIndex(alice.address, 1));
+
     const balanceBob = getInt(await seed.balanceOf(bob.address));
     const balanceAlice = getInt(await seed.balanceOf(alice.address));
+
+    // console.log("seeds", balanceBob)
+    // console.log("boost", balanceAlice)
 
     expect(Math.abs(balanceBob - balanceAlice)).lt(3);
   });

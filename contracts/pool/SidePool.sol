@@ -19,7 +19,7 @@ import "../utils/Versionable.sol";
 
 import "../utils/Versionable.sol";
 
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 abstract contract SidePool is
   ISidePool,

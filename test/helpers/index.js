@@ -70,6 +70,16 @@ const Helpers = {
   getInt(val) {
     return parseInt(ethers.utils.formatEther(val.toString()));
   },
+
+  cleanStruct(struct) {
+    let ret = {};
+    for (let key in struct) {
+      if (isNaN(parseInt(key))) {
+        ret[key] = struct[key];
+      }
+    }
+    return ret;
+  },
 };
 
 Helpers.tokenTypes = {
