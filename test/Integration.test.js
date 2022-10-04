@@ -554,6 +554,30 @@ describe("#Integration test", function () {
     expect(Math.abs(balanceBob - balanceAlice)).lt(3);
   });
 
+  it("should verify boost more profitable over equivalent", async function () {
+    let balanceBob;
+    let balanceAlice;
+
+    const stakedAmount = ethers.utils.parseEther((sPSynrEquivalent * 1.6).toString());
+
+    await stakeSYNR(alice, stakedAmount);
+    await stakePass(alice, aliceTokenID, true, 1);
+
+    await stakeSYNR(bob, stakedAmount);
+    await stakePass(bob, bobTokenID, false, 1);
+
+    await increaseBlockTimestampBy(366 * 24 * 3600);
+
+    await unstake(bob, 0);
+    await unstake(bob, 1);
+    await unstake(alice, 0);
+    await unstake(alice, 1);
+    balanceBob = getInt(await seed.balanceOf(bob.address));
+    balanceAlice = getInt(await seed.balanceOf(alice.address));
+
+    expect((balanceAlice / balanceBob).toString().substring(0, 4)).equal("1.23");
+  });
+
   it("should verify the boost Vs equivalent for Blueprints", async function () {
     // like the synr equivalent
     const stakedAmount = ethers.utils.parseEther(bPSynrEquivalent.toString());
