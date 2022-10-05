@@ -10,7 +10,7 @@ module.exports = {
   // SidePool
   // conf
   rewardsFactor: 17000,
-  stakeFactor: 530,
+  stakeFactor: 640,
 
   // initial. In 1 month it will be reduced to 690
   swapFactor: 1380,

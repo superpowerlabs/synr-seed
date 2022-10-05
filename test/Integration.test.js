@@ -138,7 +138,7 @@ describe("#Integration test", function () {
     SynCityCoupons = await ethers.getContractFactory("SynCityCoupons");
   });
 
-  async function initAndDeploy(initSeedPool = true, boostFactor) {
+  async function initAndDeploy(initSeedPool = true, boostFactor, stakeFactor0) {
     const maxTotalSupply = 10000000000; // 10 billions
     synr = await SyndicateERC20.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
     await synr.deployed();
@@ -208,7 +208,15 @@ describe("#Integration test", function () {
 
     await seedPool.deployed();
     if (initSeedPool) {
-      await seedPool.initPool(rewardsFactor, decayInterval, decayFactor, swapFactor, stakeFactor, taxPoints, coolDownDays);
+      await seedPool.initPool(
+        rewardsFactor,
+        decayInterval,
+        decayFactor,
+        swapFactor,
+        stakeFactor0 || stakeFactor,
+        taxPoints,
+        coolDownDays
+      );
       await seedPool.updateExtraConf(
         sPSynrEquivalent,
         boostFactor || sPBoostFactor,
@@ -513,6 +521,18 @@ describe("#Integration test", function () {
     expect(lockedUntil).equal(deposit.lockedUntil);
     expect(mainIndex).equal(deposit.mainIndex);
     expect(tokenAmountOrID).equal(deposit.tokenAmountOrID);
+  });
+
+  it("should verify that 640 produce a 20:1 ratio in a year", async function () {
+    let rewardsFactor0 = 640;
+    await initAndDeploy(undefined, undefined, rewardsFactor0);
+    let balanceFred;
+    const stakedAmount = ethers.utils.parseEther("100000");
+    await stakeSYNR(fred, stakedAmount);
+    await increaseBlockTimestampBy(365 * 24 * 3600);
+    await unstake(fred, 0);
+    balanceFred = getInt(await seed.balanceOf(fred.address));
+    expect(Math.round(balanceFred / 100000)).equal(20);
   });
 
   it("should verify the boost Vs equivalent for SYNR Pass", async function () {
@@ -861,45 +881,6 @@ describe("#Integration test", function () {
     balanceBob = await seed.balanceOf(bob.address);
 
     expect(getInt(balanceBob)).equal(1953071);
-  });
-
-  it("should verify SYNR and SYNR equivalent produce same results", async function () {
-    // like the synr equivalent
-    const amount = ethers.utils.parseEther("100000");
-
-    await stakeSYNR(bob, amount);
-    await stakeSYNR(bob, amount, 1);
-    await stakeSYNR(alice, amount);
-
-    let payloadPass = await serializeInput(
-      SYNR_PASS_STAKE_FOR_SEEDS,
-      365, // 1 year
-      aliceTokenID
-    );
-    await pass.connect(alice).approve(mainPool.address, aliceTokenID);
-    await mainTesseract.connect(alice).crossChainTransfer(1, payloadPass, 4, 1);
-
-    let deposit = await getDeposit(mainPool, alice.address, 1);
-    let finalPayload = await fromMainDepositToTransferPayload(deposit);
-    await sideTesseract.completeCrossChainTransfer(1, mockEncodedVm(alice.address, finalPayload));
-
-    await increaseBlockTimestampBy(366 * 24 * 3600);
-
-    await unstake(bob);
-    await unstake(bob, 1);
-    await unstake(alice);
-    await unstake(alice, 1);
-
-    await seedPool.connect(bob).collectRewards();
-    await seedPool.connect(alice).collectRewards();
-
-    let balanceBob = await seed.balanceOf(bob.address);
-    let balanceAlice = await seed.balanceOf(alice.address);
-
-    balanceBob = getInt(balanceBob);
-    balanceAlice = getInt(balanceAlice);
-
-    expect(Math.abs(balanceBob - balanceAlice)).lte(1);
   });
 
   it("should start the process, upgrade the contract and complete the flow", async function () {
