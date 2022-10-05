@@ -18,7 +18,7 @@ module.exports = {
   decayInterval: 604800,
   decayFactor: 9900,
   taxPoints: 800,
-  burnRatio: 7000,
+  burnRatio: 7500,
 
   // initially, after will be decreased to 14
   coolDownDays: 30,
