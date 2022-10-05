@@ -519,12 +519,15 @@ describe("#Integration test", function () {
     // like the synr equivalent
     let balanceBob;
     let balanceAlice;
+    let balanceFred;
 
     // the loops helps us to find the right parameters when we change the equivalent
 
     // for (let i = sPBoostFactor;; i+= 50) {
 
     const stakedAmount = ethers.utils.parseEther(sPSynrEquivalent.toString());
+
+    await stakeSYNR(fred, stakedAmount);
 
     await stakeSYNR(alice, stakedAmount);
     await stakePass(alice, aliceTokenID, true, 1);
@@ -534,12 +537,16 @@ describe("#Integration test", function () {
 
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
+    await unstake(fred, 0);
     await unstake(bob, 0);
     await unstake(bob, 1);
     await unstake(alice, 0);
     await unstake(alice, 1);
     balanceBob = getInt(await seed.balanceOf(bob.address));
     balanceAlice = getInt(await seed.balanceOf(alice.address));
+    balanceFred = getInt(await seed.balanceOf(fred.address));
+
+    expect(parseInt(balanceAlice / balanceFred)).equal(2);
 
     // console.log(i);
     // console.log("seeds", balanceBob)
@@ -557,6 +564,7 @@ describe("#Integration test", function () {
   it("should verify boost more profitable over equivalent", async function () {
     let balanceBob;
     let balanceAlice;
+    let balanceFred;
 
     const stakedAmount = ethers.utils.parseEther((sPSynrEquivalent * 1.6).toString());
 
@@ -566,14 +574,20 @@ describe("#Integration test", function () {
     await stakeSYNR(bob, stakedAmount);
     await stakePass(bob, bobTokenID, false, 1);
 
+    await stakeSYNR(fred, stakedAmount);
+
     await increaseBlockTimestampBy(366 * 24 * 3600);
 
+    await unstake(fred, 0);
     await unstake(bob, 0);
     await unstake(bob, 1);
     await unstake(alice, 0);
     await unstake(alice, 1);
     balanceBob = getInt(await seed.balanceOf(bob.address));
     balanceAlice = getInt(await seed.balanceOf(alice.address));
+    balanceFred = getInt(await seed.balanceOf(fred.address));
+
+    expect(parseInt(balanceAlice / balanceFred)).equal(2);
 
     expect((balanceAlice / balanceBob).toString().substring(0, 4)).equal("1.23");
   });
