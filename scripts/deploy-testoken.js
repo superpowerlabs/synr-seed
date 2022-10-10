@@ -9,7 +9,7 @@ const requireOrMock = require("require-or-mock");
 const ethers = hre.ethers;
 const DeployUtils = require("./lib/DeployUtils");
 let deployUtils;
-const testnetWallets = requireOrMock("./testnetWallets", []);
+const testnetWallets = requireOrMock("scripts/testnetWallets", []);
 
 async function currentChainId() {
   return (await ethers.provider.getNetwork()).chainId;
