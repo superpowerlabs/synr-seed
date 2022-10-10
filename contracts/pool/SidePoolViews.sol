@@ -153,6 +153,7 @@ contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable,
       } else {
         boostableAmount = amount2.mul(limit2).mul(10**18);
       }
+      // an internal function is needed here to avoid a "too deep stack compiler error"
       boostableRewards = _getBoostableRewards(rewards, boostableRewards, boostableAmount, stakedAmount);
       if (boostableRewards > rewards) {
         boostableRewards = rewards;
