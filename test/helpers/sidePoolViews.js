@@ -36,6 +36,7 @@ function boostRewards(extraConf, rewards, stakedAmount, passAmountForBoost, blue
 function boostRewardsByBestBooster(rewards, stakedAmount, amount1, boost1, limit1, amount2, boost2, limit2) {
   let boostableAmount = BN();
   let boosted = BN();
+  let rewards0 = rewards;
   if (amount1 > 0) {
     boostableAmount = BN(amount1).mul(limit1).mul(BN(1, 18));
     if (stakedAmount.lt(boostableAmount)) {
@@ -51,7 +52,7 @@ function boostRewardsByBestBooster(rewards, stakedAmount, amount1, boost1, limit
     } else {
       boostableAmount = BN(amount2).mul(limit2).mul(BN(1, 18));
     }
-    let boostableRewards = rewards.mul(boostableAmount).div(stakedAmount);
+    let boostableRewards = rewards0.mul(boostableAmount).div(stakedAmount);
     if (boostableRewards.gt(rewards)) {
       boostableRewards = rewards;
     }

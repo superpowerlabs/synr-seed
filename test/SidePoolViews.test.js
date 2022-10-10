@@ -128,7 +128,155 @@ describe("#SidePoolViews", function () {
       passAmountForBoost,
       blueprintAmountForBoost
     );
-    expect(boostedRewards).equal("10818000000000000000000000");
+    expect(boostedRewards).equal("10830000000000000000000000");
+  });
+
+  it("should verify that boost increments adding NFTs under the limit", async function () {
+    let rewards = BN(10000000, 18);
+    let stakedAmount = BN(390000, 18);
+    let passAmountForBoost = 1;
+    let blueprintAmountForBoost = 1;
+
+    let boostedRewards = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+
+    passAmountForBoost++;
+    blueprintAmountForBoost++;
+
+    let boostedRewards2 = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards2.gt(boostedRewards)).equal(true);
+
+    passAmountForBoost++;
+    // blueprintAmountForBoost++;
+
+    boostedRewards = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards.sub(boostedRewards2)).equal(0);
+
+    blueprintAmountForBoost++;
+
+    boostedRewards2 = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards2.gt(boostedRewards)).equal(false);
+  });
+
+  it("should verify that boost increments adding NFTs over the limit", async function () {
+    let rewards = BN(10000000, 18);
+    let stakedAmount = BN(1000000, 18);
+    let passAmountForBoost = 1;
+    let blueprintAmountForBoost = 1;
+
+    let boostedRewards = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+
+    passAmountForBoost++;
+    // blueprintAmountForBoost++;
+
+    let boostedRewards2 = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards2.gt(boostedRewards)).equal(true);
+
+    passAmountForBoost++;
+    // blueprintAmountForBoost++;
+
+    boostedRewards = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards.gt(boostedRewards2)).equal(true);
+
+    blueprintAmountForBoost++;
+
+    boostedRewards2 = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards2.gt(boostedRewards)).equal(true);
+
+    rewards = BN(10000000, 18);
+    stakedAmount = BN(1000000, 18);
+    passAmountForBoost = 1;
+    blueprintAmountForBoost = 1;
+
+    boostedRewards = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+
+    // passAmountForBoost++;
+    blueprintAmountForBoost++;
+
+    boostedRewards2 = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards2.gt(boostedRewards)).equal(true);
+
+    // passAmountForBoost++;
+    blueprintAmountForBoost++;
+
+    boostedRewards = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards.gt(boostedRewards2)).equal(true);
+
+    passAmountForBoost++;
+
+    boostedRewards2 = await sidePoolViews.boostRewards(
+      extraConf,
+      rewards,
+      stakedAmount,
+      passAmountForBoost,
+      blueprintAmountForBoost
+    );
+    expect(boostedRewards2.gt(boostedRewards)).equal(true);
   });
 
   it("should verify that boost is fully boosted despite the excess", async function () {
@@ -192,7 +340,7 @@ describe("#SidePoolViews", function () {
         passAmountForBoost,
         blueprintAmountForBoost
       );
-      expect(boostedRewards).equal("10814400000000000000000000");
+      expect(boostedRewards).equal("10824000000000000000000000");
     }
   });
 

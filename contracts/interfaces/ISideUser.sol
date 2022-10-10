@@ -21,8 +21,8 @@ interface ISideUser {
     uint16 tokenID;
     // @dev when the deposit is unlocked
     uint32 unlockedAt;
-    // @dev mainIndex Since the process is asyncronous, the same deposit can be at a different index
-    // on the main net and on the sidechain. This guarantees alignment
+    // @dev mainIndex Since the process is asynchronous, the same deposit can be at a different index
+    // on the main net and on the side-chain. This guarantees alignment
     uint16 mainIndex;
     // @dev pool token amount staked
     uint128 generator; //

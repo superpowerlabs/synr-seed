@@ -136,13 +136,14 @@ contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable,
     uint256 limit2
   ) internal pure returns (uint256) {
     uint256 boostableAmount;
+    uint256 boostableRewards;
     uint256 boosted;
     if (amount1 > 0) {
       boostableAmount = amount1.mul(limit1).mul(10**18);
       if (stakedAmount < boostableAmount) {
         boostableAmount = stakedAmount;
       }
-      uint256 boostableRewards = rewards.mul(boostableAmount).div(stakedAmount);
+      boostableRewards = rewards.mul(boostableAmount).div(stakedAmount);
       rewards = rewards.sub(boostableRewards);
       boosted = boostableRewards.mul(boost1).div(10000);
     }
@@ -152,7 +153,8 @@ contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable,
       } else {
         boostableAmount = amount2.mul(limit2).mul(10**18);
       }
-      uint256 boostableRewards = rewards.mul(boostableAmount).div(stakedAmount);
+      // an internal function is needed here to avoid a "too deep stack compiler error"
+      boostableRewards = _getBoostableRewards(rewards, boostableRewards, boostableAmount, stakedAmount);
       if (boostableRewards > rewards) {
         boostableRewards = rewards;
       }
@@ -160,5 +162,14 @@ contract SidePoolViews is ISidePoolViews, Versionable, Constants, Initializable,
       boosted = boosted.add(boostableRewards.mul(boost2).div(10000));
     }
     return rewards.add(boosted);
+  }
+
+  function _getBoostableRewards(
+    uint256 rewards,
+    uint256 boostableRewards,
+    uint256 boostableAmount,
+    uint256 stakedAmount
+  ) internal pure returns (uint256) {
+    return rewards.add(boostableRewards).mul(boostableAmount).div(stakedAmount);
   }
 }
