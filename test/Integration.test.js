@@ -537,9 +537,15 @@ describe("#Integration test", function () {
     expect(balanceFred / 100000).equal(20.01852);
   });
 
-  it("should verify that 1381 produce a 13.8:1 ratio for sSYNR swaps", async function () {
-    let swapFactor0 = 1381;
-    let rewardsFactor0 = 16661;
+  it("should verify that 680 produce a 6.9:1 ratio for sSYNR swaps", async function () {
+    // 13.80
+    // 12.075
+    // 10.35
+    // 8.625
+    // 6.9
+
+    let swapFactor0 = 690;
+    let rewardsFactor0 = 15842;
     await initAndDeploy(undefined, undefined, undefined, rewardsFactor0, swapFactor0);
     let balanceFred;
     const stakedAmount = ethers.utils.parseEther("100000");
@@ -553,7 +559,7 @@ describe("#Integration test", function () {
     let deposit = await getDeposit(seedPool, fred.address, 0);
     await seedPool.connect(fred).unstake(deposit);
     balanceFred = getInt(await seed.balanceOf(fred.address));
-    expect(balanceFred / 100000).equal(13.81);
+    expect(balanceFred / 100000).equal(6.9);
   });
 
   it("should verify the boost Vs equivalent for SYNR Pass", async function () {
