@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.11;
+pragma solidity 0.8.17;
 
 // Authors: Francesco Sullo <francesco@sullo.co>
 // to be used by Tesseract.sol

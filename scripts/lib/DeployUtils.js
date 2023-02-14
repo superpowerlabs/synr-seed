@@ -17,7 +17,6 @@ const oZChainName = {
   1: "mainnet",
   3: "ropsten",
   5: "goerli",
-  56: "bsc",
 };
 
 const chainName = {
