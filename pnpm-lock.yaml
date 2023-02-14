@@ -11,7 +11,7 @@ specifiers:
   '@openzeppelin/contracts-upgradeable': ^4.5.2
   '@openzeppelin/hardhat-upgrades': ^1.17.0
   chai: ^4.3.6
-  cryptoenv: ^0.1.8
+  cryptoenv: ^0.2.0
   csv-parse: ^5.0.4
   dotenv: ^16.0.0
   ethereum-waffle: ^3.4.4
@@ -44,7 +44,7 @@ devDependencies:
   '@openzeppelin/contracts-upgradeable': 4.5.2
   '@openzeppelin/hardhat-upgrades': 1.17.0_ycmkfmk7ioq37phgrm6irkae5a
   chai: 4.3.6
-  cryptoenv: 0.1.8
+  cryptoenv: 0.2.0
   csv-parse: 5.0.4
   dotenv: 16.0.0
   ethereum-waffle: 3.4.4_typescript@4.6.3
@@ -123,7 +123,7 @@ packages:
     dependencies:
       '@resolver-engine/imports': 0.3.3
       '@resolver-engine/imports-fs': 0.3.3
-      '@typechain/ethers-v5': 2.0.0_typechain@3.0.0
+      '@typechain/ethers-v5': 2.0.0_qley2rx35ivxdhts3xbz4kmg2i
       '@types/mkdirp': 0.5.2
       '@types/node-fetch': 2.6.1
       ethers: 5.6.2
@@ -918,16 +918,14 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@typechain/ethers-v5/2.0.0_typechain@3.0.0:
+  /@typechain/ethers-v5/2.0.0_qley2rx35ivxdhts3xbz4kmg2i:
     resolution: {integrity: sha512-0xdCkyGOzdqh4h5JSf+zoWx85IusEjDcPIwNEHP8mrWSnCae4rvrqB+/gtpdNfX7zjlFlZiMeePn2r63EI3Lrw==}
     peerDependencies:
+      ethers: ^5.0.0
       typechain: ^3.0.0
     dependencies:
       ethers: 5.6.2
       typechain: 3.0.0_typescript@4.6.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
     dev: true
 
   /@types/abstract-leveldown/7.2.0:
@@ -3004,8 +3002,8 @@ packages:
       randomfill: 1.0.4
     dev: true
 
-  /cryptoenv/0.1.8:
-    resolution: {integrity: sha512-LnR+ylNNBN4CtV55efm6oltUXCeQpEC5mr527FRPFLgYYFISvPGeTmvnZh5HbFL5+OP+YJGojducXCKMaOe8hQ==}
+  /cryptoenv/0.2.0:
+    resolution: {integrity: sha512-mktc/eYkiPSdEsYKEcCP75EXQrOpSK7GKQZFxVaoQnm+VkbC28Th71NVUijkWPA0XVIxfpLvv1yokuO5rWwcRg==}
     hasBin: true
     requiresBuild: true
     dependencies:
@@ -3521,7 +3519,7 @@ packages:
     dev: true
 
   /escape-string-regexp/1.0.5:
-    resolution: {integrity: sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=}
+    resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
     engines: {node: '>=0.8.0'}
     dev: true
 
@@ -6081,7 +6079,7 @@ packages:
     dev: true
 
   /jsonfile/2.4.0:
-    resolution: {integrity: sha1-NzaitCi4e72gzIO1P6PWM6NcKug=}
+    resolution: {integrity: sha512-PKllAqbgLgxHaj8TElYymKCAgrASebJrWpTnEkOaTowt23VKXXN0sUeriJ+eh7y6ufb/CC5ap11pz71/cM0hUw==}
     optionalDependencies:
       graceful-fs: 4.2.10
     dev: true
@@ -9071,7 +9069,7 @@ packages:
     dev: true
 
   /string_decoder/0.10.31:
-    resolution: {integrity: sha1-YuIDvEF2bGwoyfyEMB2rHFMQ+pQ=}
+    resolution: {integrity: sha512-ev2QzSzWPYmy9GuqfIVildA4OdcGLeFZQrq5ys6RtiuF+RQQiZWr8TZNyAcuVXyQRYfEO+MsoB/1BuQVhOJuoQ==}
     dev: true
 
   /string_decoder/1.1.1:
@@ -9689,7 +9687,7 @@ packages:
     dev: true
 
   /util-deprecate/1.0.2:
-    resolution: {integrity: sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=}
+    resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
     dev: true
 
   /util.promisify/1.1.1:

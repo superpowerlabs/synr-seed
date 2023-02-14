@@ -3,10 +3,7 @@ const {requirePath} = require("require-or-mock");
 requirePath(".env");
 
 require("dotenv").config();
-require("cryptoenv").parse({
-  noLogsIfNoKeys: true,
-});
-
+require("cryptoenv").parse(() => process.env.NODE_ENV !== "test");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
 require("@nomiclabs/hardhat-etherscan");
