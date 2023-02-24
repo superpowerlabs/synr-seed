@@ -20,6 +20,8 @@ Tesseract, used here as a primary interface, supports multiple bridges. Also, po
 2. The user waits for the encoded VM coming from Wormhole API
 3. When the evm is ready, the user connects to the side-chain and complete the process to stake the side token
 
+The unstaking process is very similar, just in the opposite direction.
+
 ## Copyright
 
 Author: Francesco Sullo <francesco@superpower.io>
