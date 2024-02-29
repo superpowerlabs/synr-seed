@@ -19,13 +19,14 @@ async function main() {
   }
 
   const wormholeContract = wormholeConfig.byChainId[chainId];
+  console.log(wormholeContract);
   let otherChain, recipientChain, bridge, otherContract;
   if (chainId === 44787) {
-    otherChain = 43113;
-    recipientChain = 6;
+    otherChain = 80001;
+    recipientChain = 5;
     bridge = await deployUtils.attach("MainWormholeBridge");
     otherContract = "SideWormholeBridge";
-  } else if (chainId === 43113) {
+  } else if (chainId === 80001) {
     otherChain = 44787;
     recipientChain = 14;
     bridge = await deployUtils.attach("SideWormholeBridge");
