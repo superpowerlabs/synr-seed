@@ -22,6 +22,7 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
   mapping(uint16 => address) public bridges;
 
   // bridges[1] is WormholeBridge
+  // bridges[2] is WormholeBridgeV2
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -42,6 +43,8 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
   function supportedBridgeById(uint256 id) external view virtual override returns (string memory) {
     if (id == 1) {
       return "Wormhole";
+    } else if (id == 2) {
+      return "WormholeV2";
     } else {
       revert("Tesseract: unsupported bridge");
     }
@@ -56,6 +59,8 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
     if (bridgeType == 1) {
       return
         IWormholeBridge(bridges[1]).wormholeTransfer(payload, recipientChain, bytes32(uint256(uint160(_msgSender()))), nonce);
+    } else if (bridgeType == 2) {
+      IWormholeBridge(bridges[2]).wormholeTransfer(payload, recipientChain, bytes32(uint256(uint160(_msgSender()))), nonce);
     } else {
       revert("Tesseract: unsupported bridge");
     }
