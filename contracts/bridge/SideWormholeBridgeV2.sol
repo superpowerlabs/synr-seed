@@ -59,9 +59,15 @@ contract SideWormholeBridgeV2 is WormholeBridgeV2 {
   ) external payable {
     require(msg.sender == address(wormholeRelayer), "Only relayer allowed");
 
-    (address to, uint256 tokenType, uint256 lockedFrom, uint256 lockedUntil, uint256 mainIndex, uint256 tokenAmountOrID) = abi
-      .decode(payload, (address, uint256, uint256, uint256, uint256, uint256));
+    (uint256 payload, address sender) = abi.decode(payload, (uint256, address));
+    (
+      uint256 tokenType,
+      uint256 lockedFrom,
+      uint256 lockedUntil,
+      uint256 mainIndex,
+      uint256 tokenAmountOrID
+    ) = deserializeDeposit(payload);
 
-    SeedPool(pool).stakeViaBridge(to, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
+    SeedPool(pool).stakeViaBridge(sender, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
   }
 }
