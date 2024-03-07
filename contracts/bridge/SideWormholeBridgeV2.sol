@@ -46,7 +46,7 @@ contract SideWormholeBridgeV2 is WormholeBridgeV2 {
       uint256 tokenAmountOrID
     ) = deserializeDeposit(payload);
     SeedPool(pool).unstakeViaBridge(sender, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
-    bytes memory encodedPayload = abi.encode(payload);
+    bytes memory encodedPayload = abi.encode(payload, sender);
     wormholeRelayer.sendPayloadToEvm(recipientChain, otherContractAddress, encodedPayload, msg.value, 70000);
   }
 

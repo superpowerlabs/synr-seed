@@ -39,7 +39,7 @@ contract MainWormholeBridgeV2 is WormholeBridgeV2, IWormholeReceiver {
   ) public payable override whenNotPaused onlyTesseract returns (uint64) {
     address sender = address(uint160(uint256(recipient)));
     payload = MainPool(pool).stake(sender, payload, recipientChain);
-    bytes memory encodedPayload = abi.encode(payload);
+    bytes memory encodedPayload = abi.encode(payload, sender);
     wormholeRelayer.sendPayloadToEvm(recipientChain, otherContractAddress, encodedPayload, msg.value, 70000);
   }
 
