@@ -5,25 +5,20 @@ pragma solidity 0.8.11;
 
 import "../pool/SeedPool.sol";
 import "./WormholeBridgeV2.sol";
-import "wormhole-solidity-sdk/interfaces/IWormholeRelayer.sol";
-import "wormhole-solidity-sdk/interfaces/IWormholeReceiver.sol";
 
 contract SideWormholeBridgeV2 is WormholeBridgeV2 {
   /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() initializer {}
 
   address public otherContractAddress;
-  IWormholeRelayer public wormholeRelayer;
 
   function initialize(
     address tesseract_,
     address pool_,
-    address _otherContractAddress,
-    address _wormholeRelayer
+    address otherContractAddress_,
+    address wormholeRelayer_
   ) public virtual initializer {
-    __WormholeBridge_init(tesseract_, pool_);
-    wormholeRelayer = IWormholeRelayer(_wormholeRelayer);
-    otherContractAddress = _otherContractAddress;
+    __WormholeBridge_init(tesseract_, pool_, wormholeRelayer_);
+    otherContractAddress = otherContractAddress_;
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
@@ -47,7 +42,7 @@ contract SideWormholeBridgeV2 is WormholeBridgeV2 {
     ) = deserializeDeposit(payload);
     SeedPool(pool).unstakeViaBridge(sender, tokenType, lockedFrom, lockedUntil, mainIndex, tokenAmountOrID);
     bytes memory encodedPayload = abi.encode(payload, sender);
-    wormholeRelayer.sendPayloadToEvm(recipientChain, otherContractAddress, encodedPayload, msg.value, 70000);
+    wormholeRelayer.sendPayloadToEvm(recipientChain, otherContractAddress, encodedPayload, msg.value, 200000);
   }
 
   function receiveWormholeMessages(
@@ -56,7 +51,7 @@ contract SideWormholeBridgeV2 is WormholeBridgeV2 {
     bytes32 sourceAddress,
     uint16 sourceChain,
     bytes32 deliveryHash
-  ) external payable {
+  ) external payable override {
     require(msg.sender == address(wormholeRelayer), "Only relayer allowed");
 
     (uint256 payload, address sender) = abi.decode(payload, (uint256, address));

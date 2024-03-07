@@ -11,6 +11,4 @@ interface IWormholeBridgeV2 {
     bytes32 recipient,
     uint32 nonce
   ) external payable returns (uint64 sequence);
-
-  function wormholeCompleteTransfer(bytes memory encodedVm) external;
 }

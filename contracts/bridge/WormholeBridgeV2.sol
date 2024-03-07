@@ -3,14 +3,19 @@ pragma solidity 0.8.11;
 
 // Authors: Francesco Sullo <francesco@sullo.co>
 
-import "@ndujalabs/wormhole-tunnel/contracts/WormholeTunnelUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "wormhole-solidity-sdk/interfaces/IWormholeRelayer.sol";
+import "wormhole-solidity-sdk/interfaces/IWormholeReceiver.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "../Tesseract.sol";
 
-contract WormholeBridgeV2 is WormholeTunnelUpgradeable {
+contract WormholeBridgeV2 is IWormholeReceiver, Initializable, OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable {
   using AddressUpgradeable for address;
   using ECDSAUpgradeable for bytes32;
   using SafeMathUpgradeable for uint256;
@@ -20,6 +25,7 @@ contract WormholeBridgeV2 is WormholeTunnelUpgradeable {
   Tesseract public tesseract;
   address public pool;
   address public validator;
+  IWormholeRelayer public wormholeRelayer;
 
   modifier onlyTesseract() {
     require(address(tesseract) == _msgSender(), "MainWormholeBridge: Forbidden");
@@ -27,18 +33,24 @@ contract WormholeBridgeV2 is WormholeTunnelUpgradeable {
   }
 
   // solhint-disable-next-line
-  function __WormholeBridge_init(address tesseract_, address pool_) public virtual initializer {
-    __WormholeTunnel_init();
+  function __WormholeBridge_init(
+    address tesseract_,
+    address pool_,
+    address wormholeRelayer_
+  ) public virtual initializer {
     require(tesseract_.isContract(), "WormholeBridge: tesseract_ not a contract");
     require(pool_.isContract(), "WormholeBridge: pool_ not a contract");
     tesseract = Tesseract(tesseract_);
     pool = pool_;
+    wormholeRelayer = IWormholeRelayer(wormholeRelayer_);
   }
 
   function setValidator(address validator_) external onlyOwner {
     require(validator_ != address(0), "MainPool: address zero not allowed");
     validator = validator_;
   }
+
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
   function updatePool(address pool_) external onlyOwner {
     require(pool_.isContract(), "WormholeBridge: pool_ not a contract");
@@ -51,9 +63,16 @@ contract WormholeBridgeV2 is WormholeTunnelUpgradeable {
     uint16,
     bytes32,
     uint32
-  ) public payable virtual override returns (uint64 sequence) {}
+  ) public payable virtual returns (uint64 sequence) {}
 
-  function wormholeCompleteTransfer(bytes memory encodedVm) public virtual override {}
+  // must be overwritten
+  function receiveWormholeMessages(
+    bytes memory payload,
+    bytes[] memory additionalVaas,
+    bytes32 sourceAddress,
+    uint16 sourceChain,
+    bytes32 deliveryHash
+  ) external payable virtual {}
 
   // this is called internally
   // and externally by the web3 app to test the validation
