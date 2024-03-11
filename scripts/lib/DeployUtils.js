@@ -35,13 +35,6 @@ const chainName = {
   44787: "alfajores",
 };
 
-const relayers = {
-  1: "0x27428DD2d3DD32A4D7f7C497eAaa23130d894911",
-  56: "0x27428DD2d3DD32A4D7f7C497eAaa23130d894911",
-  80001: "0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0",
-  44787: "0x306B68267Deb7c5DfCDa3619E22E9Ca39C374f84",
-};
-
 const scanner = {
   1337: "localhost",
   1: "etherscan.io",
@@ -62,10 +55,6 @@ class DeployUtils {
   async sleep(millis) {
     // eslint-disable-next-line no-undef
     return new Promise((resolve) => setTimeout(resolve, millis));
-  }
-
-  getRelayer(chainId) {
-    return relayers[chainId];
   }
 
   getProviders() {
