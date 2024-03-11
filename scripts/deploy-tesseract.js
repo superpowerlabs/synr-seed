@@ -29,7 +29,6 @@ async function main() {
   deployUtils = new DeployUtils(ethers);
   const {network} = deployUtils;
   const chainId = await deployUtils.currentChainId();
-  const relayer = await deployUtils.getRelayer(chainId);
   const [owner] = await ethers.getSigners();
 
   let pool;
@@ -106,15 +105,10 @@ async function main() {
   const tesseract = await deployUtils.deployProxy("Tesseract");
 
   const bridgeName = isMainChain ? "MainWormholeBridge" : "SideWormholeBridge";
-  const bridgeNameV2 = isMainChain ? "MainWormholeBridgeV2" : "SideWormholeBridgeV2";
   const bridge = await deployUtils.deployProxy(bridgeName, tesseract.address, pool.address);
-  const bridgeV2 = await deployUtils.deployProxy(bridgeNameV2, tesseract.address, pool.address, relayer);
 
   await deployUtils.Tx(pool.setBridge(bridge.address, true), "Set bridge in pool");
   await deployUtils.Tx(tesseract.setBridge(1, bridge.address), "Set bridge in tesseract");
-
-  await deployUtils.Tx(pool.setBridge(bridgeV2.address, true), "Set bridgeV2 in pool");
-  await deployUtils.Tx(tesseract.setBridge(2, bridgeV2.address), "Set bridgeV2 in tesseract");
 }
 
 main()

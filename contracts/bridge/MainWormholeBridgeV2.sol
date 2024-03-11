@@ -35,7 +35,8 @@ contract MainWormholeBridgeV2 is WormholeBridgeV2 {
     address sender = address(uint160(uint256(recipient)));
     payload = MainPool(pool).stake(sender, payload, recipientChain);
     bytes memory encodedPayload = abi.encode(payload, sender);
-    wormholeRelayer.sendPayloadToEvm(recipientChain, otherContractAddress, encodedPayload, msg.value, 200000);
+    uint256 cost = quoteCrossChainGreeting(recipientChain);
+    wormholeRelayer.sendPayloadToEvm{value: cost}(recipientChain, otherContractAddress, encodedPayload, msg.value, 200000);
   }
 
   function receiveWormholeMessages(
