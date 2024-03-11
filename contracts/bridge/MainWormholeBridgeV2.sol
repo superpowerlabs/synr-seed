@@ -9,16 +9,12 @@ import "./WormholeBridgeV2.sol";
 contract MainWormholeBridgeV2 is WormholeBridgeV2 {
   /// @custom:oz-upgrades-unsafe-allow constructor
 
-  address public otherContractAddress;
-
   function initialize(
     address tesseract_,
     address pool_,
-    address otherContractAddress_,
     address wormholeRelayer_
   ) public virtual initializer {
     __WormholeBridge_init(tesseract_, pool_, wormholeRelayer_);
-    otherContractAddress = otherContractAddress_;
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
@@ -30,7 +26,7 @@ contract MainWormholeBridgeV2 is WormholeBridgeV2 {
     uint256 payload,
     uint16 recipientChain,
     bytes32 recipient,
-    uint32 nonce
+    address otherContractAddress
   ) public payable override whenNotPaused onlyTesseract returns (uint64) {
     address sender = address(uint160(uint256(recipient)));
     payload = MainPool(pool).stake(sender, payload, recipientChain);
