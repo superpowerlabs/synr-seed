@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./interfaces/IWormholeBridge.sol";
+import "./interfaces/IWormholeBridgeV2.sol";
 import "./interfaces/ITesseract.sol";
 import "./utils/Versionable.sol";
 
@@ -54,13 +55,19 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
     uint8 bridgeType,
     uint256 payload,
     uint16 recipientChain,
-    uint32 nonce
+    uint32 nonce,
+    address otherContractAddress
   ) external payable virtual override returns (uint64 sequence) {
     if (bridgeType == 1) {
       return
         IWormholeBridge(bridges[1]).wormholeTransfer(payload, recipientChain, bytes32(uint256(uint160(_msgSender()))), nonce);
     } else if (bridgeType == 2) {
-      IWormholeBridge(bridges[2]).wormholeTransfer(payload, recipientChain, bytes32(uint256(uint160(_msgSender()))), nonce);
+      IWormholeBridgeV2(bridges[2]).wormholeTransfer(
+        payload,
+        recipientChain,
+        bytes32(uint256(uint160(_msgSender()))),
+        otherContractAddress
+      );
     } else {
       revert("Tesseract: unsupported bridge");
     }

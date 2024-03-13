@@ -9,6 +9,6 @@ interface IWormholeBridgeV2 {
     uint256 payload,
     uint16 recipientChain,
     bytes32 recipient,
-    uint32 nonce
+    address otherContractAddress
   ) external payable returns (uint64 sequence);
 }
