@@ -25,7 +25,8 @@ contract TesseractV2Mock is Tesseract {
     uint8 bridgeType,
     uint256 payload,
     uint16 recipientChain,
-    uint32 nonce
+    uint32 nonce,
+    address otherContractAddress
   ) external payable override returns (uint64 sequence) {
     if (bridgeType == 1) {
       return

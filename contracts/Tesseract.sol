@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./interfaces/IWormholeBridge.sol";
+import "./interfaces/IWormholeBridgeV2.sol";
 import "./interfaces/ITesseract.sol";
 import "./utils/Versionable.sol";
 
@@ -22,6 +23,7 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
   mapping(uint16 => address) public bridges;
 
   // bridges[1] is WormholeBridge
+  // bridges[2] is WormholeBridgeV2
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -42,6 +44,8 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
   function supportedBridgeById(uint256 id) external view virtual override returns (string memory) {
     if (id == 1) {
       return "Wormhole";
+    } else if (id == 2) {
+      return "WormholeV2";
     } else {
       revert("Tesseract: unsupported bridge");
     }
@@ -51,11 +55,19 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
     uint8 bridgeType,
     uint256 payload,
     uint16 recipientChain,
-    uint32 nonce
+    uint32 nonce,
+    address otherContractAddress
   ) external payable virtual override returns (uint64 sequence) {
     if (bridgeType == 1) {
       return
         IWormholeBridge(bridges[1]).wormholeTransfer(payload, recipientChain, bytes32(uint256(uint160(_msgSender()))), nonce);
+    } else if (bridgeType == 2) {
+      IWormholeBridgeV2(bridges[2]).wormholeTransfer(
+        payload,
+        recipientChain,
+        bytes32(uint256(uint160(_msgSender()))),
+        otherContractAddress
+      );
     } else {
       revert("Tesseract: unsupported bridge");
     }
