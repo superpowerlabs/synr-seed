@@ -65,9 +65,7 @@ contract WormholeBridgeV2 is IWormholeReceiver, Initializable, OwnableUpgradeabl
     address
   ) public payable virtual returns (uint64 sequence) {}
 
-  function quoteCrossChainGreeting(uint16 targetChain) public view returns (uint256 cost) {
-    (cost, ) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, 0, 50_000);
-  }
+  function quoteCrossChainGreeting(uint16 targetChain) public view virtual returns (uint256 cost) {}
 
   // must be overwritten
   function receiveWormholeMessages(

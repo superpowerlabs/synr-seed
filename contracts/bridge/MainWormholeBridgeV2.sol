@@ -35,6 +35,10 @@ contract MainWormholeBridgeV2 is WormholeBridgeV2 {
     wormholeRelayer.sendPayloadToEvm{value: cost}(recipientChain, otherContractAddress, encodedPayload, msg.value, 200000);
   }
 
+  function quoteCrossChainGreeting(uint16 targetChain) public view override returns (uint256 cost) {
+    (cost, ) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, 0, 500000);
+  }
+
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,

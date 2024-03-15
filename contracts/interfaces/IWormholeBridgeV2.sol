@@ -11,4 +11,6 @@ interface IWormholeBridgeV2 {
     bytes32 recipient,
     address otherContractAddress
   ) external payable returns (uint64 sequence);
+
+  function quoteCrossChainGreeting(uint16 targetChain) external view returns (uint256 cost);
 }
