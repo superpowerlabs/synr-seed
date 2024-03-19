@@ -66,7 +66,7 @@ module.exports = {
       accounts: [process.env.FOR_TESTNET],
     },
     mumbai: {
-      url: "https://rpc-mumbai.maticvigil.com",
+      url: "https://rpc.ankr.com/polygon_mumbai",
       chainId: 80001,
       gasPrice: 20000000000,
       gasLimit: 6000000,

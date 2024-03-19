@@ -9,6 +9,8 @@ import "./WormholeBridgeV2.sol";
 contract MainWormholeBridgeV2 is WormholeBridgeV2 {
   /// @custom:oz-upgrades-unsafe-allow constructor
 
+  error WrongValue(uint256 cost, uint256 value);
+
   function initialize(
     address tesseract_,
     address pool_,
@@ -31,11 +33,12 @@ contract MainWormholeBridgeV2 is WormholeBridgeV2 {
     address sender = address(uint160(uint256(recipient)));
     payload = MainPool(pool).stake(sender, payload, recipientChain);
     bytes memory encodedPayload = abi.encode(payload, sender);
-    uint256 cost = quoteCrossChainGreeting(recipientChain);
-    wormholeRelayer.sendPayloadToEvm{value: cost}(recipientChain, otherContractAddress, encodedPayload, msg.value, 200000);
+    uint256 cost = getQuoteCrossChain(recipientChain);
+    if (cost != msg.value) revert WrongValue(cost, msg.value);
+    wormholeRelayer.sendPayloadToEvm{value: cost}(recipientChain, otherContractAddress, encodedPayload, msg.value, 500000);
   }
 
-  function quoteCrossChainGreeting(uint16 targetChain) public view override returns (uint256 cost) {
+  function getQuoteCrossChain(uint16 targetChain) public view override returns (uint256 cost) {
     (cost, ) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, 0, 500000);
   }
 

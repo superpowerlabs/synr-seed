@@ -27,6 +27,8 @@ async function main() {
 
   abi("MainWormholeBridge", "bridge");
   abi("SideWormholeBridge", "bridge");
+  abi("MainWormholeBridgeV2", "bridge");
+  abi("SideWormholeBridgeV2", "bridge");
 
   abi("SeedToken", "token");
   abi("WeedToken", "token");

@@ -73,10 +73,6 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
     }
   }
 
-  function getQuoteCrossChain(uint16 targetChain) public virtual returns (uint256 cost) {
-    IWormholeBridgeV2(bridges[2]).quoteCrossChainGreeting(targetChain);
-  }
-
   function completeCrossChainTransfer(uint16 bridgeType, bytes memory encodedVm) external override {
     if (bridgeType == 1) {
       IWormholeBridge(bridges[1]).wormholeCompleteTransfer(encodedVm);
