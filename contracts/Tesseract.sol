@@ -62,12 +62,13 @@ contract Tesseract is ITesseract, Versionable, Initializable, OwnableUpgradeable
       return
         IWormholeBridge(bridges[1]).wormholeTransfer(payload, recipientChain, bytes32(uint256(uint160(_msgSender()))), nonce);
     } else if (bridgeType == 2) {
-      IWormholeBridgeV2(bridges[2]).wormholeTransfer(
-        payload,
-        recipientChain,
-        bytes32(uint256(uint160(_msgSender()))),
-        otherContractAddress
-      );
+      return
+        IWormholeBridgeV2(bridges[2]).wormholeTransfer(
+          payload,
+          recipientChain,
+          bytes32(uint256(uint160(_msgSender()))),
+          otherContractAddress
+        );
     } else {
       revert("Tesseract: unsupported bridge");
     }
